@@ -47,21 +47,7 @@ code generators.
         'package:id/id.dart',
       ]
       ..enums = [
-        enum_('pod_scalar_type')
-        ..hasLibraryScopedValues = true
-        ..values = [
-          'pod_double',
-          'pod_string',
-          'pod_binary_data',
-          'pod_object_id',
-          'pod_boolean',
-          'pod_date',
-          'pod_null',
-          'pod_regex',
-          'pod_int32',
-          'pod_int64',
-          'pod_timestamp',
-        ]
+        enum_('foo')..requiresClass = true..values = [ 'a','b']
       ]
       ..classes = [
 
@@ -71,12 +57,12 @@ code generators.
 
         class_('pod_scalar')
         ..extend = 'PodType'
-        ..hasOpEquals = true
         ..members = [
-          member('pod_scalar_type')..type = 'PodScalarType',
+          member('value')..isFinal = true..type = 'int'
         ],
 
         class_('pod_array')
+        ..isImmutable = true
         ..extend = 'PodType'
         ..hasOpEquals = true
         ..members = [

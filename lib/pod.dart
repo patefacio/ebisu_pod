@@ -10,67 +10,49 @@ import 'package:quiver/core.dart';
 
 final _logger = new Logger('pod');
 
-enum PodScalarType {
-  podDouble,
-  podString,
-  podBinaryData,
-  podObjectId,
-  podBoolean,
-  podDate,
-  podNull,
-  podRegex,
-  podInt32,
-  podInt64,
-  podTimestamp
+class Foo implements Comparable<Foo> {
+  static const A = const Foo._(0);
+  static const B = const Foo._(1);
+
+  static get values => [A, B];
+
+  final int value;
+
+  int get hashCode => value;
+
+  const Foo._(this.value);
+
+  copy() => this;
+
+  int compareTo(Foo other) => value.compareTo(other.value);
+
+  String toString() {
+    switch (this) {
+      case A:
+        return "A";
+      case B:
+        return "B";
+    }
+    return null;
+  }
+
+  static Foo fromString(String s) {
+    if (s == null) return null;
+    switch (s) {
+      case "A":
+        return A;
+      case "B":
+        return B;
+      default:
+        return null;
+    }
+  }
 }
-
-/// Convenient access to PodScalarType.podDouble with *podDouble* see [PodScalarType].
-///
-const PodScalarType podDouble = PodScalarType.podDouble;
-
-/// Convenient access to PodScalarType.podString with *podString* see [PodScalarType].
-///
-const PodScalarType podString = PodScalarType.podString;
-
-/// Convenient access to PodScalarType.podBinaryData with *podBinaryData* see [PodScalarType].
-///
-const PodScalarType podBinaryData = PodScalarType.podBinaryData;
-
-/// Convenient access to PodScalarType.podObjectId with *podObjectId* see [PodScalarType].
-///
-const PodScalarType podObjectId = PodScalarType.podObjectId;
-
-/// Convenient access to PodScalarType.podBoolean with *podBoolean* see [PodScalarType].
-///
-const PodScalarType podBoolean = PodScalarType.podBoolean;
-
-/// Convenient access to PodScalarType.podDate with *podDate* see [PodScalarType].
-///
-const PodScalarType podDate = PodScalarType.podDate;
-
-/// Convenient access to PodScalarType.podNull with *podNull* see [PodScalarType].
-///
-const PodScalarType podNull = PodScalarType.podNull;
-
-/// Convenient access to PodScalarType.podRegex with *podRegex* see [PodScalarType].
-///
-const PodScalarType podRegex = PodScalarType.podRegex;
-
-/// Convenient access to PodScalarType.podInt32 with *podInt32* see [PodScalarType].
-///
-const PodScalarType podInt32 = PodScalarType.podInt32;
-
-/// Convenient access to PodScalarType.podInt64 with *podInt64* see [PodScalarType].
-///
-const PodScalarType podInt64 = PodScalarType.podInt64;
-
-/// Convenient access to PodScalarType.podTimestamp with *podTimestamp* see [PodScalarType].
-///
-const PodScalarType podTimestamp = PodScalarType.podTimestamp;
 
 class PodType {
   // custom <class PodType>
 
+  const PodType();
   get isScalar => this is PodScalar;
   get isArray => this is PodArray;
   get isObject => this is PodObject;
@@ -81,17 +63,64 @@ class PodType {
 }
 
 class PodScalar extends PodType {
-  bool operator ==(PodScalar other) =>
-      identical(this, other) || podScalarType == other.podScalarType;
-
-  int get hashCode => podScalarType.hashCode;
-
-  PodScalarType podScalarType;
+  final int value;
 
   // custom <class PodScalar>
 
-  PodScalar(this.podScalarType);
-  toString() => 'PodScalar($podScalarType)';
+  static const podDouble = const PodScalar._(0);
+  static const podString = const PodScalar._(1);
+  static const podBinaryData = const PodScalar._(2);
+  static const podObjectId = const PodScalar._(3);
+  static const podBoolean = const PodScalar._(4);
+  static const podDate = const PodScalar._(5);
+  static const podNull = const PodScalar._(6);
+  static const podRegex = const PodScalar._(7);
+  static const podInt32 = const PodScalar._(8);
+  static const podInt64 = const PodScalar._(9);
+  static const podTimestamp = const PodScalar._(10);
+
+  static get values => [
+        podDouble,
+        podString,
+        podBinaryData,
+        podObjectId,
+        podBoolean,
+        podDate,
+        podNull,
+        podRegex,
+        podInt32,
+        podInt64,
+        podTimestamp
+      ];
+
+  String toString() {
+    switch (this) {
+      case podDouble:
+        return 'podDouble';
+      case podString:
+        return 'podString';
+      case podBinaryData:
+        return 'podBinaryData';
+      case podObjectId:
+        return 'podObjectId';
+      case podBoolean:
+        return 'podBoolean';
+      case podDate:
+        return 'podDate';
+      case podNull:
+        return 'podNull';
+      case podRegex:
+        return 'podRegex';
+      case podInt32:
+        return 'podInt32';
+      case podInt64:
+        return 'podInt64';
+      case podTimestamp:
+        return 'podTimestamp';
+    }
+  }
+
+  const PodScalar._(this.value);
   get typeName => toString();
 
   // end <class PodScalar>
@@ -99,16 +128,17 @@ class PodScalar extends PodType {
 }
 
 class PodArray extends PodType {
+  const PodArray(this.referredType);
+
   bool operator ==(PodArray other) =>
       identical(this, other) || referredType == other.referredType;
 
   int get hashCode => referredType.hashCode;
 
-  PodType referredType;
+  final PodType referredType;
 
   // custom <class PodArray>
 
-  PodArray(this.referredType);
   toString() => 'PodArray(${referredType.typeName})';
   get typeName => toString();
 
@@ -172,16 +202,31 @@ class PodObject extends PodType {
 
 // custom <library pod>
 
-PodField podField(id, [podType]) {
-  id = makeId(id);
-  if (podType == null) {
-    return new PodField(id);
-  } else if (podType is PodType) {
-    return new PodField(id, podType);
-  } else if (podType is PodScalarType) {
-    return new PodField(id, new PodScalar(podType));
-  }
-}
+const podDouble = PodScalar.podDouble;
+const podString = PodScalar.podString;
+const podBinaryData = PodScalar.podBinaryData;
+const podObjectId = PodScalar.podObjectId;
+const podBoolean = PodScalar.podBoolean;
+const podDate = PodScalar.podDate;
+const podNull = PodScalar.podNull;
+const podRegex = PodScalar.podRegex;
+const podInt32 = PodScalar.podInt32;
+const podInt64 = PodScalar.podInt64;
+const podTimestamp = PodScalar.podTimestamp;
+
+const doubleArray = const PodArray(podDouble);
+const stringArray = const PodArray(podString);
+const binaryDataArray = const PodArray(podBinaryData);
+const objectIdArray = const PodArray(podObjectId);
+const booleanArray = const PodArray(podBoolean);
+const dateArray = const PodArray(podDate);
+const nullArray = const PodArray(podNull);
+const regexArray = const PodArray(podRegex);
+const int32Array = const PodArray(podInt32);
+const int64Array = const PodArray(podInt64);
+const timestampArray = const PodArray(podTimestamp);
+
+PodField podField(id, [podType]) => new PodField(makeId(id), podType);
 
 PodObject podObject(id, [podFields]) => new PodObject(makeId(id), podFields);
 
