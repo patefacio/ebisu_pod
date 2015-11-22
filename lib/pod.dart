@@ -3,17 +3,16 @@ library ebisu_pod.pod;
 import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
 import 'package:logging/logging.dart';
+import 'package:quiver/core.dart';
 
 // custom <additional imports>
 // end <additional imports>
 
 final _logger = new Logger('pod');
 
-enum PodType {
+enum PodScalarType {
   podDouble,
   podString,
-  podObject,
-  podArray,
   podBinaryData,
   podObjectId,
   podBoolean,
@@ -25,96 +24,107 @@ enum PodType {
   podTimestamp
 }
 
-/// Convenient access to PodType.podDouble with *podDouble* see [PodType].
+/// Convenient access to PodScalarType.podDouble with *podDouble* see [PodScalarType].
 ///
-const PodType podDouble = PodType.podDouble;
+const PodScalarType podDouble = PodScalarType.podDouble;
 
-/// Convenient access to PodType.podString with *podString* see [PodType].
+/// Convenient access to PodScalarType.podString with *podString* see [PodScalarType].
 ///
-const PodType podString = PodType.podString;
+const PodScalarType podString = PodScalarType.podString;
 
-/// Convenient access to PodType.podObject with *podObject* see [PodType].
+/// Convenient access to PodScalarType.podBinaryData with *podBinaryData* see [PodScalarType].
 ///
-const PodType podObject = PodType.podObject;
+const PodScalarType podBinaryData = PodScalarType.podBinaryData;
 
-/// Convenient access to PodType.podArray with *podArray* see [PodType].
+/// Convenient access to PodScalarType.podObjectId with *podObjectId* see [PodScalarType].
 ///
-const PodType podArray = PodType.podArray;
+const PodScalarType podObjectId = PodScalarType.podObjectId;
 
-/// Convenient access to PodType.podBinaryData with *podBinaryData* see [PodType].
+/// Convenient access to PodScalarType.podBoolean with *podBoolean* see [PodScalarType].
 ///
-const PodType podBinaryData = PodType.podBinaryData;
+const PodScalarType podBoolean = PodScalarType.podBoolean;
 
-/// Convenient access to PodType.podObjectId with *podObjectId* see [PodType].
+/// Convenient access to PodScalarType.podDate with *podDate* see [PodScalarType].
 ///
-const PodType podObjectId = PodType.podObjectId;
+const PodScalarType podDate = PodScalarType.podDate;
 
-/// Convenient access to PodType.podBoolean with *podBoolean* see [PodType].
+/// Convenient access to PodScalarType.podNull with *podNull* see [PodScalarType].
 ///
-const PodType podBoolean = PodType.podBoolean;
+const PodScalarType podNull = PodScalarType.podNull;
 
-/// Convenient access to PodType.podDate with *podDate* see [PodType].
+/// Convenient access to PodScalarType.podRegex with *podRegex* see [PodScalarType].
 ///
-const PodType podDate = PodType.podDate;
+const PodScalarType podRegex = PodScalarType.podRegex;
 
-/// Convenient access to PodType.podNull with *podNull* see [PodType].
+/// Convenient access to PodScalarType.podInt32 with *podInt32* see [PodScalarType].
 ///
-const PodType podNull = PodType.podNull;
+const PodScalarType podInt32 = PodScalarType.podInt32;
 
-/// Convenient access to PodType.podRegex with *podRegex* see [PodType].
+/// Convenient access to PodScalarType.podInt64 with *podInt64* see [PodScalarType].
 ///
-const PodType podRegex = PodType.podRegex;
+const PodScalarType podInt64 = PodScalarType.podInt64;
 
-/// Convenient access to PodType.podInt32 with *podInt32* see [PodType].
+/// Convenient access to PodScalarType.podTimestamp with *podTimestamp* see [PodScalarType].
 ///
-const PodType podInt32 = PodType.podInt32;
-
-/// Convenient access to PodType.podInt64 with *podInt64* see [PodType].
-///
-const PodType podInt64 = PodType.podInt64;
-
-/// Convenient access to PodType.podTimestamp with *podTimestamp* see [PodType].
-///
-const PodType podTimestamp = PodType.podTimestamp;
+const PodScalarType podTimestamp = PodScalarType.podTimestamp;
 
 class PodType {
-  PodType podType;
-
   // custom <class PodType>
-
-  PodType(this.podType);
 
   get isScalar => this is PodScalar;
   get isArray => this is PodArray;
   get isObject => this is PodObject;
+  get typeName;
 
   // end <class PodType>
 
 }
 
 class PodScalar extends PodType {
+  bool operator ==(PodScalar other) =>
+      identical(this, other) || podScalarType == other.podScalarType;
+
+  int get hashCode => podScalarType.hashCode;
+
+  PodScalarType podScalarType;
+
   // custom <class PodScalar>
 
-  PodScalar(PodType podType) : super(podType);
-  toString() => 'PodScalar($podType)';
+  PodScalar(this.podScalarType);
+  toString() => 'PodScalar($podScalarType)';
+  get typeName => toString();
 
   // end <class PodScalar>
 
 }
 
 class PodArray extends PodType {
+  bool operator ==(PodArray other) =>
+      identical(this, other) || referredType == other.referredType;
+
+  int get hashCode => referredType.hashCode;
+
   PodType referredType;
 
   // custom <class PodArray>
 
-  PodArray(this.referredType) : super(PodType.podArray);
-  toString() => 'PodArray($podType<${referredType.id}>)';
+  PodArray(this.referredType);
+  toString() => 'PodArray(${referredType.typeName})';
+  get typeName => toString();
 
   // end <class PodArray>
 
 }
 
 class PodField {
+  bool operator ==(PodField other) => identical(this, other) ||
+      _id == other._id &&
+          isIndex == other.isIndex &&
+          podType == other.podType &&
+          defaultValue == other.defaultValue;
+
+  int get hashCode => hash4(_id, isIndex, podType, defaultValue);
+
   Id get id => _id;
 
   /// If true the field is defined as index
@@ -123,15 +133,9 @@ class PodField {
   dynamic defaultValue;
 
   // custom <class PodField>
-
-  bool isIndex = false;
-  PodType podType;
-  dynamic defaultValue;
-
   // custom <class PodField>
 
   PodField(this._id, [this.podType]);
-
   toString() => 'PodField($id:$podType)';
 
   // end <class PodField>
@@ -145,10 +149,19 @@ class PodObject extends PodType {
 
   // custom <class PodObject>
 
-  PodObject(this._id, [this.podFields]) : super(PodType.podObject);
+  PodObject(this._id, [this.podFields]);
 
-  toString() =>
-      brCompact(['PodObject($id)', indentBlock(brCompact(podFields))]);
+  get typeName => 'PodObject($_id)';
+
+  toString() {
+    print('to string on object $id');
+
+    return brCompact([
+      'PodObject($id)',
+      indentBlock(
+          brCompact(podFields.map((pf) => '${pf.id}:${pf.podType.typeName}')))
+    ]);
+  }
 
   bool get hasArray => podFields.any((pf) => pf.podType is PodArray);
 
@@ -165,7 +178,7 @@ PodField podField(id, [podType]) {
     return new PodField(id);
   } else if (podType is PodType) {
     return new PodField(id, podType);
-  } else if (podType is PodType) {
+  } else if (podType is PodScalarType) {
     return new PodField(id, new PodScalar(podType));
   }
 }
@@ -174,9 +187,9 @@ PodObject podObject(id, [podFields]) => new PodObject(makeId(id), podFields);
 
 PodArray podArray(dynamic referredType) => referredType is PodType
     ? new PodArray(referredType)
-    : referredType is PodType
+    : referredType is PodScalarType
         ? new PodArray(new PodScalar(referredType))
-        : throw 'podArray(...) requires PodType or PodType: $referredType';
+        : throw 'podArray(...) requires PodType or PodScalarType: $referredType';
 
 PodField podArrayField(id, referredType) =>
     podField(id, podArray(referredType));

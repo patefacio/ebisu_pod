@@ -47,13 +47,11 @@ code generators.
         'package:id/id.dart',
       ]
       ..enums = [
-        enum_('pod_type')
+        enum_('pod_scalar_type')
         ..hasLibraryScopedValues = true
         ..values = [
           'pod_double',
           'pod_string',
-          'pod_object',
-          'pod_array',
           'pod_binary_data',
           'pod_object_id',
           'pod_boolean',
@@ -69,21 +67,24 @@ code generators.
 
         class_('pod_type')
         ..members = [
-          member('pod_type')..type = 'PodType',
         ],
 
         class_('pod_scalar')
         ..extend = 'PodType'
+        ..hasOpEquals = true
         ..members = [
+          member('pod_scalar_type')..type = 'PodScalarType',
         ],
 
         class_('pod_array')
         ..extend = 'PodType'
+        ..hasOpEquals = true
         ..members = [
           member('referred_type')..type = 'PodType',
         ],
 
         class_('pod_field')
+        ..hasOpEquals = true
         ..members = [
           member('id')..type = 'Id'..access = RO,
           member('is_index')
