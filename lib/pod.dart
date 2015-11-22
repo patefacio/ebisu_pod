@@ -166,7 +166,7 @@ class PodField {
   // custom <class PodField>
 
   PodField(this._id, [this.podType]);
-  toString() => 'PodField($id:$podType)';
+  toString() => 'PodField($id:$podType:default=$defaultValue)';
 
   // end <class PodField>
 
@@ -179,7 +179,11 @@ class PodObject extends PodType {
 
   // custom <class PodObject>
 
-  PodObject(this._id, [this.podFields]);
+  PodObject(this._id, [this.podFields]) {
+    if(podFields == null) {
+      podFields = [];
+    }
+  }
 
   get typeName => 'PodObject($_id)';
 
@@ -226,7 +230,8 @@ const int32Array = const PodArray(podInt32);
 const int64Array = const PodArray(podInt64);
 const timestampArray = const PodArray(podTimestamp);
 
-PodField podField(id, [podType]) => new PodField(makeId(id), podType);
+PodField podField(id, [podType = podString]) =>
+    new PodField(makeId(id), podType);
 
 PodObject podObject(id, [podFields]) => new PodObject(makeId(id), podFields);
 

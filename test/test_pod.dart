@@ -52,30 +52,45 @@ main([List<String> args]) {
 
   final address = podObject('address')
     ..podFields = [
+      podField('number', podInt32),
       podField('street', podString),
       podField('zipcode', podString),
       podField('state', podString),
     ];
 
   test('basic object has fields', () {
-    expect(address.podFields.length, 3);
-    expect(address.podFields.first, podField('street', podString));
+    expect(address.podFields.length, 4);
+    expect(address.podFields.first, podField('number', podInt32));
+    expect(address.podFields.last, podField('state', podString));
   });
 
-  final person = podObject('person');
+  test('fields can be PodScalar, PodArray or PodObject', () {
+    final referred = podObject('referred');
+    final obj = podObject('obj', [
+      podField('scalar'),
+      podField('array', int32Array),
+      podField('object', referred)
+    ]);
+    expect(obj.podFields.first.podType is PodScalar, true);
+    expect(obj.podFields[1].podType is PodArray, true);
+    expect(obj.podFields.last.podType is PodObject, true);
+  });
 
-  person
-    ..podFields = [
-      podField('name', podString),
-      podField('age', podInt32)..defaultValue = 32,
-      podField('birth_date', podDate),
-      podField('address', address)..defaultValue = '"foo", "bar", "goo"',
-      podArrayField('children', person),
-      podArrayField('pet_names', podString),
-      podArrayField('pet_ages', podInt32),
-    ];
+  test('fields may have defaults', () {
+    final field = podField('behavior', podString)..defaultValue = 'good';
+    expect(field.defaultValue, 'good');
+  });
 
-  print(person);
+  test('default field type is podString', () {
+    expect(podField('behavior').podType, podString);
+  });
+
+  test('pod types can be self referential', () {
+    final o = podObject('o');
+    o.podFields.add(podField('children', podArray(o)));
+    expect(o.podFields.first.podType is PodArray, true);
+    expect(o.podFields.first.podType.referredType, o);
+  });
 
 // end <main>
 }
