@@ -1,0 +1,36 @@
+name: ebisu_pod
+version: 0.0.1
+author: Daniel Davidson <dbdavidson@yahoo.com>
+homepage: https://github.com/patefacio/ebisu_pod
+description: >
+  A general purpose *recursive design pattern* for modeling plain old
+  data components. Think *IDL*, or *json schema* but only covering the
+  basic data modeling of scalars, arrays, and dictionaries
+  (a.k.a. objects).
+
+  The goal is a simple modeling API that can then be used as inputs to
+  code generators.
+
+dependencies:
+
+# custom <ebisu_pod dependencies>
+# end <ebisu_pod dependencies>
+
+dev_dependencies:
+  yaml: "any"
+  browser: "any"
+  hop: "any"
+  hop_docgen: "any"
+
+# custom <ebisu_pod dev dependencies>
+# end <ebisu_pod dev dependencies>
+
+dependency_overrides:
+# custom <ebisu_pod dependency overrides>
+# end <ebisu_pod dependency overrides>
+
+transformers:
+
+# custom <ebisu_pod transformers>
+# end <ebisu_pod transformers>
+
