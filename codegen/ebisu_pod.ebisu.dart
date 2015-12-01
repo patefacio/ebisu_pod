@@ -47,7 +47,6 @@ code generators.
         'package:id/id.dart',
       ]
       ..enums = [
-        enum_('foo')..requiresClass = true..values = [ 'a','b']
       ]
       ..classes = [
 
@@ -55,10 +54,18 @@ code generators.
         ..members = [
         ],
 
+        class_('pod_enum')
+        ..extend = 'PodType'
+        ..members = [
+          member('id')..type = 'Id'..access = RO,
+          member('values')..type = 'List<String>'..classInit = [],
+          member('doc')..doc = 'Documentation for the enum',
+        ],
+
         class_('pod_scalar')
         ..extend = 'PodType'
         ..members = [
-          member('value')..isFinal = true..type = 'int'
+          member('value')..isFinal = true..type = 'int',
         ],
 
         class_('pod_array')
@@ -67,6 +74,7 @@ code generators.
         ..hasOpEquals = true
         ..members = [
           member('referred_type')..type = 'PodType',
+          member('doc')..doc = 'Documentation for the array',
         ],
 
         class_('pod_field')
@@ -78,6 +86,7 @@ code generators.
           ..classInit = false,
           member('pod_type')..type = 'PodType',
           member('default_value')..type = 'dynamic',
+          member('doc')..doc = 'Documentation for the field',
         ],
 
         class_('pod_object')
@@ -85,6 +94,7 @@ code generators.
         ..members = [
           member('id')..type = 'Id'..access = RO,
           member('pod_fields')..type = 'List<PodField>'..classInit = [],
+          member('doc')..doc = 'Documentation for the object',
         ],
       ],
     ];

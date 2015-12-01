@@ -25,6 +25,8 @@ main([List<String> args]) {
   });
 
   test('podFields carry type info', () {
+    final e = podEnum('color', ['red', 'white', 'blue']);
+    expect(podField('field', e).podType is PodEnum, true);
     expect(podField('field', podDouble).podType, podDouble);
     expect(podField('field', podString).podType, podString);
     expect(podField('field', podBinaryData).podType, podBinaryData);

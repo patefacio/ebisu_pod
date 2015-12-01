@@ -10,45 +10,6 @@ import 'package:quiver/core.dart';
 
 final _logger = new Logger('pod');
 
-class Foo implements Comparable<Foo> {
-  static const A = const Foo._(0);
-  static const B = const Foo._(1);
-
-  static get values => [A, B];
-
-  final int value;
-
-  int get hashCode => value;
-
-  const Foo._(this.value);
-
-  copy() => this;
-
-  int compareTo(Foo other) => value.compareTo(other.value);
-
-  String toString() {
-    switch (this) {
-      case A:
-        return "A";
-      case B:
-        return "B";
-    }
-    return null;
-  }
-
-  static Foo fromString(String s) {
-    if (s == null) return null;
-    switch (s) {
-      case "A":
-        return A;
-      case "B":
-        return B;
-      default:
-        return null;
-    }
-  }
-}
-
 class PodType {
   // custom <class PodType>
 
@@ -56,10 +17,32 @@ class PodType {
   get isScalar => this is PodScalar;
   get isArray => this is PodArray;
   get isObject => this is PodObject;
-  get typeName;
+
+  String get doc;
+  String get typeName;
 
   // end <class PodType>
 
+}
+
+class PodEnum extends PodType {
+  Id get id => _id;
+  List<String> values = [];
+
+  /// Documentation for the enum
+  String doc;
+
+  // custom <class PodEnum>
+
+  PodEnum(this._id, [this.values]) {
+    if (values == null) {
+      values = [];
+    }
+  }
+
+  // end <class PodEnum>
+
+  Id _id;
 }
 
 class PodScalar extends PodType {
@@ -121,6 +104,7 @@ class PodScalar extends PodType {
   }
 
   const PodScalar._(this.value);
+  String get doc => 'builtin ${this}';
   get typeName => toString();
 
   // end <class PodScalar>
@@ -128,14 +112,17 @@ class PodScalar extends PodType {
 }
 
 class PodArray extends PodType {
-  const PodArray(this.referredType);
+  PodArray(this.referredType, [this.doc]);
 
-  bool operator ==(PodArray other) =>
-      identical(this, other) || referredType == other.referredType;
+  bool operator ==(PodArray other) => identical(this, other) ||
+      referredType == other.referredType && doc == other.doc;
 
-  int get hashCode => referredType.hashCode;
+  int get hashCode => hash2(referredType, doc);
 
   final PodType referredType;
+
+  /// Documentation for the array
+  final String doc;
 
   // custom <class PodArray>
 
@@ -151,9 +138,10 @@ class PodField {
       _id == other._id &&
           isIndex == other.isIndex &&
           podType == other.podType &&
-          defaultValue == other.defaultValue;
+          defaultValue == other.defaultValue &&
+          doc == other.doc;
 
-  int get hashCode => hash4(_id, isIndex, podType, defaultValue);
+  int get hashCode => hashObjects([_id, isIndex, podType, defaultValue, doc]);
 
   Id get id => _id;
 
@@ -161,6 +149,9 @@ class PodField {
   bool isIndex = false;
   PodType podType;
   dynamic defaultValue;
+
+  /// Documentation for the field
+  String doc;
 
   // custom <class PodField>
   // custom <class PodField>
@@ -177,10 +168,13 @@ class PodObject extends PodType {
   Id get id => _id;
   List<PodField> podFields = [];
 
+  /// Documentation for the object
+  String doc;
+
   // custom <class PodObject>
 
   PodObject(this._id, [this.podFields]) {
-    if(podFields == null) {
+    if (podFields == null) {
       podFields = [];
     }
   }
@@ -218,17 +212,19 @@ const podInt32 = PodScalar.podInt32;
 const podInt64 = PodScalar.podInt64;
 const podTimestamp = PodScalar.podTimestamp;
 
-const doubleArray = const PodArray(podDouble);
-const stringArray = const PodArray(podString);
-const binaryDataArray = const PodArray(podBinaryData);
-const objectIdArray = const PodArray(podObjectId);
-const booleanArray = const PodArray(podBoolean);
-const dateArray = const PodArray(podDate);
-const nullArray = const PodArray(podNull);
-const regexArray = const PodArray(podRegex);
-const int32Array = const PodArray(podInt32);
-const int64Array = const PodArray(podInt64);
-const timestampArray = const PodArray(podTimestamp);
+final doubleArray = new PodArray(podDouble, 'Array<double>');
+final stringArray = new PodArray(podString, 'Array<String>');
+final binaryDataArray = new PodArray(podBinaryData, 'Array<BinaryData>');
+final objectIdArray = new PodArray(podObjectId, 'Array<ObjectId>');
+final booleanArray = new PodArray(podBoolean, 'Array<Boolean>');
+final dateArray = new PodArray(podDate, 'Array<Date>');
+final nullArray = new PodArray(podNull, 'Array<Null>');
+final regexArray = new PodArray(podRegex, 'Array<Regex>');
+final int32Array = new PodArray(podInt32, 'Array<Int32>');
+final int64Array = new PodArray(podInt64, 'Array<Int64>');
+final timestampArray = new PodArray(podTimestamp, 'Array<Timestamp>');
+
+PodEnum podEnum(id, [values]) => new PodEnum(makeId(id), values);
 
 PodField podField(id, [podType = podString]) =>
     new PodField(makeId(id), podType);
