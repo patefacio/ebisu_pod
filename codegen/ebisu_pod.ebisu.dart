@@ -117,7 +117,7 @@ speed by allocating space for strings inline.
         ..extend = 'PodType'
         ..members = [
           member('id')..type = 'Id'..access = RO,
-          member('pod_fields')..type = 'List<PodField>'..classInit = [],
+          member('fields')..type = 'List<PodField>'..classInit = [],
           member('doc')..doc = 'Documentation for the object',
         ],
       ],

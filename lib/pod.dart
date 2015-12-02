@@ -199,16 +199,16 @@ class PodField {
 
 class PodObject extends PodType {
   Id get id => _id;
-  List<PodField> podFields = [];
+  List<PodField> fields = [];
 
   /// Documentation for the object
   String doc;
 
   // custom <class PodObject>
 
-  PodObject(this._id, [this.podFields]) {
-    if (podFields == null) {
-      podFields = [];
+  PodObject(this._id, [this.fields]) {
+    if (fields == null) {
+      fields = [];
     }
   }
 
@@ -220,11 +220,11 @@ class PodObject extends PodType {
     return brCompact([
       'PodObject($id)',
       indentBlock(
-          brCompact(podFields.map((pf) => '${pf.id}:${pf.podType.typeName}')))
+          brCompact(fields.map((pf) => '${pf.id}:${pf.podType.typeName}')))
     ]);
   }
 
-  bool get hasArray => podFields.any((pf) => pf.podType is PodArray);
+  bool get hasArray => fields.any((pf) => pf.podType is PodArray);
 
   // end <class PodObject>
 
@@ -257,23 +257,21 @@ final int32Array = new PodArray(podInt32, 'Array<Int32>');
 final int64Array = new PodArray(podInt64, 'Array<Int64>');
 final timestampArray = new PodArray(podTimestamp, 'Array<Timestamp>');
 
-PodEnum podEnum(id, [values]) => new PodEnum(makeId(id), values);
+PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
-PodField podField(id, [podType = podString]) =>
-    new PodField(makeId(id), podType);
+PodField field(id, [podType = podString]) => new PodField(makeId(id), podType);
 
-PodObject podObject(id, [podFields]) => new PodObject(makeId(id), podFields);
+PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArray podArray(dynamic referredType) => referredType is PodType
+PodArray array(dynamic referredType) => referredType is PodType
     ? new PodArray(referredType)
     : referredType is PodScalarType
         ? new PodArray(new PodScalar(referredType))
         : throw 'podArray(...) requires PodType or PodScalarType: $referredType';
 
-PodField podArrayField(id, referredType) =>
-    podField(id, podArray(referredType));
+PodField arrayField(id, referredType) => podField(id, podArray(referredType));
 
-PodFixedSizeString podFixedSizeString(int maxLength) =>
+PodFixedSizeString fixedSizeString(int maxLength) =>
     new PodFixedSizeString(maxLength);
 
 // end <library pod>
