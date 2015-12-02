@@ -50,6 +50,9 @@ main([List<String> args]) {
     expect(podField('field', int32Array).podType, int32Array);
     expect(podField('field', int64Array).podType, int64Array);
     expect(podField('field', timestampArray).podType, timestampArray);
+
+    expect(podField('field', podFixedSizeString(32)).podType,
+        podFixedSizeString(32));
   });
 
   final address = podObject('address')

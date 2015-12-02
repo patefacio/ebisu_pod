@@ -111,21 +111,54 @@ class PodScalar extends PodType {
 
 }
 
+/// Used to store strings that have a capped size.
+///
+/// The primary purpose for modeling data as fixed size string over the
+/// more general scalar string type is so code generators may optimize for
+/// speed by allocating space for strings inline.
+class PodFixedSizeString extends PodType {
+  /// Documentation for fixed size string
+  String doc;
+
+  /// If non-0 indicates length capped to [max_length]
+  int maxLength = 0;
+
+  // custom <class PodFixedSizeString>
+
+  factory PodFixedSizeString(int maxLength, [doc]) => _typeCache.putIfAbsent(
+      maxLength, () => new PodFixedSizeString._(maxLength, doc));
+
+  PodFixedSizeString._(this.maxLength, [this.doc]);
+
+  toString() => 'PodFixedLengthString($maxLength)';
+  get typeName => toString();
+
+  // end <class PodFixedSizeString>
+
+  /// Cache of all fixed size strings
+  static Map<int, PodFixedSizeString> _typeCache =
+      new Map<int, PodFixedSizeString>();
+}
+
 class PodArray extends PodType {
-  PodArray(this.referredType, [this.doc]);
-
   bool operator ==(PodArray other) => identical(this, other) ||
-      referredType == other.referredType && doc == other.doc;
+      referredType == other.referredType &&
+          doc == other.doc &&
+          maxLength == other.maxLength;
 
-  int get hashCode => hash2(referredType, doc);
+  int get hashCode => hash3(referredType, doc, maxLength);
 
-  final PodType referredType;
+  PodType referredType;
 
   /// Documentation for the array
-  final String doc;
+  String doc;
+
+  /// If non-0 indicates length capped to [max_length]
+  int maxLength = 0;
 
   // custom <class PodArray>
 
+  PodArray(this.referredType, [this.doc]);
   toString() => 'PodArray(${referredType.typeName})';
   get typeName => toString();
 
@@ -239,5 +272,8 @@ PodArray podArray(dynamic referredType) => referredType is PodType
 
 PodField podArrayField(id, referredType) =>
     podField(id, podArray(referredType));
+
+PodFixedSizeString podFixedSizeString(int maxLength) =>
+    new PodFixedSizeString(maxLength);
 
 // end <library pod>

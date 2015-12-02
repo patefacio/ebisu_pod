@@ -68,13 +68,37 @@ code generators.
           member('value')..isFinal = true..type = 'int',
         ],
 
+        class_('pod_fixed_size_string')
+        ..doc = '''
+Used to store strings that have a capped size.
+
+The primary purpose for modeling data as fixed size string over the
+more general scalar string type is so code generators may optimize for
+speed by allocating space for strings inline.
+'''
+        ..extend = 'PodType'
+        ..members = [
+          member('doc')..doc = 'Documentation for fixed size string',
+          member('max_length')
+          ..doc = 'If non-0 indicates length capped to [max_length]'
+          ..classInit = 0,
+          member('type_cache')
+          ..doc = 'Cache of all fixed size strings'
+          ..access = IA
+          ..isStatic = true
+          ..type = 'Map<int, PodFixedSizeString>'
+          ..classInit = 'new Map<int, PodFixedSizeString>()',
+        ],
+
         class_('pod_array')
-        ..isImmutable = true
         ..extend = 'PodType'
         ..hasOpEquals = true
         ..members = [
           member('referred_type')..type = 'PodType',
           member('doc')..doc = 'Documentation for the array',
+          member('max_length')
+          ..doc = 'If non-0 indicates length capped to [max_length]'
+          ..classInit = 0,
         ],
 
         class_('pod_field')
