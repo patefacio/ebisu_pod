@@ -21,23 +21,23 @@ main([List<String> args]) {
 // custom <main>
 
   test('fields are comparable', () {
-    expect(field('age', podInt32), field('age', podInt32));
+    expect(field('age', Int32), field('age', Int32));
   });
 
   test('fields carry type info', () {
     final e = enum_('color', ['red', 'white', 'blue']);
     expect(field('field', e).podType is PodEnum, true);
-    expect(field('field', podDouble).podType, podDouble);
-    expect(field('field', podString).podType, podString);
-    expect(field('field', podBinaryData).podType, podBinaryData);
-    expect(field('field', podObjectId).podType, podObjectId);
-    expect(field('field', podBoolean).podType, podBoolean);
-    expect(field('field', podDate).podType, podDate);
-    expect(field('field', podNull).podType, podNull);
-    expect(field('field', podRegex).podType, podRegex);
-    expect(field('field', podInt32).podType, podInt32);
-    expect(field('field', podInt64).podType, podInt64);
-    expect(field('field', podTimestamp).podType, podTimestamp);
+    expect(field('field', Double).podType, Double);
+    expect(field('field', VarString).podType, VarString);
+    expect(field('field', BinaryData).podType, BinaryData);
+    expect(field('field', ObjectId).podType, ObjectId);
+    expect(field('field', Boolean).podType, Boolean);
+    expect(field('field', Date).podType, Date);
+    expect(field('field', Null).podType, Null);
+    expect(field('field', Regex).podType, Regex);
+    expect(field('field', Int32).podType, Int32);
+    expect(field('field', Int64).podType, Int64);
+    expect(field('field', Timestamp).podType, Timestamp);
 
     expect(field('field', doubleArray).podType, doubleArray);
     expect(field('field', stringArray).podType, stringArray);
@@ -57,16 +57,16 @@ main([List<String> args]) {
 
   final address = object('address')
     ..fields = [
-      field('number', podInt32),
-      field('street', podString),
-      field('zipcode', podString),
-      field('state', podString),
+      field('number', Int32),
+      field('street', VarString),
+      field('zipcode', VarString),
+      field('state', VarString),
     ];
 
   test('basic object has fields', () {
     expect(address.fields.length, 4);
-    expect(address.fields.first, field('number', podInt32));
-    expect(address.fields.last, field('state', podString));
+    expect(address.fields.first, field('number', Int32));
+    expect(address.fields.last, field('state', VarString));
   });
 
   test('fields can be PodScalar, PodArray or PodObject', () {
@@ -82,12 +82,12 @@ main([List<String> args]) {
   });
 
   test('fields may have defaults', () {
-    final f = field('behavior', podString)..defaultValue = 'good';
+    final f = field('behavior', VarString)..defaultValue = 'good';
     expect(f.defaultValue, 'good');
   });
 
-  test('default field type is podString', () {
-    expect(field('behavior').podType, podString);
+  test('default field type is String', () {
+    expect(field('behavior').podType, VarString);
   });
 
   test('pod types can be self referential', () {

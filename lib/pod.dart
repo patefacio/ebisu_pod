@@ -50,56 +50,56 @@ class PodScalar extends PodType {
 
   // custom <class PodScalar>
 
-  static const podDouble = const PodScalar._(0);
-  static const podString = const PodScalar._(1);
-  static const podBinaryData = const PodScalar._(2);
-  static const podObjectId = const PodScalar._(3);
-  static const podBoolean = const PodScalar._(4);
-  static const podDate = const PodScalar._(5);
-  static const podNull = const PodScalar._(6);
-  static const podRegex = const PodScalar._(7);
-  static const podInt32 = const PodScalar._(8);
-  static const podInt64 = const PodScalar._(9);
-  static const podTimestamp = const PodScalar._(10);
+  static const Double = const PodScalar._(0);
+  static const VarString = const PodScalar._(1);
+  static const BinaryData = const PodScalar._(2);
+  static const ObjectId = const PodScalar._(3);
+  static const Boolean = const PodScalar._(4);
+  static const Date = const PodScalar._(5);
+  static const Null = const PodScalar._(6);
+  static const Regex = const PodScalar._(7);
+  static const Int32 = const PodScalar._(8);
+  static const Int64 = const PodScalar._(9);
+  static const Timestamp = const PodScalar._(10);
 
   static get values => [
-        podDouble,
-        podString,
-        podBinaryData,
-        podObjectId,
-        podBoolean,
-        podDate,
-        podNull,
-        podRegex,
-        podInt32,
-        podInt64,
-        podTimestamp
+        Double,
+        VarString,
+        BinaryData,
+        ObjectId,
+        Boolean,
+        Date,
+        Null,
+        Regex,
+        Int32,
+        Int64,
+        Timestamp
       ];
 
   String toString() {
     switch (this) {
-      case podDouble:
-        return 'podDouble';
-      case podString:
-        return 'podString';
-      case podBinaryData:
-        return 'podBinaryData';
-      case podObjectId:
-        return 'podObjectId';
-      case podBoolean:
-        return 'podBoolean';
-      case podDate:
-        return 'podDate';
-      case podNull:
-        return 'podNull';
-      case podRegex:
-        return 'podRegex';
-      case podInt32:
-        return 'podInt32';
-      case podInt64:
-        return 'podInt64';
-      case podTimestamp:
-        return 'podTimestamp';
+      case Double:
+        return 'Double';
+      case VarString:
+        return 'VarString';
+      case BinaryData:
+        return 'BinaryData';
+      case ObjectId:
+        return 'ObjectId';
+      case Boolean:
+        return 'Boolean';
+      case Date:
+        return 'Date';
+      case Null:
+        return 'Null';
+      case Regex:
+        return 'Regex';
+      case Int32:
+        return 'Int32';
+      case Int64:
+        return 'Int64';
+      case Timestamp:
+        return 'Timestamp';
     }
   }
 
@@ -233,33 +233,33 @@ class PodObject extends PodType {
 
 // custom <library pod>
 
-const podDouble = PodScalar.podDouble;
-const podString = PodScalar.podString;
-const podBinaryData = PodScalar.podBinaryData;
-const podObjectId = PodScalar.podObjectId;
-const podBoolean = PodScalar.podBoolean;
-const podDate = PodScalar.podDate;
-const podNull = PodScalar.podNull;
-const podRegex = PodScalar.podRegex;
-const podInt32 = PodScalar.podInt32;
-const podInt64 = PodScalar.podInt64;
-const podTimestamp = PodScalar.podTimestamp;
+const Double = PodScalar.Double;
+const VarString = PodScalar.VarString;
+const BinaryData = PodScalar.BinaryData;
+const ObjectId = PodScalar.ObjectId;
+const Boolean = PodScalar.Boolean;
+const Date = PodScalar.Date;
+const Null = PodScalar.Null;
+const Regex = PodScalar.Regex;
+const Int32 = PodScalar.Int32;
+const Int64 = PodScalar.Int64;
+const Timestamp = PodScalar.Timestamp;
 
-final doubleArray = new PodArray(podDouble, 'Array<double>');
-final stringArray = new PodArray(podString, 'Array<String>');
-final binaryDataArray = new PodArray(podBinaryData, 'Array<BinaryData>');
-final objectIdArray = new PodArray(podObjectId, 'Array<ObjectId>');
-final booleanArray = new PodArray(podBoolean, 'Array<Boolean>');
-final dateArray = new PodArray(podDate, 'Array<Date>');
-final nullArray = new PodArray(podNull, 'Array<Null>');
-final regexArray = new PodArray(podRegex, 'Array<Regex>');
-final int32Array = new PodArray(podInt32, 'Array<Int32>');
-final int64Array = new PodArray(podInt64, 'Array<Int64>');
-final timestampArray = new PodArray(podTimestamp, 'Array<Timestamp>');
+final doubleArray = new PodArray(Double, 'Array<double>');
+final stringArray = new PodArray(VarString, 'Array<VarString>');
+final binaryDataArray = new PodArray(BinaryData, 'Array<BinaryData>');
+final objectIdArray = new PodArray(ObjectId, 'Array<ObjectId>');
+final booleanArray = new PodArray(Boolean, 'Array<Boolean>');
+final dateArray = new PodArray(Date, 'Array<Date>');
+final nullArray = new PodArray(Null, 'Array<Null>');
+final regexArray = new PodArray(Regex, 'Array<Regex>');
+final int32Array = new PodArray(Int32, 'Array<Int32>');
+final int64Array = new PodArray(Int64, 'Array<Int64>');
+final timestampArray = new PodArray(Timestamp, 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
-PodField field(id, [podType = podString]) => new PodField(makeId(id), podType);
+PodField field(id, [podType = VarString]) => new PodField(makeId(id), podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
