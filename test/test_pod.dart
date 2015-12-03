@@ -54,7 +54,7 @@ main([List<String> args]) {
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
 
-  test('is fixed size', () {
+  test('isFixedSize tracks size recursively', () {
     [Double, ObjectId, Boolean, Date, Null, Regex, Int32, Int64, Timestamp]
         .forEach((var t) {
       expect(t.isFixedSize, true);
@@ -63,6 +63,13 @@ main([List<String> args]) {
         field('x', t),
       ];
       expect(o.isFixedSize, true);
+      final outer = object('y')..fields = [
+        field('x', o)
+      ];
+      final outerOuter = object('z')..fields = [
+        field('y', outer)
+      ];
+      expect(outerOuter.isFixedSize, true);
     });
 
     [Str, BinaryData].forEach((var t) {
@@ -75,6 +82,14 @@ main([List<String> args]) {
         field('x_arr', array(t)),
       ];
       expect(o.isFixedSize, false);
+
+      final outer = object('y')..fields = [
+        field('x', o)
+      ];
+      final outerOuter = object('z')..fields = [
+        field('y', outer)
+      ];
+      expect(outerOuter.isFixedSize, false);
     });
   });
 
