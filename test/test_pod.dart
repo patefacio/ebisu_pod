@@ -28,7 +28,7 @@ main([List<String> args]) {
     final e = enum_('color', ['red', 'white', 'blue']);
     expect(field('field', e).podType is PodEnum, true);
     expect(field('field', Double).podType, Double);
-    expect(field('field', VarString).podType, VarString);
+    expect(field('field', Str).podType, Str);
     expect(field('field', BinaryData).podType, BinaryData);
     expect(field('field', ObjectId).podType, ObjectId);
     expect(field('field', Boolean).podType, Boolean);
@@ -65,7 +65,7 @@ main([List<String> args]) {
       expect(o.isFixedSize, true);
     });
 
-    [VarString, BinaryData].forEach((var t) {
+    [Str, BinaryData].forEach((var t) {
       expect(t.isFixedSize, false);
       var o = object('x')..fields = [
         field('x', t),
@@ -81,15 +81,15 @@ main([List<String> args]) {
   final address = object('address')
     ..fields = [
       field('number', Int32),
-      field('street', VarString),
-      field('zipcode', VarString),
-      field('state', VarString),
+      field('street', Str),
+      field('zipcode', Str),
+      field('state', Str),
     ];
 
   test('basic object has fields', () {
     expect(address.fields.length, 4);
     expect(address.fields.first, field('number', Int32));
-    expect(address.fields.last, field('state', VarString));
+    expect(address.fields.last, field('state', Str));
   });
 
   test('fields can be PodScalar, PodArray or PodObject', () {
@@ -105,12 +105,12 @@ main([List<String> args]) {
   });
 
   test('fields may have defaults', () {
-    final f = field('behavior', VarString)..defaultValue = 'good';
+    final f = field('behavior', Str)..defaultValue = 'good';
     expect(f.defaultValue, 'good');
   });
 
   test('default field type is String', () {
-    expect(field('behavior').podType, VarString);
+    expect(field('behavior').podType, Str);
   });
 
   test('pod types can be self referential', () {

@@ -54,7 +54,7 @@ class PodScalar extends PodType {
   // custom <class PodScalar>
 
   static const Double = const PodScalar._(0);
-  static const VarString = const PodScalar._(1);
+  static const Str = const PodScalar._(1);
   static const BinaryData = const PodScalar._(2);
   static const ObjectId = const PodScalar._(3);
   static const Boolean = const PodScalar._(4);
@@ -67,7 +67,7 @@ class PodScalar extends PodType {
 
   static get values => [
         Double,
-        VarString,
+        Str,
         BinaryData,
         ObjectId,
         Boolean,
@@ -83,8 +83,8 @@ class PodScalar extends PodType {
     switch (this) {
       case Double:
         return 'Double';
-      case VarString:
-        return 'VarString';
+      case Str:
+        return 'Str';
       case BinaryData:
         return 'BinaryData';
       case ObjectId:
@@ -106,7 +106,7 @@ class PodScalar extends PodType {
     }
   }
 
-  bool get isFixedSize => this != VarString && this != BinaryData;
+  bool get isFixedSize => this != Str && this != BinaryData;
 
   const PodScalar._(this.value);
   String get doc => 'builtin ${this}';
@@ -245,7 +245,7 @@ class PodObject extends PodType {
 // custom <library pod>
 
 const Double = PodScalar.Double;
-const VarString = PodScalar.VarString;
+const Str = PodScalar.Str;
 const BinaryData = PodScalar.BinaryData;
 const ObjectId = PodScalar.ObjectId;
 const Boolean = PodScalar.Boolean;
@@ -257,7 +257,7 @@ const Int64 = PodScalar.Int64;
 const Timestamp = PodScalar.Timestamp;
 
 final doubleArray = new PodArray(Double, 'Array<double>');
-final stringArray = new PodArray(VarString, 'Array<VarString>');
+final stringArray = new PodArray(Str, 'Array<Str>');
 final binaryDataArray = new PodArray(BinaryData, 'Array<BinaryData>');
 final objectIdArray = new PodArray(ObjectId, 'Array<ObjectId>');
 final booleanArray = new PodArray(Boolean, 'Array<Boolean>');
@@ -270,7 +270,7 @@ final timestampArray = new PodArray(Timestamp, 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
-PodField field(id, [podType = VarString]) => new PodField(makeId(id), podType);
+PodField field(id, [podType = Str]) => new PodField(makeId(id), podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
