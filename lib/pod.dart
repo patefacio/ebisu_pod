@@ -20,6 +20,7 @@ class PodType {
 
   String get doc;
   String get typeName;
+  bool get isFixedSize;
 
   // end <class PodType>
 
@@ -31,6 +32,8 @@ class PodEnum extends PodType {
 
   /// Documentation for the enum
   String doc;
+
+  bool get isFixedSize => true;
 
   // custom <class PodEnum>
 
@@ -103,6 +106,8 @@ class PodScalar extends PodType {
     }
   }
 
+  bool get isFixedSize => this != VarString && this != BinaryData;
+
   const PodScalar._(this.value);
   String get doc => 'builtin ${this}';
   get typeName => toString();
@@ -116,28 +121,29 @@ class PodScalar extends PodType {
 /// The primary purpose for modeling data as fixed size string over the
 /// more general scalar string type is so code generators may optimize for
 /// speed by allocating space for strings inline.
-class PodFixedSizeString extends PodType {
+class PodFixedStr extends PodType {
   /// Documentation for fixed size string
   String doc;
 
   /// If non-0 indicates length capped to [max_length]
   int maxLength = 0;
 
-  // custom <class PodFixedSizeString>
+  // custom <class PodFixedStr>
 
-  factory PodFixedSizeString(int maxLength, [doc]) => _typeCache.putIfAbsent(
-      maxLength, () => new PodFixedSizeString._(maxLength, doc));
 
-  PodFixedSizeString._(this.maxLength, [this.doc]);
+  factory PodFixedStr(int maxLength, [doc]) => _typeCache.putIfAbsent(
+      maxLength, () => new PodFixedStr._(maxLength, doc));
 
-  toString() => 'PodFixedLengthString($maxLength)';
+  PodFixedStr._(this.maxLength, [this.doc]);
+
+  toString() => 'PodFixedStr($maxLength)';
   get typeName => toString();
+  bool get isFixedSize => true;
 
-  // end <class PodFixedSizeString>
+  // end <class PodFixedStr>
 
   /// Cache of all fixed size strings
-  static Map<int, PodFixedSizeString> _typeCache =
-      new Map<int, PodFixedSizeString>();
+  static Map<int, PodFixedStr> _typeCache = new Map<int, PodFixedStr>();
 }
 
 class PodArray extends PodType {
@@ -161,6 +167,7 @@ class PodArray extends PodType {
   PodArray(this.referredType, [this.doc]);
   toString() => 'PodArray(${referredType.typeName})';
   get typeName => toString();
+  bool get isFixedSize => false;
 
   // end <class PodArray>
 
@@ -192,6 +199,8 @@ class PodField {
   PodField(this._id, [this.podType]);
   toString() => 'PodField($id:$podType:default=$defaultValue)';
 
+  bool get isFixedSize => podType.isFixedSize;
+
   // end <class PodField>
 
   Id _id;
@@ -213,6 +222,8 @@ class PodObject extends PodType {
   }
 
   get typeName => 'PodObject($_id)';
+
+  bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
   toString() {
     print('to string on object $id');
@@ -271,7 +282,7 @@ PodArray array(dynamic referredType) => referredType is PodType
 
 PodField arrayField(id, referredType) => podField(id, podArray(referredType));
 
-PodFixedSizeString fixedSizeString(int maxLength) =>
-    new PodFixedSizeString(maxLength);
+PodFixedStr fixedStr(int maxLength) =>
+    new PodFixedStr(maxLength);
 
 // end <library pod>

@@ -51,8 +51,31 @@ main([List<String> args]) {
     expect(field('field', int64Array).podType, int64Array);
     expect(field('field', timestampArray).podType, timestampArray);
 
-    expect(
-        field('field', fixedSizeString(32)).podType, fixedSizeString(32));
+    expect(field('field', fixedStr(32)).podType, fixedStr(32));
+  });
+
+  test('is fixed size', () {
+    [Double, ObjectId, Boolean, Date, Null, Regex, Int32, Int64, Timestamp]
+        .forEach((var t) {
+      expect(t.isFixedSize, true);
+
+      final o = object('x')..fields = [
+        field('x', t),
+      ];
+      expect(o.isFixedSize, true);
+    });
+
+    [VarString, BinaryData].forEach((var t) {
+      expect(t.isFixedSize, false);
+      var o = object('x')..fields = [
+        field('x', t),
+      ];
+      expect(o.isFixedSize, false);
+      o = object('x')..fields = [
+        field('x_arr', array(t)),
+      ];
+      expect(o.isFixedSize, false);
+    });
   });
 
   final address = object('address')

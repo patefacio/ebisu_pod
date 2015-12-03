@@ -68,7 +68,7 @@ code generators.
           member('value')..isFinal = true..type = 'int',
         ],
 
-        class_('pod_fixed_size_string')
+        class_('pod_fixed_str')
         ..doc = '''
 Used to store strings that have a capped size.
 
@@ -86,8 +86,8 @@ speed by allocating space for strings inline.
           ..doc = 'Cache of all fixed size strings'
           ..access = IA
           ..isStatic = true
-          ..type = 'Map<int, PodFixedSizeString>'
-          ..classInit = 'new Map<int, PodFixedSizeString>()',
+          ..type = 'Map<int, PodFixedStr>'
+          ..classInit = 'new Map<int, PodFixedStr>()',
         ],
 
         class_('pod_array')
