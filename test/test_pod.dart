@@ -54,41 +54,32 @@ main([List<String> args]) {
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
 
+  test('fixedArray', () {
+    expect(array(Double, doc:'Variable array of doubles').isFixedSize, false);
+    expect(array(Double, maxLength:12, doc:'Array of 12 doubles').isFixedSize, true);
+  });
+
   test('isFixedSize tracks size recursively', () {
     [Double, ObjectId, Boolean, Date, Null, Regex, Int32, Int64, Timestamp]
         .forEach((var t) {
       expect(t.isFixedSize, true);
 
-      final o = object('x')..fields = [
-        field('x', t),
-      ];
+      final o = object('x')..fields = [field('x', t),];
       expect(o.isFixedSize, true);
-      final outer = object('y')..fields = [
-        field('x', o)
-      ];
-      final outerOuter = object('z')..fields = [
-        field('y', outer)
-      ];
+      final outer = object('y')..fields = [field('x', o)];
+      final outerOuter = object('z')..fields = [field('y', outer)];
       expect(outerOuter.isFixedSize, true);
     });
 
     [Str, BinaryData].forEach((var t) {
       expect(t.isFixedSize, false);
-      var o = object('x')..fields = [
-        field('x', t),
-      ];
+      var o = object('x')..fields = [field('x', t),];
       expect(o.isFixedSize, false);
-      o = object('x')..fields = [
-        field('x_arr', array(t)),
-      ];
+      o = object('x')..fields = [field('x_arr', array(t)),];
       expect(o.isFixedSize, false);
 
-      final outer = object('y')..fields = [
-        field('x', o)
-      ];
-      final outerOuter = object('z')..fields = [
-        field('y', outer)
-      ];
+      final outer = object('y')..fields = [field('x', o)];
+      final outerOuter = object('z')..fields = [field('y', outer)];
       expect(outerOuter.isFixedSize, false);
     });
   });
