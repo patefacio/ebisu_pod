@@ -295,9 +295,9 @@ PodArray array(dynamic referredType, {String doc, int maxLength}) => referredTyp
   ? new PodArray(referredType, doc: doc, maxLength: maxLength)
     : referredType is PodScalarType
   ? new PodArray(new PodScalar(referredType), doc: doc, maxLength: maxLength)
-        : throw 'podArray(...) requires PodType or PodScalarType: $referredType';
+        : throw 'array(...) requires PodType or PodScalarType: $referredType';
 
-PodField arrayField(id, referredType) => podField(id, podArray(referredType));
+PodField arrayField(id, referredType) => field(id, array(referredType));
 
 PodFixedStr fixedStr(int maxLength) => new PodFixedStr(maxLength);
 

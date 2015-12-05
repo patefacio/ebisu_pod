@@ -124,6 +124,9 @@ main([List<String> args]) {
     o.fields.add(field('children', array(o)));
     expect(o.fields.first.podType is PodArray, true);
     expect(o.fields.first.podType.referredType, o);
+    o.fields.add(arrayField('siblings', o));
+    expect(o.fields.last.podType is PodArray, true);
+    expect(o.fields.last.podType.referredType, o);
   });
 
 // end <main>
