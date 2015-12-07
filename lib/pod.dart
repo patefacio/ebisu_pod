@@ -43,9 +43,9 @@ class PodEnum extends PodType {
 
   String get typeName => toString();
   toString() => brCompact([
-    'PodEnum($id:[${values.join(", ")}])',
-    doc == null? null : blockComment(doc)
-  ]);
+        'PodEnum($id:[${values.join(", ")}])',
+        doc == null ? null : blockComment(doc)
+      ]);
 
   // end <class PodEnum>
 
