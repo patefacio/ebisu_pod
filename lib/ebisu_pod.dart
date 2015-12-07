@@ -13,7 +13,7 @@ final _logger = new Logger('ebisu_pod');
 class PodType {
   // custom <class PodType>
 
-  const PodType();
+  PodType();
   get isScalar => this is PodScalar;
   get isArray => this is PodArray;
   get isObject => this is PodObject;
@@ -57,17 +57,17 @@ class PodScalar extends PodType {
 
   // custom <class PodScalar>
 
-  static const Double = const PodScalar._(0);
-  static const Str = const PodScalar._(1);
-  static const BinaryData = const PodScalar._(2);
-  static const ObjectId = const PodScalar._(3);
-  static const Boolean = const PodScalar._(4);
-  static const Date = const PodScalar._(5);
-  static const Null = const PodScalar._(6);
-  static const Regex = const PodScalar._(7);
-  static const Int32 = const PodScalar._(8);
-  static const Int64 = const PodScalar._(9);
-  static const Timestamp = const PodScalar._(10);
+  static final Double = new PodScalar._(0);
+  static final Str = new PodScalar._(1);
+  static final BinaryData = new PodScalar._(2);
+  static final ObjectId = new PodScalar._(3);
+  static final Boolean = new PodScalar._(4);
+  static final Date = new PodScalar._(5);
+  static final Null = new PodScalar._(6);
+  static final Regex = new PodScalar._(7);
+  static final Int32 = new PodScalar._(8);
+  static final Int64 = new PodScalar._(9);
+  static final Timestamp = new PodScalar._(10);
 
   static get values => [
         Double,
@@ -112,7 +112,7 @@ class PodScalar extends PodType {
 
   bool get isFixedSize => this != Str && this != BinaryData;
 
-  const PodScalar._(this.value);
+  PodScalar._(this.value);
   String get doc => 'builtin ${this}';
   get typeName => toString();
 
@@ -252,17 +252,17 @@ class PodObject extends PodType {
 
 // custom <library ebisu_pod>
 
-const Double = PodScalar.Double;
-const Str = PodScalar.Str;
-const BinaryData = PodScalar.BinaryData;
-const ObjectId = PodScalar.ObjectId;
-const Boolean = PodScalar.Boolean;
-const Date = PodScalar.Date;
-const Null = PodScalar.Null;
-const Regex = PodScalar.Regex;
-const Int32 = PodScalar.Int32;
-const Int64 = PodScalar.Int64;
-const Timestamp = PodScalar.Timestamp;
+final Double = PodScalar.Double;
+final Str = PodScalar.Str;
+final BinaryData = PodScalar.BinaryData;
+final ObjectId = PodScalar.ObjectId;
+final Boolean = PodScalar.Boolean;
+final Date = PodScalar.Date;
+final Null = PodScalar.Null;
+final Regex = PodScalar.Regex;
+final Int32 = PodScalar.Int32;
+final Int64 = PodScalar.Int64;
+final Timestamp = PodScalar.Timestamp;
 
 final doubleArray = new PodArray(Double, doc: 'Array<double>');
 final stringArray = new PodArray(Str, doc: 'Array<Str>');
@@ -278,7 +278,7 @@ final timestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
-PodField field(id, [podType = Str]) => new PodField(makeId(id), podType);
+PodField field(id, [podType]) => new PodField(makeId(id), podType == null? Str : podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
