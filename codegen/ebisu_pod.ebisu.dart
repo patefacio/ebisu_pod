@@ -40,7 +40,7 @@ code generators.
     ]
     ..libraries = [
 
-      library('pod')
+      library('ebisu_pod')
       ..includesLogger = true
       ..imports = [
         'package:ebisu/ebisu.dart',
@@ -120,6 +120,14 @@ speed by allocating space for strings inline.
           member('fields')..type = 'List<PodField>'..classInit = [],
           member('doc')..doc = 'Documentation for the object',
         ],
+      ],
+
+      library('pod_cpp')
+      ..doc = 'Consistent mapping of *plain old data* to C++ structs'
+      ..imports = [
+        'package:ebisu/ebisu.dart',
+        'package:ebisu/ebisu_cpp.dart',
+        'package:id/id.dart',
       ],
 
       library('balance_sheet')

@@ -1,4 +1,4 @@
-library ebisu_pod.pod;
+library ebisu_pod.ebisu_pod;
 
 import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
@@ -8,7 +8,7 @@ import 'package:quiver/core.dart';
 // custom <additional imports>
 // end <additional imports>
 
-final _logger = new Logger('pod');
+final _logger = new Logger('ebisu_pod');
 
 class PodType {
   // custom <class PodType>
@@ -250,7 +250,7 @@ class PodObject extends PodType {
   Id _id;
 }
 
-// custom <library pod>
+// custom <library ebisu_pod>
 
 const Double = PodScalar.Double;
 const Str = PodScalar.Str;
@@ -294,4 +294,4 @@ PodField arrayField(id, referredType) => field(id, array(referredType));
 
 PodFixedStr fixedStr(int maxLength) => new PodFixedStr(maxLength);
 
-// end <library pod>
+// end <library ebisu_pod>
