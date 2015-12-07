@@ -55,8 +55,9 @@ main([List<String> args]) {
   });
 
   test('fixedArray', () {
-    expect(array(Double, doc:'Variable array of doubles').isFixedSize, false);
-    expect(array(Double, maxLength:12, doc:'Array of 12 doubles').isFixedSize, true);
+    expect(array(Double, doc: 'Variable array of doubles').isFixedSize, false);
+    expect(array(Double, maxLength: 12, doc: 'Array of 12 doubles').isFixedSize,
+        true);
   });
 
   test('isFixedSize tracks size recursively', () {

@@ -11,7 +11,6 @@ import 'package:quiver/core.dart';
 final _logger = new Logger('pod');
 
 class PodType {
-
   // custom <class PodType>
 
   const PodType();
@@ -27,11 +26,10 @@ class PodType {
 
 }
 
-
 class PodEnum extends PodType {
-
   Id get id => _id;
   List<String> values = [];
+
   /// Documentation for the enum
   String doc;
 
@@ -43,15 +41,18 @@ class PodEnum extends PodType {
     }
   }
 
+  String get typeName => toString();
+  toString() => brCompact([
+    'PodEnum($id:[${values.join(", ")}])',
+    doc == null? null : blockComment(doc)
+  ]);
+
   // end <class PodEnum>
 
   Id _id;
-
 }
 
-
 class PodScalar extends PodType {
-
   final int value;
 
   // custom <class PodScalar>
@@ -119,16 +120,15 @@ class PodScalar extends PodType {
 
 }
 
-
 /// Used to store strings that have a capped size.
 ///
 /// The primary purpose for modeling data as fixed size string over the
 /// more general scalar string type is so code generators may optimize for
 /// speed by allocating space for strings inline.
 class PodFixedStr extends PodType {
-
   /// Documentation for fixed size string
   String doc;
+
   /// If non-0 indicates length capped to [max_length]
   int maxLength = 0;
 
@@ -147,30 +147,28 @@ class PodFixedStr extends PodType {
 
   /// Cache of all fixed size strings
   static Map<int, PodFixedStr> _typeCache = new Map<int, PodFixedStr>();
-
 }
 
-
 class PodArray extends PodType {
-
-  bool operator==(PodArray other) =>
-    identical(this, other) ||
-    referredType == other.referredType &&
-    doc == other.doc &&
-    maxLength == other.maxLength;
+  bool operator ==(PodArray other) => identical(this, other) ||
+      referredType == other.referredType &&
+          doc == other.doc &&
+          maxLength == other.maxLength;
 
   int get hashCode => hash3(referredType, doc, maxLength);
 
   PodType referredType;
+
   /// Documentation for the array
   String doc;
+
   /// If non-0 indicates length capped to [max_length]
   int maxLength = 0;
 
   // custom <class PodArray>
 
   PodArray(this.referredType, {this.doc, this.maxLength}) {
-    if(maxLength == null) maxLength = 0;
+    if (maxLength == null) maxLength = 0;
   }
 
   toString() => 'PodArray(${referredType.typeName})';
@@ -181,29 +179,23 @@ class PodArray extends PodType {
 
 }
 
-
 class PodField {
+  bool operator ==(PodField other) => identical(this, other) ||
+      _id == other._id &&
+          isIndex == other.isIndex &&
+          podType == other.podType &&
+          defaultValue == other.defaultValue &&
+          doc == other.doc;
 
-  bool operator==(PodField other) =>
-    identical(this, other) ||
-    _id == other._id &&
-    isIndex == other.isIndex &&
-    podType == other.podType &&
-    defaultValue == other.defaultValue &&
-    doc == other.doc;
-
-  int get hashCode => hashObjects([
-    _id,
-    isIndex,
-    podType,
-    defaultValue,
-    doc]);
+  int get hashCode => hashObjects([_id, isIndex, podType, defaultValue, doc]);
 
   Id get id => _id;
+
   /// If true the field is defined as index
   bool isIndex = false;
   PodType podType;
   dynamic defaultValue;
+
   /// Documentation for the field
   String doc;
 
@@ -211,21 +203,22 @@ class PodField {
   // custom <class PodField>
 
   PodField(this._id, [this.podType]);
-  toString() => 'PodField($id:$podType:default=$defaultValue)';
+  toString() => brCompact([
+        'PodField($id:$podType:default=$defaultValue)',
+        indentBlock(blockComment(doc))
+      ]);
 
   bool get isFixedSize => podType.isFixedSize;
 
   // end <class PodField>
 
   Id _id;
-
 }
 
-
 class PodObject extends PodType {
-
   Id get id => _id;
   List<PodField> fields = [];
+
   /// Documentation for the object
   String doc;
 
@@ -241,22 +234,20 @@ class PodObject extends PodType {
 
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
-  toString() {
-    print('to string on object $id');
-
-    return brCompact([
-      'PodObject($id)',
-      indentBlock(
-          brCompact(fields.map((pf) => '${pf.id}:${pf.podType.typeName}')))
-    ]);
-  }
+  toString() => brCompact([
+        'PodObject($id)',
+        indentBlock(blockComment(doc)),
+        indentBlock(brCompact(fields.map((pf) => [
+              '${pf.id}:${pf.podType.typeName}',
+              pf.doc == null ? null : blockComment(pf.doc)
+            ])))
+      ]);
 
   bool get hasArray => fields.any((pf) => pf.podType is PodArray);
 
   // end <class PodObject>
 
   Id _id;
-
 }
 
 // custom <library pod>
@@ -273,17 +264,17 @@ const Int32 = PodScalar.Int32;
 const Int64 = PodScalar.Int64;
 const Timestamp = PodScalar.Timestamp;
 
-final doubleArray = new PodArray(Double, doc:'Array<double>');
-final stringArray = new PodArray(Str, doc:'Array<Str>');
-final binaryDataArray = new PodArray(BinaryData, doc:'Array<BinaryData>');
-final objectIdArray = new PodArray(ObjectId, doc:'Array<ObjectId>');
-final booleanArray = new PodArray(Boolean, doc:'Array<Boolean>');
-final dateArray = new PodArray(Date, doc:'Array<Date>');
-final nullArray = new PodArray(Null, doc:'Array<Null>');
-final regexArray = new PodArray(Regex, doc:'Array<Regex>');
-final int32Array = new PodArray(Int32, doc:'Array<Int32>');
-final int64Array = new PodArray(Int64, doc:'Array<Int64>');
-final timestampArray = new PodArray(Timestamp, doc:'Array<Timestamp>');
+final doubleArray = new PodArray(Double, doc: 'Array<double>');
+final stringArray = new PodArray(Str, doc: 'Array<Str>');
+final binaryDataArray = new PodArray(BinaryData, doc: 'Array<BinaryData>');
+final objectIdArray = new PodArray(ObjectId, doc: 'Array<ObjectId>');
+final booleanArray = new PodArray(Boolean, doc: 'Array<Boolean>');
+final dateArray = new PodArray(Date, doc: 'Array<Date>');
+final nullArray = new PodArray(Null, doc: 'Array<Null>');
+final regexArray = new PodArray(Regex, doc: 'Array<Regex>');
+final int32Array = new PodArray(Int32, doc: 'Array<Int32>');
+final int64Array = new PodArray(Int64, doc: 'Array<Int64>');
+final timestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
@@ -291,10 +282,12 @@ PodField field(id, [podType = Str]) => new PodField(makeId(id), podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArray array(dynamic referredType, {String doc, int maxLength}) => referredType is PodType
-  ? new PodArray(referredType, doc: doc, maxLength: maxLength)
+PodArray array(dynamic referredType, {String doc, int maxLength}) => referredType
+    is PodType
+    ? new PodArray(referredType, doc: doc, maxLength: maxLength)
     : referredType is PodScalarType
-  ? new PodArray(new PodScalar(referredType), doc: doc, maxLength: maxLength)
+        ? new PodArray(new PodScalar(referredType),
+            doc: doc, maxLength: maxLength)
         : throw 'array(...) requires PodType or PodScalarType: $referredType';
 
 PodField arrayField(id, referredType) => field(id, array(referredType));

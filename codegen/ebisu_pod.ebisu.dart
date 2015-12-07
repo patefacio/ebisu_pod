@@ -121,6 +121,12 @@ speed by allocating space for strings inline.
           member('doc')..doc = 'Documentation for the object',
         ],
       ],
+
+      library('balance_sheet')
+      ..imports = [ 'package:ebisu_pod/pod.dart' ]
+      ..includesMain = true
+      ..path = path.join(_topDir, 'lib/example'),
+
     ];
 
 
