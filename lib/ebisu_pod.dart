@@ -14,7 +14,6 @@ class PodType {
   // custom <class PodType>
 
   PodType();
-  get isScalar => this is PodScalar;
   get isArray => this is PodArray;
   get isObject => this is PodObject;
 
@@ -52,123 +51,84 @@ class PodEnum extends PodType {
   Id _id;
 }
 
-class PodScalar extends PodType {
-  final int value;
+class FixedSizeType extends PodType {
+  // custom <class FixedSizeType>
+  // end <class FixedSizeType>
 
-  // custom <class PodScalar>
-
-  static final Double = new PodScalar._(0);
-  static final Str = new PodScalar._(1);
-  static final BinaryData = new PodScalar._(2);
-  static final ObjectId = new PodScalar._(3);
-  static final Boolean = new PodScalar._(4);
-  static final Date = new PodScalar._(5);
-  static final Null = new PodScalar._(6);
-  static final Regex = new PodScalar._(7);
-  static final Int32 = new PodScalar._(8);
-  static final Int64 = new PodScalar._(9);
-  static final Timestamp = new PodScalar._(10);
-
-  static get values => [
-        Double,
-        Str,
-        BinaryData,
-        ObjectId,
-        Boolean,
-        Date,
-        Null,
-        Regex,
-        Int32,
-        Int64,
-        Timestamp
-      ];
-
-  String toString() {
-    switch (this) {
-      case Double:
-        return 'Double';
-      case Str:
-        return 'Str';
-      case BinaryData:
-        return 'BinaryData';
-      case ObjectId:
-        return 'ObjectId';
-      case Boolean:
-        return 'Boolean';
-      case Date:
-        return 'Date';
-      case Null:
-        return 'Null';
-      case Regex:
-        return 'Regex';
-      case Int32:
-        return 'Int32';
-      case Int64:
-        return 'Int64';
-      case Timestamp:
-        return 'Timestamp';
-    }
-  }
-
-  bool get isFixedSize => this != Str && this != BinaryData;
-
-  PodScalar._(this.value);
-  String get doc => 'builtin ${this}';
-  get typeName => toString();
-
-  // end <class PodScalar>
-
+  bool get isFixedSize => true;
 }
 
-/// Used to store strings that have a capped size.
+class VariableSizeType extends PodType {
+  VariableSizeType(this.maxLength);
+
+  /// If non-0 indicates length capped to [max_length]
+  int maxLength;
+
+  // custom <class VariableSizeType>
+  // end <class VariableSizeType>
+
+  bool get isFixedSize => maxLength != null;
+}
+
+/// Used to define string types, which may have a fixed type.
 ///
-/// The primary purpose for modeling data as fixed size string over the
-/// more general scalar string type is so code generators may optimize for
-/// speed by allocating space for strings inline.
-class PodFixedStr extends PodType {
+/// The primary purpose for modeling data as fixed size strings over the
+/// more general string type is so code generators may optimize for speed
+/// by allocating space for strings inline.
+class StrType extends VariableSizeType {
   /// Documentation for fixed size string
   String doc;
 
-  /// If non-0 indicates length capped to [max_length]
-  int maxLength = 0;
+  // custom <class StrType>
 
-  // custom <class PodFixedStr>
+  factory StrType([maxLength, doc]) =>
+      _typeCache.putIfAbsent(maxLength, () => new StrType._(maxLength, doc));
 
-  factory PodFixedStr(int maxLength, [doc]) => _typeCache.putIfAbsent(
-      maxLength, () => new PodFixedStr._(maxLength, doc));
-
-  PodFixedStr._(this.maxLength, [this.doc]);
-
-  toString() => 'PodFixedStr($maxLength)';
+  StrType._([maxLength, this.doc]) : super(maxLength);
+  toString() => 'StrType($maxLength)';
   get typeName => toString();
-  bool get isFixedSize => true;
 
-  // end <class PodFixedStr>
+  // end <class StrType>
 
   /// Cache of all fixed size strings
-  static Map<int, PodFixedStr> _typeCache = new Map<int, PodFixedStr>();
+  static Map<int, Str> _typeCache = new Map<int, Str>();
 }
 
-class PodArray extends PodType {
-  bool operator ==(PodArray other) => identical(this, other) ||
-      referredType == other.referredType &&
-          doc == other.doc &&
-          maxLength == other.maxLength;
+/// Stores binary data as array of bytes
+class BinaryDataType extends VariableSizeType {
+  /// Documentation for the binary data type
+  String doc;
 
-  int get hashCode => hash3(referredType, doc, maxLength);
+  // custom <class BinaryDataType>
+
+  factory BinaryDataType([maxLength, doc]) => _typeCache.putIfAbsent(
+      maxLength, () => new BinaryDataType._(maxLength, doc));
+
+  BinaryDataType._([maxLength, this.doc]) : super(maxLength);
+  toString() => 'BinaryDataType($maxLength)';
+  get typeName => toString();
+
+  // end <class BinaryDataType>
+
+  /// Cache of all fixed size BinaryData types
+  static Map<int, BinaryData> _typeCache = new Map<int, BinaryData>();
+}
+
+class PodArray extends VariableSizeType {
+  bool operator ==(PodArray other) => identical(this, other) ||
+      referredType == other.referredType && doc == other.doc;
+
+  int get hashCode => hash2(referredType, doc);
 
   PodType referredType;
 
   /// Documentation for the array
   String doc;
 
-  /// If non-0 indicates length capped to [max_length]
-  int maxLength = 0;
-
   // custom <class PodArray>
 
-  PodArray(this.referredType, {this.doc, this.maxLength}) {
-    if (maxLength == null) maxLength = 0;
+  PodArray(this.referredType, {this.doc, maxLength}) : super(maxLength) {
+    if (this.maxLength == null) this.maxLength = 0;
   }
 
   toString() => 'PodArray(${referredType.typeName})';
@@ -250,19 +210,83 @@ class PodObject extends PodType {
   Id _id;
 }
 
+class DoubleType extends FixedSizeType {
+  // custom <class DoubleType>
+  // end <class DoubleType>
+
+  DoubleType._();
+}
+
+class ObjectIdType extends FixedSizeType {
+  // custom <class ObjectIdType>
+  // end <class ObjectIdType>
+
+  ObjectIdType._();
+}
+
+class BooleanType extends FixedSizeType {
+  // custom <class BooleanType>
+  // end <class BooleanType>
+
+  BooleanType._();
+}
+
+class DateType extends FixedSizeType {
+  // custom <class DateType>
+  // end <class DateType>
+
+  DateType._();
+}
+
+class NullType extends FixedSizeType {
+  // custom <class NullType>
+  // end <class NullType>
+
+  NullType._();
+}
+
+class RegexType extends FixedSizeType {
+  // custom <class RegexType>
+  // end <class RegexType>
+
+  RegexType._();
+}
+
+class Int32Type extends FixedSizeType {
+  // custom <class Int32Type>
+  // end <class Int32Type>
+
+  Int32Type._();
+}
+
+class Int64Type extends FixedSizeType {
+  // custom <class Int64Type>
+  // end <class Int64Type>
+
+  Int64Type._();
+}
+
+class TimestampType extends FixedSizeType {
+  // custom <class TimestampType>
+  // end <class TimestampType>
+
+  TimestampType._();
+}
+
 // custom <library ebisu_pod>
 
-final Double = PodScalar.Double;
-final Str = PodScalar.Str;
-final BinaryData = PodScalar.BinaryData;
-final ObjectId = PodScalar.ObjectId;
-final Boolean = PodScalar.Boolean;
-final Date = PodScalar.Date;
-final Null = PodScalar.Null;
-final Regex = PodScalar.Regex;
-final Int32 = PodScalar.Int32;
-final Int64 = PodScalar.Int64;
-final Timestamp = PodScalar.Timestamp;
+final Str = new StrType();
+final BinaryData = new BinaryDataType();
+
+final Double = new DoubleType._();
+final ObjectId = new ObjectIdType._();
+final Boolean = new BooleanType._();
+final Date = new DateType._();
+final Null = new NullType._();
+final Regex = new RegexType._();
+final Int32 = new Int32Type._();
+final Int64 = new Int64Type._();
+final Timestamp = new TimestampType._();
 
 final doubleArray = new PodArray(Double, doc: 'Array<double>');
 final stringArray = new PodArray(Str, doc: 'Array<Str>');
@@ -278,20 +302,16 @@ final timestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
-PodField field(id, [podType]) => new PodField(makeId(id), podType == null? Str : podType);
+PodField field(id, [podType]) =>
+    new PodField(makeId(id), podType == null ? Str : podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArray array(dynamic referredType, {String doc, int maxLength}) => referredType
-    is PodType
-    ? new PodArray(referredType, doc: doc, maxLength: maxLength)
-    : referredType is PodScalarType
-        ? new PodArray(new PodScalar(referredType),
-            doc: doc, maxLength: maxLength)
-        : throw 'array(...) requires PodType or PodScalarType: $referredType';
+PodArray array(dynamic referredType, {String doc, int maxLength}) =>
+  new PodArray(referredType, doc: doc, maxLength: maxLength);
 
 PodField arrayField(id, referredType) => field(id, array(referredType));
 
-PodFixedStr fixedStr(int maxLength) => new PodFixedStr(maxLength);
+StrType fixedStr(int maxLength) => new StrType(maxLength);
 
 // end <library ebisu_pod>

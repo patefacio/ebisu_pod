@@ -15,8 +15,7 @@ dependencies:
 
 # custom <ebisu_pod dependencies>
 
-  ebisu: "^0.6.7"
-
+  ebisu: "^0.6.8"
 
 # end <ebisu_pod dependencies>
 

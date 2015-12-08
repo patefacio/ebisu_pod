@@ -99,14 +99,14 @@ main([List<String> args]) {
     expect(address.fields.last, field('state', Str));
   });
 
-  test('fields can be PodScalar, PodArray or PodObject', () {
+  test('fields can be Builtin, PodArray or PodObject', () {
     final referred = object('referred');
     final obj = object('obj', [
       field('scalar'),
       field('array', int32Array),
       field('object', referred)
     ]);
-    expect(obj.fields.first.podType is PodScalar, true);
+    expect(obj.fields.first.podType == Str, true);
     expect(obj.fields[1].podType is PodArray, true);
     expect(obj.fields.last.podType is PodObject, true);
   });

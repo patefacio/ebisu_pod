@@ -35,108 +35,131 @@ code generators.
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
-    ..testLibraries = [
-      library('test_pod'),
-    ]
+    ..testLibraries = [library('test_pod'),]
     ..libraries = [
-
       library('ebisu_pod')
-      ..includesLogger = true
-      ..imports = [
-        'package:ebisu/ebisu.dart',
-        'package:id/id.dart',
-      ]
-      ..enums = [
-      ]
-      ..classes = [
+        ..includesLogger = true
+        ..imports = ['package:ebisu/ebisu.dart', 'package:id/id.dart',]
+        ..enums = []
+        ..classes = [
+          class_('pod_type')..members = [],
+          class_('pod_enum')
+            ..extend = 'PodType'
+            ..members = [
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
+              member('values')
+                ..type = 'List<String>'
+                ..classInit = [],
+              member('doc')..doc = 'Documentation for the enum',
+            ],
 
-        class_('pod_type')
-        ..members = [
-        ],
+          class_('fixed_size_type')
+          ..extend = 'PodType'
+          ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
 
-        class_('pod_enum')
-        ..extend = 'PodType'
-        ..members = [
-          member('id')..type = 'Id'..access = RO,
-          member('values')..type = 'List<String>'..classInit = [],
-          member('doc')..doc = 'Documentation for the enum',
-        ],
+          class_('variable_size_type')
+          ..extend = 'PodType'
+          ..customCodeBlock.snippets.add('bool get isFixedSize => maxLength != null;')
+          ..members = [
+            member('max_length')
+            ..doc = 'If non-0 indicates length capped to [max_length]'
+            ..type = 'int'
+            ..ctors = ['']
+          ],
 
-        class_('pod_scalar')
-        ..extend = 'PodType'
-        ..members = [
-          member('value')..isFinal = true..type = 'int',
-        ],
+          class_('str_type')
+            ..doc = '''
+Used to define string types, which may have a fixed type.
 
-        class_('pod_fixed_str')
-        ..doc = '''
-Used to store strings that have a capped size.
-
-The primary purpose for modeling data as fixed size string over the
-more general scalar string type is so code generators may optimize for
-speed by allocating space for strings inline.
+The primary purpose for modeling data as fixed size strings over the
+more general string type is so code generators may optimize for speed
+by allocating space for strings inline.
 '''
-        ..extend = 'PodType'
-        ..members = [
-          member('doc')..doc = 'Documentation for fixed size string',
-          member('max_length')
-          ..doc = 'If non-0 indicates length capped to [max_length]'
-          ..classInit = 0,
-          member('type_cache')
-          ..doc = 'Cache of all fixed size strings'
-          ..access = IA
-          ..isStatic = true
-          ..type = 'Map<int, PodFixedStr>'
-          ..classInit = 'new Map<int, PodFixedStr>()',
-        ],
+            ..extend = 'VariableSizeType'
+            ..members = [
+              member('doc')..doc = 'Documentation for fixed size string',
+              member('type_cache')
+                ..doc = 'Cache of all fixed size strings'
+                ..access = IA
+                ..isStatic = true
+                ..type = 'Map<int, Str>'
+                ..classInit = 'new Map<int, Str>()',
+            ],
 
-        class_('pod_array')
-        ..extend = 'PodType'
-        ..hasOpEquals = true
-        ..members = [
-          member('referred_type')..type = 'PodType',
-          member('doc')..doc = 'Documentation for the array',
-          member('max_length')
-          ..doc = 'If non-0 indicates length capped to [max_length]'
-          ..classInit = 0,
-        ],
+          class_('binary_data_type')
+            ..doc = 'Stores binary data as array of bytes'
+            ..extend = 'VariableSizeType'
+            ..members = [
+              member('doc')..doc = 'Documentation for the binary data type',
+              member('type_cache')
+                ..doc = 'Cache of all fixed size BinaryData types'
+                ..access = IA
+                ..isStatic = true
+                ..type = 'Map<int, BinaryData>'
+                ..classInit = 'new Map<int, BinaryData>()',
+            ],
 
-        class_('pod_field')
-        ..hasOpEquals = true
-        ..members = [
-          member('id')..type = 'Id'..access = RO,
-          member('is_index')
-          ..doc = 'If true the field is defined as index'
-          ..classInit = false,
-          member('pod_type')..type = 'PodType',
-          member('default_value')..type = 'dynamic',
-          member('doc')..doc = 'Documentation for the field',
-        ],
+          class_('pod_array')
+            ..extend = 'VariableSizeType'
+            ..hasOpEquals = true
+            ..members = [
+              member('referred_type')..type = 'PodType',
+              member('doc')..doc = 'Documentation for the array',
+            ],
 
-        class_('pod_object')
-        ..extend = 'PodType'
-        ..members = [
-          member('id')..type = 'Id'..access = RO,
-          member('fields')..type = 'List<PodField>'..classInit = [],
-          member('doc')..doc = 'Documentation for the object',
-        ],
-      ],
+          class_('pod_field')
+            ..hasOpEquals = true
+            ..members = [
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
+              member('is_index')
+                ..doc = 'If true the field is defined as index'
+                ..classInit = false,
+              member('pod_type')..type = 'PodType',
+              member('default_value')..type = 'dynamic',
+              member('doc')..doc = 'Documentation for the field',
+            ],
+          class_('pod_object')
+            ..extend = 'PodType'
+            ..members = [
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
+              member('fields')
+                ..type = 'List<PodField>'
+                ..classInit = [],
+              member('doc')..doc = 'Documentation for the object',
+            ],
+        ]
+        ..classes.addAll([
+          'double',
+          'object_id',
+          'boolean',
+          'date',
+          'null',
+          'regex',
+          'int32',
+          'int64',
+          'timestamp'
+        ].map((var t) => class_('${t}_type')
+            ..extend = 'FixedSizeType'
+            ..withClass((c) => c.customCodeBlock.snippets.add('${c.name}._();')))),
 
       library('pod_cpp')
-      ..doc = 'Consistent mapping of *plain old data* to C++ structs'
-      ..imports = [
-        'package:ebisu/ebisu.dart',
-        'package:ebisu/ebisu_cpp.dart',
-        'package:id/id.dart',
-      ],
-
+        ..doc = 'Consistent mapping of *plain old data* to C++ structs'
+        ..imports = [
+          'package:ebisu/ebisu.dart',
+          'package:ebisu/ebisu_cpp.dart',
+          'package:id/id.dart',
+        ],
       library('balance_sheet')
-      ..imports = [ 'package:ebisu_pod/pod.dart' ]
-      ..includesMain = true
-      ..path = path.join(_topDir, 'lib/example'),
-
+        ..imports = ['package:ebisu_pod/pod.dart']
+        ..includesMain = true
+        ..path = path.join(_topDir, 'lib/example'),
     ];
-
 
   ebisu.generate();
 
