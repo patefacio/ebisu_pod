@@ -113,9 +113,10 @@ by allocating space for strings inline.
             ],
 
           class_('pod_type_ref')
-          ..doc = 'Reference to a pod type within packaging system'
+          ..doc = 'Combination of owning package name and name of a type within it'
           ..members = [
-            member('path')..type = 'Path to referred type',
+            member('package_name')..type = 'PackageName',
+            member('type_name')..type = 'Id',
           ],
 
           class_('pod_field')
@@ -144,12 +145,41 @@ by allocating space for strings inline.
               member('doc')..doc = 'Documentation for the object',
             ],
 
+          class_('pod_alias')
+          ..members = [
+            member('id')
+            ..doc = 'Alias name for referenced type'
+            ..type = 'Id',
+            member('pod_type_ref')..type = 'PodTypeRef',
+          ],
+
+          class_('package_name')
+          ..doc = '''
+Package names are effectively a list of Id isntances.
+
+They can be constructed from and represented by the common dotted form:
+
+   [ id('dossier'), id('common') ] => 'dossier.common'
+
+   [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
+'''
+          ..members = [
+            member('identity')..type = 'Lsit<Id>'..classInit = [],
+          ],
+
           class_('pod_package')
           ..doc = 'Package structure to support organization of pod definitions'
           ..extend = 'Entity'
           ..members = [
-            member('packages')..type = 'List<Package>'..classInit = [],
-            member('types')..type = 'Map<String, PodType>'..classInit = {},
+            member('name')
+            ..doc = 'Name of package'
+            ..type = 'PackageName',
+            member('imports')
+            ..doc = 'Packages required by (ie containing referenced types) this package'
+            ..type = 'List<Package>'..classInit = [],
+            member('types')
+            ..doc = 'The named and therefore referencable types within the package'
+            ..type = 'Map<String, PodType>'..classInit = {},
           ],
 
         ]
@@ -173,7 +203,24 @@ by allocating space for strings inline.
           'package:ebisu/ebisu.dart',
           'package:ebisu/ebisu_cpp.dart',
           'package:id/id.dart',
-        ],
+        ]
+      ..classes = [
+
+        class_('pod_cpp_mapper')
+        ..doc = 'Given a pod package, maps the data definitions to C++'
+        ..members = [
+          member('package')
+          ..doc = 'Package to generate basic C++ mappings for'
+          ..type = 'Package'
+          ..ctors = [''],
+          member('namespace')
+          ..doc = 'Napespace into which to place the type hierarchy'
+          ..type = 'Napespace',
+        ]
+
+      ],
+
+
       library('balance_sheet')
         ..imports = ['package:ebisu_pod/ebisu_pod.dart']
         ..includesMain = true

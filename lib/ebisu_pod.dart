@@ -11,7 +11,6 @@ import 'package:quiver/core.dart';
 final _logger = new Logger('ebisu_pod');
 
 class PodType {
-
   // custom <class PodType>
 
   PodType();
@@ -26,11 +25,10 @@ class PodType {
 
 }
 
-
 class PodEnum extends PodType {
-
   Id get id => _id;
   List<String> values = [];
+
   /// Documentation for the enum
   String doc;
 
@@ -51,22 +49,16 @@ class PodEnum extends PodType {
   // end <class PodEnum>
 
   Id _id;
-
 }
 
-
 class FixedSizeType extends PodType {
-
   // custom <class FixedSizeType>
   // end <class FixedSizeType>
 
   bool get isFixedSize => true;
-
 }
 
-
 class VariableSizeType extends PodType {
-
   VariableSizeType(this.maxLength);
 
   /// If non-0 indicates length capped to [max_length]
@@ -76,9 +68,7 @@ class VariableSizeType extends PodType {
   // end <class VariableSizeType>
 
   bool get isFixedSize => maxLength != null;
-
 }
-
 
 /// Used to define string types, which may have a fixed type.
 ///
@@ -86,7 +76,6 @@ class VariableSizeType extends PodType {
 /// more general string type is so code generators may optimize for speed
 /// by allocating space for strings inline.
 class StrType extends VariableSizeType {
-
   /// Documentation for fixed size string
   String doc;
 
@@ -103,13 +92,10 @@ class StrType extends VariableSizeType {
 
   /// Cache of all fixed size strings
   static Map<int, Str> _typeCache = new Map<int, Str>();
-
 }
-
 
 /// Stores binary data as array of bytes
 class BinaryDataType extends VariableSizeType {
-
   /// Documentation for the binary data type
   String doc;
 
@@ -126,20 +112,16 @@ class BinaryDataType extends VariableSizeType {
 
   /// Cache of all fixed size BinaryData types
   static Map<int, BinaryData> _typeCache = new Map<int, BinaryData>();
-
 }
 
-
 class PodArray extends VariableSizeType {
-
-  bool operator==(PodArray other) =>
-    identical(this, other) ||
-    referredType == other.referredType &&
-    doc == other.doc;
+  bool operator ==(PodArray other) => identical(this, other) ||
+      referredType == other.referredType && doc == other.doc;
 
   int get hashCode => hash2(referredType, doc);
 
   PodType referredType;
+
   /// Documentation for the array
   String doc;
 
@@ -157,40 +139,33 @@ class PodArray extends VariableSizeType {
 
 }
 
-
-/// Reference to a pod type within packaging system
+/// Combination of owning package name and name of a type within it
 class PodTypeRef {
-
-  Path to referred type path;
+  PackageName packageName;
+  Id typeName;
 
   // custom <class PodTypeRef>
   // end <class PodTypeRef>
 
 }
 
-
 class PodField {
+  bool operator ==(PodField other) => identical(this, other) ||
+      _id == other._id &&
+          isIndex == other.isIndex &&
+          podType == other.podType &&
+          defaultValue == other.defaultValue &&
+          doc == other.doc;
 
-  bool operator==(PodField other) =>
-    identical(this, other) ||
-    _id == other._id &&
-    isIndex == other.isIndex &&
-    podType == other.podType &&
-    defaultValue == other.defaultValue &&
-    doc == other.doc;
-
-  int get hashCode => hashObjects([
-    _id,
-    isIndex,
-    podType,
-    defaultValue,
-    doc]);
+  int get hashCode => hashObjects([_id, isIndex, podType, defaultValue, doc]);
 
   Id get id => _id;
+
   /// If true the field is defined as index
   bool isIndex = false;
   PodType podType;
   dynamic defaultValue;
+
   /// Documentation for the field
   String doc;
 
@@ -208,14 +183,12 @@ class PodField {
   // end <class PodField>
 
   Id _id;
-
 }
 
-
 class PodObject extends PodType {
-
   Id get id => _id;
   List<PodField> fields = [];
+
   /// Documentation for the object
   String doc;
 
@@ -245,14 +218,42 @@ class PodObject extends PodType {
   // end <class PodObject>
 
   Id _id;
+}
+
+class PodAlias {
+  /// Alias name for referenced type
+  Id id;
+  PodTypeRef podTypeRef;
+
+  // custom <class PodAlias>
+  // end <class PodAlias>
 
 }
 
+/// Package names are effectively a list of Id isntances.
+///
+/// They can be constructed from and represented by the common dotted form:
+///
+///    [ id('dossier'), id('common') ] => 'dossier.common'
+///
+///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
+class PackageName {
+  Lsit<Id> identity = [];
+
+  // custom <class PackageName>
+  // end <class PackageName>
+
+}
 
 /// Package structure to support organization of pod definitions
 class PodPackage extends Entity {
+  /// Name of package
+  PackageName name;
 
-  List<Package> packages = [];
+  /// Packages required by (ie containing referenced types) this package
+  List<Package> imports = [];
+
+  /// The named and therefore referencable types within the package
   Map<String, PodType> types = {};
 
   // custom <class PodPackage>
@@ -260,94 +261,67 @@ class PodPackage extends Entity {
 
 }
 
-
 class DoubleType extends FixedSizeType {
-
   // custom <class DoubleType>
   // end <class DoubleType>
 
   DoubleType._();
-
 }
 
-
 class ObjectIdType extends FixedSizeType {
-
   // custom <class ObjectIdType>
   // end <class ObjectIdType>
 
   ObjectIdType._();
-
 }
 
-
 class BooleanType extends FixedSizeType {
-
   // custom <class BooleanType>
   // end <class BooleanType>
 
   BooleanType._();
-
 }
 
-
 class DateType extends FixedSizeType {
-
   // custom <class DateType>
   // end <class DateType>
 
   DateType._();
-
 }
 
-
 class NullType extends FixedSizeType {
-
   // custom <class NullType>
   // end <class NullType>
 
   NullType._();
-
 }
 
-
 class RegexType extends FixedSizeType {
-
   // custom <class RegexType>
   // end <class RegexType>
 
   RegexType._();
-
 }
 
-
 class Int32Type extends FixedSizeType {
-
   // custom <class Int32Type>
   // end <class Int32Type>
 
   Int32Type._();
-
 }
 
-
 class Int64Type extends FixedSizeType {
-
   // custom <class Int64Type>
   // end <class Int64Type>
 
   Int64Type._();
-
 }
 
-
 class TimestampType extends FixedSizeType {
-
   // custom <class TimestampType>
   // end <class TimestampType>
 
   TimestampType._();
-
 }
 
 // custom <library ebisu_pod>
@@ -392,5 +366,3 @@ PodField arrayField(id, referredType) => field(id, array(referredType));
 StrType fixedStr(int maxLength) => new StrType(maxLength);
 
 // end <library ebisu_pod>
-
-
