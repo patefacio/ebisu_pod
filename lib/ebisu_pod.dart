@@ -1,5 +1,6 @@
 library ebisu_pod.ebisu_pod;
 
+import 'package:collection/equality.dart';
 import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
 import 'package:logging/logging.dart';
@@ -141,12 +142,29 @@ class PodArray extends VariableSizeType {
 
 /// Combination of owning package name and name of a type within it
 class PodTypeRef {
-  PackageName packageName;
-  Id typeName;
+  bool operator ==(PodTypeRef other) => identical(this, other) ||
+      _packageName == other._packageName && _typeName == other._typeName;
+
+  int get hashCode => hash2(_packageName, _typeName);
+
+  PackageName get packageName => _packageName;
+  Id get typeName => _typeName;
 
   // custom <class PodTypeRef>
+
+  PodTypeRef.fromQualifiedName(String qualifiedName) {
+    final packageNameParts = qualifiedName.split('.');
+    _packageName = new PackageName(
+        packageNameParts.sublist(0, packageNameParts.length - 1));
+    _typeName = makeId(packageNameParts.last);
+  }
+
+  toString() => 'PodTypeRef($packageName:$typeName)';
+
   // end <class PodTypeRef>
 
+  PackageName _packageName;
+  Id _typeName;
 }
 
 class PodField {
@@ -184,7 +202,7 @@ class PodField {
       _podType = (podType is PodType || PodType is PodTypeRef)
           ? podType
           : podType is String
-              ? _makePodTypeRef(podType)
+              ? new PodTypeRef.fromQualifiedName(podType)
               : throw new ArgumentError(
                   'PodField.podType can only be assigned PodType or PodTypeRef '
                   '- not ${podType.runtimeType}');
@@ -195,6 +213,7 @@ class PodField {
       ]);
 
   bool get isFixedSize => podType.isFixedSize;
+  String get name => _id.snake;
 
   // end <class PodField>
 
@@ -203,6 +222,14 @@ class PodField {
 }
 
 class PodObject extends PodType {
+  bool operator ==(PodObject other) => identical(this, other) ||
+      _id == other._id &&
+          const ListEquality().equals(fields, other.fields) &&
+          doc == other.doc;
+
+  int get hashCode =>
+      hash3(_id, const ListEquality<PodField>().hash(fields), doc);
+
   Id get id => _id;
   List<PodField> fields = [];
 
@@ -255,6 +282,11 @@ class PodAlias {
 ///
 ///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 class PackageName {
+  bool operator ==(PackageName other) =>
+      identical(this, other) || const ListEquality().equals(_path, other._path);
+
+  int get hashCode => const ListEquality<Id>().hash(_path).hashCode;
+
   List<Id> get path => _path;
 
   // custom <class PackageName>
@@ -263,14 +295,13 @@ class PackageName {
     this._path = path is List
         ? _makeValidPath(path)
         : path is String
-            ? path.split('.').map(_makeValidPart).toList()
+            ? path.split('.').map(_makeValidIdPart).toList()
             : throw ArgumentError(
                 'PackageName must be initialized with List or String'
                 ' - not ${path.runtimeType}');
   }
 
-  _makeValidPart(dynamic part) => makeId(part);
-  _makeValidPath(List path) => path.map(_makeValidPart).toList();
+  toString() => path.join('.');
 
   // end <class PackageName>
 
@@ -396,5 +427,8 @@ PodArray array(dynamic referredType, {String doc, int maxLength}) =>
 PodField arrayField(id, referredType) => field(id, array(referredType));
 
 StrType fixedStr(int maxLength) => new StrType(maxLength);
+
+_makeValidIdPart(part) => makeId(part);
+_makeValidPath(path) => path.map(_makeValidIdPart).toList();
 
 // end <library ebisu_pod>

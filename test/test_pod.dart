@@ -74,6 +74,16 @@ main([List<String> args]) {
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
 
+  test('fields can have type that is ref', () {
+    expect(
+        new PodTypeRef.fromQualifiedName('foo.goo.some_type')
+            .packageName
+            .toString(),
+        'foo.goo');
+    expect(new PodTypeRef.fromQualifiedName('foo.goo.some_type').typeName.snake,
+        'some_type');
+  });
+
   test('fixedArray', () {
     expect(array(Double, doc: 'Variable array of doubles').isFixedSize, false);
     expect(array(Double, maxLength: 12, doc: 'Array of 12 doubles').isFixedSize,
@@ -103,6 +113,15 @@ main([List<String> args]) {
       final outerOuter = object('z')..fields = [field('y', outer)];
       expect(outerOuter.isFixedSize, false);
     });
+  });
+
+  test('object field types may be anonymous defined or ref', () {
+    final o = object('o')
+      ..fields = [field('x', object('deep')), field('y', 'a.b.c')];
+    expect(o.fields.first.name, 'x');
+    expect(o.fields.first.podType, object('deep'));
+    expect(o.fields.last.name, 'y');
+    expect(o.fields.last.podType, new PodTypeRef.fromQualifiedName('a.b.c'));
   });
 
   final address = object('address')

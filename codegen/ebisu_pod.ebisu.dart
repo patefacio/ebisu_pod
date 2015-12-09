@@ -114,6 +114,8 @@ by allocating space for strings inline.
 
           class_('pod_type_ref')
           ..doc = 'Combination of owning package name and name of a type within it'
+          ..hasOpEquals = true
+          ..defaultMemberAccess = RO
           ..members = [
             member('package_name')..type = 'PackageName',
             member('type_name')..type = 'Id',
@@ -143,6 +145,7 @@ If it is a String it is converted to a PodTypeRef
 
           class_('pod_object')
             ..extend = 'PodType'
+            ..hasOpEquals = true
             ..members = [
               member('id')
                 ..type = 'Id'
@@ -171,6 +174,7 @@ They can be constructed from and represented by the common dotted form:
 
    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 '''
+          ..hasOpEquals = true
           ..members = [
             member('path')..type = 'List<Id>'..classInit = []..access = RO,
           ],
