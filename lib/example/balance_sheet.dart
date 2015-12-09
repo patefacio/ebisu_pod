@@ -1,6 +1,6 @@
 library ebisu_pod.example.balance_sheet;
 
-import 'package:ebisu_pod/pod.dart';
+import 'package:ebisu_pod/ebisu_pod.dart';
 
 // custom <additional imports>
 // end <additional imports>

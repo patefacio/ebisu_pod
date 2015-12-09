@@ -35,7 +35,10 @@ code generators.
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
-    ..testLibraries = [library('test_pod'),]
+    ..testLibraries = [
+      library('test_pod'),
+      library('test_package'),
+    ]
     ..libraries = [
       library('ebisu_pod')
         ..includesLogger = true
@@ -109,6 +112,12 @@ by allocating space for strings inline.
               member('doc')..doc = 'Documentation for the array',
             ],
 
+          class_('pod_type_ref')
+          ..doc = 'Reference to a pod type within packaging system'
+          ..members = [
+            member('path')..type = 'Path to referred type',
+          ],
+
           class_('pod_field')
             ..hasOpEquals = true
             ..members = [
@@ -122,6 +131,7 @@ by allocating space for strings inline.
               member('default_value')..type = 'dynamic',
               member('doc')..doc = 'Documentation for the field',
             ],
+
           class_('pod_object')
             ..extend = 'PodType'
             ..members = [
@@ -133,6 +143,15 @@ by allocating space for strings inline.
                 ..classInit = [],
               member('doc')..doc = 'Documentation for the object',
             ],
+
+          class_('pod_package')
+          ..doc = 'Package structure to support organization of pod definitions'
+          ..extend = 'Entity'
+          ..members = [
+            member('packages')..type = 'List<Package>'..classInit = [],
+            member('types')..type = 'Map<String, PodType>'..classInit = {},
+          ],
+
         ]
         ..classes.addAll([
           'double',
@@ -156,7 +175,7 @@ by allocating space for strings inline.
           'package:id/id.dart',
         ],
       library('balance_sheet')
-        ..imports = ['package:ebisu_pod/pod.dart']
+        ..imports = ['package:ebisu_pod/ebisu_pod.dart']
         ..includesMain = true
         ..path = path.join(_topDir, 'lib/example'),
     ];
