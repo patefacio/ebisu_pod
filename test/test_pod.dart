@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 // custom <additional imports>
 
 import '../lib/ebisu_pod.dart';
+import 'package:ebisu/ebisu.dart';
 
 // end <additional imports>
 
@@ -19,6 +20,24 @@ main([List<String> args]) {
       (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
 // custom <main>
+
+  group('package naming', () {
+    test(':from string', () {
+      expect(new PackageName('this.is.a.test').path,
+          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+    });
+
+    test(':from list of Id', () {
+      expect(new PackageName([ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]).path,
+          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+    });
+
+    test(':from list of String', () {
+      expect(new PackageName([ 'this', 'is', 'a', 'test' ]).path,
+          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+    });
+
+  });
 
   test('fields are comparable', () {
     expect(field('age', Int32), field('age', Int32));

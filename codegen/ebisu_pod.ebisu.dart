@@ -128,7 +128,15 @@ by allocating space for strings inline.
               member('is_index')
                 ..doc = 'If true the field is defined as index'
                 ..classInit = false,
-              member('pod_type')..type = 'PodType',
+              member('pod_type')
+              ..doc = '''
+Type associated with the field.
+
+May be a PodType, PodTypeRef, or a String.
+If it is a String it is converted to a PodTypeRef
+'''
+              ..type = 'dynamic'
+              ..access = RO,
               member('default_value')..type = 'dynamic',
               member('doc')..doc = 'Documentation for the field',
             ],
@@ -164,7 +172,7 @@ They can be constructed from and represented by the common dotted form:
    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 '''
           ..members = [
-            member('identity')..type = 'Lsit<Id>'..classInit = [],
+            member('path')..type = 'List<Id>'..classInit = []..access = RO,
           ],
 
           class_('pod_package')

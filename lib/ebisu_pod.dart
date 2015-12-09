@@ -153,26 +153,42 @@ class PodField {
   bool operator ==(PodField other) => identical(this, other) ||
       _id == other._id &&
           isIndex == other.isIndex &&
-          podType == other.podType &&
+          _podType == other._podType &&
           defaultValue == other.defaultValue &&
           doc == other.doc;
 
-  int get hashCode => hashObjects([_id, isIndex, podType, defaultValue, doc]);
+  int get hashCode => hashObjects([_id, isIndex, _podType, defaultValue, doc]);
 
   Id get id => _id;
 
   /// If true the field is defined as index
   bool isIndex = false;
-  PodType podType;
+
+  /// Type associated with the field.
+  ///
+  /// May be a PodType, PodTypeRef, or a String.
+  /// If it is a String it is converted to a PodTypeRef
+  dynamic get podType => _podType;
   dynamic defaultValue;
 
   /// Documentation for the field
   String doc;
 
   // custom <class PodField>
-  // custom <class PodField>
 
-  PodField(this._id, [this.podType]);
+  PodField(this._id, [podType]) {
+    this.podType = podType;
+  }
+
+  set podType(dynamic podType) =>
+      _podType = (podType is PodType || PodType is PodTypeRef)
+          ? podType
+          : podType is String
+              ? _makePodTypeRef(podType)
+              : throw new ArgumentError(
+                  'PodField.podType can only be assigned PodType or PodTypeRef '
+                  '- not ${podType.runtimeType}');
+
   toString() => brCompact([
         'PodField($id:$podType:default=$defaultValue)',
         indentBlock(blockComment(doc))
@@ -183,6 +199,7 @@ class PodField {
   // end <class PodField>
 
   Id _id;
+  dynamic _podType;
 }
 
 class PodObject extends PodType {
@@ -238,11 +255,26 @@ class PodAlias {
 ///
 ///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 class PackageName {
-  Lsit<Id> identity = [];
+  List<Id> get path => _path;
 
   // custom <class PackageName>
+
+  PackageName(dynamic path) {
+    this._path = path is List
+        ? _makeValidPath(path)
+        : path is String
+            ? path.split('.').map(_makeValidPart).toList()
+            : throw ArgumentError(
+                'PackageName must be initialized with List or String'
+                ' - not ${path.runtimeType}');
+  }
+
+  _makeValidPart(dynamic part) => makeId(part);
+  _makeValidPath(List path) => path.map(_makeValidPart).toList();
+
   // end <class PackageName>
 
+  List<Id> _path = [];
 }
 
 /// Package structure to support organization of pod definitions
