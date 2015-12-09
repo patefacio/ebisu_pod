@@ -283,7 +283,7 @@ class PodPackage extends Entity {
   PackageName name;
 
   /// Packages required by (ie containing referenced types) this package
-  List<Package> imports = [];
+  List<PodPackage> imports = [];
 
   /// The named and therefore referencable types within the package
   Map<String, PodType> types = {};

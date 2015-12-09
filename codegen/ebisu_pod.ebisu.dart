@@ -184,7 +184,7 @@ They can be constructed from and represented by the common dotted form:
             ..type = 'PackageName',
             member('imports')
             ..doc = 'Packages required by (ie containing referenced types) this package'
-            ..type = 'List<Package>'..classInit = [],
+            ..type = 'List<PodPackage>'..classInit = [],
             member('types')
             ..doc = 'The named and therefore referencable types within the package'
             ..type = 'Map<String, PodType>'..classInit = {},

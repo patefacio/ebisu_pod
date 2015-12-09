@@ -24,19 +24,20 @@ main([List<String> args]) {
   group('package naming', () {
     test(':from string', () {
       expect(new PackageName('this.is.a.test').path,
-          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+          [makeId('this'), makeId('is'), makeId('a'), makeId('test')]);
     });
 
     test(':from list of Id', () {
-      expect(new PackageName([ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]).path,
-          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+      expect(
+          new PackageName(
+              [makeId('this'), makeId('is'), makeId('a'), makeId('test')]).path,
+          [makeId('this'), makeId('is'), makeId('a'), makeId('test')]);
     });
 
     test(':from list of String', () {
-      expect(new PackageName([ 'this', 'is', 'a', 'test' ]).path,
-          [ makeId('this'), makeId('is'), makeId('a'), makeId('test') ]);
+      expect(new PackageName(['this', 'is', 'a', 'test']).path,
+          [makeId('this'), makeId('is'), makeId('a'), makeId('test')]);
     });
-
   });
 
   test('fields are comparable', () {
