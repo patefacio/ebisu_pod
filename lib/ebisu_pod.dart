@@ -35,6 +35,8 @@ class PodEnum extends PodType {
 
   // custom <class PodEnum>
 
+  get name => id.snake;
+
   PodEnum(this._id, [this.values]) {
     if (values == null) {
       values = [];
@@ -244,6 +246,7 @@ class PodObject extends PodType {
     }
   }
 
+  get name => id.snake;
   get typeName => 'PodObject($_id)';
 
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
@@ -311,17 +314,89 @@ class PackageName {
 /// Package structure to support organization of pod definitions
 class PodPackage extends Entity {
   /// Name of package
-  PackageName name;
+  PackageName get name => _name;
 
   /// Packages required by (ie containing referenced types) this package
-  List<PodPackage> imports = [];
+  List<PodPackage> get imports => _imports;
 
   /// The named and therefore referencable types within the package
-  Map<String, PodType> types = {};
+  List<PodType> get namedTypes => _namedTypes;
 
   // custom <class PodPackage>
+
+  PodPackage(name, [Iterable imports, Iterable<PodType> namedTypes]) {
+    this.name = name;
+    this.imports = (imports != null) ? imports : [];
+    this.namedTypes = (namedTypes != null) ? namedTypes : [];
+  }
+
+  set imports(Iterable imports) {
+    print('Imports set: $imports');
+    this._imports =
+        imports.map((i) => i is PackageName ? i : new PackageName(i)).toList();
+  }
+
+  set name(name) {
+    this._name = new PackageName(name);
+  }
+
+  set namedTypes(Iterable<PodType> namedTypes) {
+    _namedTypes = _checkNamedTypes(namedTypes);
+    _allTypes = null;
+  }
+
+  /// All types within the package including *anonymous* types
+  Set get allTypes {
+    if (_allTypes == null) {
+      _allTypes = visitTypes(null);
+    }
+
+    return _allTypes;
+  }
+
+  visitTypes(func(PodType)) {
+    Set visitedTypes = new Set();
+
+    visitType(PodType podType) {
+      if (!visitedTypes.contains(podType)) {
+        if (func != null) func(podType);
+        visitedTypes.add(podType);
+      }
+    }
+
+    for (var podType in _namedTypes) {
+      visitType(podType);
+      if (podType is PodObject) {
+        for (var field in (podType as PodObject).fields) {
+          visitType(field.podType);
+        }
+      }
+    }
+    return visitedTypes;
+  }
+
+  toString() => brCompact([
+        'PodPackage($name)',
+        indentBlock(brCompact(allTypes.map((t) => t.typeName)))
+      ]);
+
+  _checkNamedTypes(namedTypes) {
+    if (!namedTypes
+        .every((namedType) => namedType is PodObject || namedType is PodEnum)) {
+      throw new ArgumentError(
+          'PodPackage named types must be named PodObjects or named PodEnums');
+    }
+    return namedTypes.toList();
+  }
+
   // end <class PodPackage>
 
+  PackageName _name;
+  List<PodPackage> _imports = [];
+  List<PodType> _namedTypes = [];
+
+  /// All types within the package including *anonymous* types
+  Set _allTypes;
 }
 
 class DoubleType extends FixedSizeType {
@@ -329,6 +404,7 @@ class DoubleType extends FixedSizeType {
   // end <class DoubleType>
 
   DoubleType._();
+  get typeName => 'DoubleType';
 }
 
 class ObjectIdType extends FixedSizeType {
@@ -336,6 +412,7 @@ class ObjectIdType extends FixedSizeType {
   // end <class ObjectIdType>
 
   ObjectIdType._();
+  get typeName => 'ObjectIdType';
 }
 
 class BooleanType extends FixedSizeType {
@@ -343,6 +420,7 @@ class BooleanType extends FixedSizeType {
   // end <class BooleanType>
 
   BooleanType._();
+  get typeName => 'BooleanType';
 }
 
 class DateType extends FixedSizeType {
@@ -350,6 +428,7 @@ class DateType extends FixedSizeType {
   // end <class DateType>
 
   DateType._();
+  get typeName => 'DateType';
 }
 
 class NullType extends FixedSizeType {
@@ -357,6 +436,7 @@ class NullType extends FixedSizeType {
   // end <class NullType>
 
   NullType._();
+  get typeName => 'NullType';
 }
 
 class RegexType extends FixedSizeType {
@@ -364,6 +444,7 @@ class RegexType extends FixedSizeType {
   // end <class RegexType>
 
   RegexType._();
+  get typeName => 'RegexType';
 }
 
 class Int32Type extends FixedSizeType {
@@ -371,6 +452,7 @@ class Int32Type extends FixedSizeType {
   // end <class Int32Type>
 
   Int32Type._();
+  get typeName => 'Int32Type';
 }
 
 class Int64Type extends FixedSizeType {
@@ -378,6 +460,7 @@ class Int64Type extends FixedSizeType {
   // end <class Int64Type>
 
   Int64Type._();
+  get typeName => 'Int64Type';
 }
 
 class TimestampType extends FixedSizeType {
@@ -385,6 +468,7 @@ class TimestampType extends FixedSizeType {
   // end <class TimestampType>
 
   TimestampType._();
+  get typeName => 'TimestampType';
 }
 
 // custom <library ebisu_pod>

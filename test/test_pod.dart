@@ -169,5 +169,17 @@ main([List<String> args]) {
     expect(o.fields.last.podType.referredType, o);
   });
 
+  test('pod package', () {
+    final podPackage = new PodPackage('p')
+      ..namedTypes = [
+        enum_('color', ['red', 'white', 'blue']),
+        enum_('usa', ['red', 'white', 'blue']),
+        object('x', [field('a'), field('b', Double), field('c')]),
+        object('y', [field('a'), field('b', Double), field('c')]),
+      ];
+
+    print(podPackage);
+  });
+
 // end <main>
 }

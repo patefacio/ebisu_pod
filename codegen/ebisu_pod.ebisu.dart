@@ -183,6 +183,7 @@ They can be constructed from and represented by the common dotted form:
           class_('pod_package')
           ..doc = 'Package structure to support organization of pod definitions'
           ..extend = 'Entity'
+          ..defaultMemberAccess = RO
           ..members = [
             member('name')
             ..doc = 'Name of package'
@@ -190,9 +191,12 @@ They can be constructed from and represented by the common dotted form:
             member('imports')
             ..doc = 'Packages required by (ie containing referenced types) this package'
             ..type = 'List<PodPackage>'..classInit = [],
-            member('types')
+            member('named_types')
             ..doc = 'The named and therefore referencable types within the package'
-            ..type = 'Map<String, PodType>'..classInit = {},
+            ..type = 'List<PodType>'..classInit = [],
+            member('all_types')
+            ..doc = 'All types within the package including *anonymous* types'
+            ..type = 'Set'..access = IA,
           ],
 
         ]
@@ -208,7 +212,10 @@ They can be constructed from and represented by the common dotted form:
           'timestamp'
         ].map((var t) => class_('${t}_type')
             ..extend = 'FixedSizeType'
-            ..withClass((c) => c.customCodeBlock.snippets.add('${c.name}._();')))),
+            ..withClass((c) => c.customCodeBlock.snippets.add('''
+${c.name}._();
+get typeName => '${c.name}';
+''')))),
 
       library('pod_cpp')
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'
