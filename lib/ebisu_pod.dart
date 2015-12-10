@@ -175,7 +175,7 @@ class PodField {
           defaultValue == other.defaultValue &&
           doc == other.doc;
 
-  int get hashCode => hashObjects([_id, isIndex, _podType, defaultValue, doc]);
+  int get hashCode => hash4(_id, isIndex, defaultValue, doc);
 
   Id get id => _id;
 

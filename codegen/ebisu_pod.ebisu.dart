@@ -138,6 +138,7 @@ May be a PodType, PodTypeRef, or a String.
 If it is a String it is converted to a PodTypeRef
 '''
               ..type = 'dynamic'
+              ..isInHashCode = false
               ..access = RO,
               member('default_value')..type = 'dynamic',
               member('doc')..doc = 'Documentation for the field',

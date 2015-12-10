@@ -15,7 +15,7 @@ dependencies:
 
 # custom <ebisu_pod dependencies>
 
-  ebisu: "^0.6.8"
+  ebisu: "^0.6.10"
 
 # end <ebisu_pod dependencies>
 
@@ -33,6 +33,10 @@ dev_dependencies:
 
 dependency_overrides:
 # custom <ebisu_pod dependency overrides>
+
+#  ebisu:
+#    path: ../ebisu
+      
 # end <ebisu_pod dependency overrides>
 
 transformers:
