@@ -17,6 +17,7 @@ final balanceSheet = new PodPackage('balance_sheet')
 Is the holding stock (equity), bond, cash, some blend of those or other.''',
     object('date_value', [field('date', Date), field('value', Double)]),
     object('holding', [
+      field('holding_type', 'holding_type')..doc = 'Type of the holding',
       field('quantity', 'date_value')..doc = 'Quantity as of the date',
       field('unit_value', 'date_value')..doc = 'Unit value as of the date',
       field('cost_basis', Double)

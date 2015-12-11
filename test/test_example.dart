@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 // custom <additional imports>
 
 import 'package:ebisu_pod/example/balance_sheet.dart';
+import 'package:ebisu_pod/ebisu_pod.dart';
 
 // end <additional imports>
 
@@ -20,9 +21,13 @@ main([List<String> args]) {
   Logger.root.level = Level.OFF;
 // custom <main>
 
-  Logger.root.level = Level.INFO;
+  Logger.root.level = Level.OFF;
   test('balance_sheet', () {
-    print(balanceSheet);
+    expect(balanceSheet.getType('holding_type') is PodEnum, true);
+    expect(balanceSheet.getType('date').typeName, 'date');
+    expect(balanceSheet.getType('holding').typeName, 'holding');
+    expect(balanceSheet.getType('holding').getField('holding_type').typeName,
+        'holding_type');
   });
 
 // end <main>

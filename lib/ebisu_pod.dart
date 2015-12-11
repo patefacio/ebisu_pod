@@ -261,6 +261,9 @@ class PodObject extends PodType {
 
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
+  getField(fieldName) =>
+      fields.firstWhere((f) => f.name == fieldName, orElse: () => null);
+
   toString() => brCompact([
         'PodObject($typeName)',
         indentBlock(blockComment(doc)),
@@ -352,7 +355,7 @@ class PodPackage extends Entity {
   }
 
   PodType getType(typeName) =>
-      namedTypes.firstWhere((t) => t.typeName == typeName, orElse: () => null);
+      allTypes.firstWhere((t) => t.typeName == typeName, orElse: () => null);
 
   set namedTypes(Iterable<PodType> namedTypes) {
     _namedTypes = namedTypes.toList();
