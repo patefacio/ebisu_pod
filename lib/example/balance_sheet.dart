@@ -19,7 +19,6 @@ Is the holding stock (equity), bond, cash, some blend of those or other.''',
     object('holding', [
       field('quantity', 'date_value')..doc = 'Quantity as of the date',
       field('unit_value', 'date_value')..doc = 'Unit value as of the date',
-      field('unit_valuex', 'dork_value')..doc = 'Unit value as of the date',
       field('cost_basis', Double)
     ])
       ..doc = '''

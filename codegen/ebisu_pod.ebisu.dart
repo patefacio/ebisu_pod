@@ -38,6 +38,7 @@ code generators.
     ..testLibraries = [
       library('test_pod'),
       library('test_package'),
+      library('test_example'),
     ]
     ..libraries = [
       library('ebisu_pod')
@@ -48,6 +49,7 @@ code generators.
           class_('pod_type')..members = [],
           class_('pod_enum')
             ..extend = 'PodType'
+            ..hasOpEquals = true
             ..members = [
               member('id')
                 ..type = 'Id'

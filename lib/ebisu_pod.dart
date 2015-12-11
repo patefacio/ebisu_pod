@@ -27,6 +27,14 @@ class PodType {
 }
 
 class PodEnum extends PodType {
+  bool operator ==(PodEnum other) => identical(this, other) ||
+      _id == other._id &&
+          const ListEquality().equals(values, other.values) &&
+          doc == other.doc;
+
+  int get hashCode =>
+      hash3(_id, const ListEquality<String>().hash(values), doc);
+
   Id get id => _id;
   List<String> values = [];
 
@@ -44,10 +52,10 @@ class PodEnum extends PodType {
   }
 
   String get typeName => name;
-  toString() => brCompact([
+  toString() => chomp(brCompact([
         'PodEnum($id:[${values.join(", ")}])',
         doc == null ? null : blockComment(doc)
-      ]);
+      ]));
 
   // end <class PodEnum>
 
@@ -328,7 +336,7 @@ class PodPackage extends Entity {
 
   // custom <class PodPackage>
 
-  PodPackage(name, [Iterable imports, Iterable<PodType> namedTypes]) {
+  PodPackage(name, {Iterable imports, Iterable<PodType> namedTypes}) {
     this.name = name;
     this.imports = (imports != null) ? imports : [];
     this.namedTypes = (namedTypes != null) ? namedTypes : [];
@@ -343,9 +351,12 @@ class PodPackage extends Entity {
     this._name = new PackageName(name);
   }
 
+  PodType getType(typeName) =>
+      namedTypes.firstWhere((t) => t.typeName == typeName, orElse: () => null);
+
   set namedTypes(Iterable<PodType> namedTypes) {
-    _namedTypes = _checkNamedTypes(namedTypes);
-    _logger.info('!!Namedtypes => ${_namedTypes.map((t) => t.typeName)}');
+    _namedTypes = namedTypes.toList();
+    _checkNamedTypes();
     _allTypes = null;
   }
 
@@ -363,22 +374,23 @@ class PodPackage extends Entity {
 
     visitType(podType) {
       if (podType is PodTypeRef) {
-        _resolveType(podType);
-        return;
-      }
+        visitType(_resolveType(podType));
+      } else {
+        if (!visitedTypes.contains(podType)) {
+          if (podType is PodObject) {
+            for (var field in (podType as PodObject).fields) {
+              visitType(field.podType);
+            }
+          }
 
-      if (!visitedTypes.contains(podType)) {
-        if (func != null) func(podType);
-        visitedTypes.add(podType);
+          _logger.info('Visiting ${podType.typeName}');
+          if (func != null) func(podType);
+          visitedTypes.add(podType);
+        }
       }
     }
 
     for (var podType in _namedTypes) {
-      if (podType is PodObject) {
-        for (var field in (podType as PodObject).fields) {
-          visitType(field.podType);
-        }
-      }
       visitType(podType);
     }
     return visitedTypes;
@@ -386,12 +398,10 @@ class PodPackage extends Entity {
 
   _resolveType(PodTypeRef podTypeRef) {
     if (podTypeRef.packageName.isQualified) {
-      _logger.info('Look for ${podTypeRef.typeName} in *this* package');
-      _logger.info('Typenames => ${namedTypes.map((t) => t.typeName)}');
-      final found = namedTypes.firstWhere(
-          (t) => t.typeName == podTypeRef.typeName,
-          orElse: () => null);
-      _logger.info('Search result $podTypeRef -> $found');
+      _logger.info('Looking for ${podTypeRef.typeName} in *this* package');
+      final found =
+          namedTypes.singleWhere((t) => t.typeName == podTypeRef.typeName);
+      _logger.info('Search result $podTypeRef -> ${found.typeName}');
       return found;
     } else {
       _logger.info('Look for $podTypeRef in imported packages');
@@ -400,7 +410,8 @@ class PodPackage extends Entity {
 
   toString() => brCompact([
         'PodPackage($name)',
-        indentBlock(brCompact(allTypes.map((t) => t.typeName)))
+        indentBlock(
+            brCompact(allTypes.map((t) => '${t.runtimeType}(${t.typeName})')))
       ]);
 
   get details => brCompact([
@@ -409,13 +420,19 @@ class PodPackage extends Entity {
             '\n----------------------------------\n'))
       ]);
 
-  _checkNamedTypes(namedTypes) {
+  _checkNamedTypes() {
     if (!namedTypes
         .every((namedType) => namedType is PodObject || namedType is PodEnum)) {
       throw new ArgumentError(
-          'PodPackage named types must be named PodObjects or named PodEnums');
+          'PodPackage named types must be PodObjects or named PodEnums');
     }
-    return namedTypes.toList();
+    final unique = new Set();
+    final duplicate =
+        allTypes.firstWhere((t) => !unique.add(t.typeName), orElse: () => null);
+    if (duplicate != null) {
+      throw new ArgumentError(
+          'PodPackage named types must unique - duplicate: $duplicate');
+    }
   }
 
   // end <class PodPackage>
@@ -549,6 +566,9 @@ PodArray array(dynamic referredType, {String doc, int maxLength}) =>
 PodField arrayField(id, referredType) => field(id, array(referredType));
 
 StrType fixedStr(int maxLength) => new StrType(maxLength);
+
+PodPackage package(packageName, {imports, namedTypes}) =>
+    new PodPackage(packageName, imports: imports, namedTypes: namedTypes);
 
 _makeValidIdPart(part) => makeId(part);
 _makeValidPath(path) => path.map(_makeValidIdPart).toList();

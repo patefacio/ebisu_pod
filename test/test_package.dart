@@ -21,7 +21,9 @@ main([List<String> args]) {
   Logger.root.level = Level.OFF;
 // custom <main>
 
-    group('package naming', () {
+  Logger.root.level = Level.INFO;
+
+  group('package naming', () {
     test(':from string', () {
       expect(new PackageName('this.is.a.test').path,
           [makeId('this'), makeId('is'), makeId('a'), makeId('test')]);
@@ -40,12 +42,28 @@ main([List<String> args]) {
     });
   });
 
+  group('pod package', () {
+    test('enums and objects only', () {
+      var e, o;
+      final p = package('p', namedTypes: [
+        (e = enum_('color', ['red', 'white', 'blue'])),
+        (o = object('z', [field('z')])),
+      ]);
+      expect(p.getType('color'), e);
+      expect(p.getType('z'), o);
+    });
+  });
+
   test('pod package', () {
     final podPackage = new PodPackage('p')
       ..namedTypes = [
         enum_('color', ['red', 'white', 'blue']),
         enum_('usa', ['red', 'white', 'blue']),
+        object('z', [field('x', 'x')]),
         object('x', [field('a'), field('b', Double), field('c')]),
+        object('a', [
+          field('b', object('ax', [field('c')]))
+        ]),
         object('y', [field('a'), field('b', Double), field('c')]),
       ];
 
@@ -59,8 +77,11 @@ main([List<String> args]) {
     expect(podPackage.allTypes.last.fields[1].name, 'b');
     expect(podPackage.allTypes.last.fields[1].podType, Double);
     expect(podPackage.allTypes.last.fields[1].typeName, 'double');
-  });
 
+    expect(podPackage.getType('usa'), enum_('usa', ['red', 'white', 'blue']));
+
+    print(podPackage);
+  });
 
 // end <main>
 }
