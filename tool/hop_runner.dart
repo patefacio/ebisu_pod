@@ -18,7 +18,8 @@ void main(List<String> args) {
       createAnalyzerTask([
         "test/test_pod.dart",
         "test/test_package.dart",
-        "test/test_example.dart"
+        "test/test_example.dart",
+        "test/test_pod_cpp_mapper.dart"
       ]));
 
   runHop(args);

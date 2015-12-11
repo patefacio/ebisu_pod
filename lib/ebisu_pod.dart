@@ -27,7 +27,8 @@ class PodType {
 }
 
 class PodEnum extends PodType {
-  bool operator ==(PodEnum other) => identical(this, other) ||
+  bool operator ==(PodEnum other) =>
+      identical(this, other) ||
       _id == other._id &&
           const ListEquality().equals(values, other.values) &&
           doc == other.doc;
@@ -126,7 +127,8 @@ class BinaryDataType extends VariableSizeType {
 }
 
 class PodArray extends VariableSizeType {
-  bool operator ==(PodArray other) => identical(this, other) ||
+  bool operator ==(PodArray other) =>
+      identical(this, other) ||
       referredType == other.referredType && doc == other.doc;
 
   int get hashCode => hash2(referredType, doc);
@@ -152,7 +154,8 @@ class PodArray extends VariableSizeType {
 
 /// Combination of owning package name and name of a type within it
 class PodTypeRef {
-  bool operator ==(PodTypeRef other) => identical(this, other) ||
+  bool operator ==(PodTypeRef other) =>
+      identical(this, other) ||
       _packageName == other._packageName && _typeName == other._typeName;
 
   int get hashCode => hash2(_packageName, _typeName);
@@ -179,7 +182,8 @@ class PodTypeRef {
 }
 
 class PodField {
-  bool operator ==(PodField other) => identical(this, other) ||
+  bool operator ==(PodField other) =>
+      identical(this, other) ||
       _id == other._id &&
           isIndex == other.isIndex &&
           _podType == other._podType &&
@@ -234,7 +238,8 @@ class PodField {
 }
 
 class PodObject extends PodType {
-  bool operator ==(PodObject other) => identical(this, other) ||
+  bool operator ==(PodObject other) =>
+      identical(this, other) ||
       _id == other._id &&
           const ListEquality().equals(fields, other.fields) &&
           doc == other.doc;
@@ -407,12 +412,12 @@ class PodPackage extends Entity {
     } else {
       _logger.info('Looking for ${podTypeRef.typeName} in *this* package');
       found = _findNamedType(podTypeRef.typeName);
-      _logger.info('Search result $podTypeRef -> ${found.typeName}');
     }
 
     if (found == null) {
       throw new ArgumentError('Cound not find type for $podTypeRef');
     }
+    _logger.info('Search result $podTypeRef -> ${found.typeName}');
     return found;
   }
 

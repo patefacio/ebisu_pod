@@ -39,6 +39,7 @@ code generators.
       library('test_pod'),
       library('test_package'),
       library('test_example'),
+      library('test_pod_cpp_mapper'),
     ]
     ..libraries = [
       library('ebisu_pod')
@@ -216,21 +217,27 @@ toString() => typeName;
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'
         ..imports = [
           'package:ebisu/ebisu.dart',
-          'package:ebisu/ebisu_cpp.dart',
+          'package:ebisu_pod/ebisu_pod.dart',
+          'package:ebisu_cpp/ebisu_cpp.dart',
           'package:id/id.dart',
         ]
       ..classes = [
 
         class_('pod_cpp_mapper')
         ..doc = 'Given a pod package, maps the data definitions to C++'
+        ..defaultMemberAccess = RO
         ..members = [
           member('package')
           ..doc = 'Package to generate basic C++ mappings for'
-          ..type = 'Package'
+          ..type = 'PodPackage'
           ..ctors = [''],
           member('namespace')
           ..doc = 'Napespace into which to place the type hierarchy'
           ..type = 'Napespace',
+          member('header')
+          ..doc = 'C++ header with all PodObject and PodEnum definitions'
+          ..type = 'Header'
+          ..access = IA,
         ]
 
       ],
