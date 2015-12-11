@@ -261,8 +261,9 @@ class PodObject extends PodType {
 
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
-  getField(fieldName) =>
-      fields.firstWhere((f) => f.name == fieldName, orElse: () => null);
+  getField(fieldName) => fields.firstWhere((f) => f.name == fieldName,
+      orElse: () =>
+          throw new ArgumentError('No field $fieldName in package $name'));
 
   toString() => brCompact([
         'PodObject($typeName)',
@@ -278,16 +279,6 @@ class PodObject extends PodType {
   // end <class PodObject>
 
   Id _id;
-}
-
-class PodAlias {
-  /// Alias name for referenced type
-  Id id;
-  PodTypeRef podTypeRef;
-
-  // custom <class PodAlias>
-  // end <class PodAlias>
-
 }
 
 /// Package names are effectively a list of Id isntances.
@@ -312,12 +303,12 @@ class PackageName {
         ? _makeValidPath(path)
         : path is String
             ? path.split('.').map(_makeValidIdPart).toList()
-            : throw ArgumentError(
+            : throw new ArgumentError(
                 'PackageName must be initialized with List or String'
                 ' - not ${path.runtimeType}');
   }
 
-  bool get isQualified => path.isEmpty;
+  bool get isQualified => path.isNotEmpty;
 
   toString() => path.join('.');
 
@@ -346,16 +337,22 @@ class PodPackage extends Entity {
   }
 
   set imports(Iterable imports) {
-    this._imports =
-        imports.map((i) => i is PackageName ? i : new PackageName(i)).toList();
+    this._imports = imports;
   }
 
   set name(name) {
     this._name = new PackageName(name);
   }
 
-  PodType getType(typeName) =>
+  PodType getType(String typeName) =>
       allTypes.firstWhere((t) => t.typeName == typeName, orElse: () => null);
+
+  PodType getFieldType(String objectName, String fieldName) {
+    final podType = getType(objectName);
+    assert(podType is PodObject);
+    final fieldType = podType.getField(fieldName).podType;
+    return fieldType is PodTypeRef ? _resolveType(fieldType) : fieldType;
+  }
 
   set namedTypes(Iterable<PodType> namedTypes) {
     _namedTypes = namedTypes.toList();
@@ -400,16 +397,27 @@ class PodPackage extends Entity {
   }
 
   _resolveType(PodTypeRef podTypeRef) {
+    var found;
     if (podTypeRef.packageName.isQualified) {
-      _logger.info('Looking for ${podTypeRef.typeName} in *this* package');
-      final found =
-          namedTypes.singleWhere((t) => t.typeName == podTypeRef.typeName);
-      _logger.info('Search result $podTypeRef -> ${found.typeName}');
-      return found;
-    } else {
       _logger.info('Look for $podTypeRef in imported packages');
+      final package = imports.firstWhere(
+          (package) => package.name == podTypeRef.packageName,
+          orElse: () => null);
+      found = package._findNamedType(podTypeRef.typeName);
+    } else {
+      _logger.info('Looking for ${podTypeRef.typeName} in *this* package');
+      found = _findNamedType(podTypeRef.typeName);
+      _logger.info('Search result $podTypeRef -> ${found.typeName}');
     }
+
+    if (found == null) {
+      throw new ArgumentError('Cound not find type for $podTypeRef');
+    }
+    return found;
   }
+
+  _findNamedType(typeName) =>
+      namedTypes.singleWhere((t) => t.typeName == typeName);
 
   toString() => brCompact([
         'PodPackage($name)',

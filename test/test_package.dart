@@ -79,8 +79,22 @@ main([List<String> args]) {
     expect(podPackage.allTypes.last.fields[1].typeName, 'double');
 
     expect(podPackage.getType('usa'), enum_('usa', ['red', 'white', 'blue']));
+  });
 
-    print(podPackage);
+  test('package import', () {
+    final a = package('a', namedTypes: [
+      enum_('color', ['red', 'white', 'blue'])
+    ]);
+    final b = package('b', imports: [
+      a
+    ], namedTypes: [
+      object('b', [field('color', 'a.color')])
+    ]);
+
+    final c1 = a.getType('color');
+    final c2 = b.getType('b').getField('color');
+    final x = b.getType('b').getField('color').podType;
+    expect(b.getFieldType('b', 'color'), a.getType('color'));
   });
 
 // end <main>

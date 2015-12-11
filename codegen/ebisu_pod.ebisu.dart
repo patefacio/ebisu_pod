@@ -159,14 +159,6 @@ If it is a String it is converted to a PodTypeRef
               member('doc')..doc = 'Documentation for the object',
             ],
 
-          class_('pod_alias')
-          ..members = [
-            member('id')
-            ..doc = 'Alias name for referenced type'
-            ..type = 'Id',
-            member('pod_type_ref')..type = 'PodTypeRef',
-          ],
-
           class_('package_name')
           ..doc = '''
 Package names are effectively a list of Id isntances.
