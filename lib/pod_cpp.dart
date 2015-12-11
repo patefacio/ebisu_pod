@@ -29,12 +29,44 @@ class PodCppMapper {
       final ns = new Namespace(path.sublist(0, path.length - 1));
       _header = new Header(path.last)
         ..namespace = ns
-        ..classes = podObjects.map((po) => new Class(po.id))
-        ..enums = podEnums.map((e) => new Enum(e.id));
+        ..classes = podObjects.map(_makeClass)
+        ..enums = podEnums.map(_makeEnum);
 
     }
     return _header;
   }
+
+  _makeClass(PodObject po) {
+    final result = new Class(po.id);
+    result.members = po.fields.map((f) => _makeMember(po, f));
+    return result;
+  }
+
+  _makeEnum(PodEnum pe) => new Enum(pe.id)
+    ..values = pe.values;
+
+  _makeMember(PodObject po, PodField field) =>
+    new Member(field.id)..type = _cppType(package.getFieldType(po.id.snake, field.name));
+
+  final _cppTypeMap = {
+    'date' : 'boost::gregorian::date',
+    'int' : 'int',
+    'int32' : 'std::int32_t',
+    'int64' : 'std::int64_t',
+    'double': 'double',
+    'str' : 'std::string',
+    'boolean' : 'bool',
+  };
+
+  _cppType(PodType podType) {
+    final podTypeName = podType.typeName;
+    var cppType = _cppTypeMap[podTypeName];
+    if(cppType == null) {
+      cppType = defaultNamer.nameClass(podType.id);
+    }
+    return cppType;
+  }
+
 
   // end <class PodCppMapper>
 
