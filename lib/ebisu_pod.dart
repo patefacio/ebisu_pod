@@ -43,7 +43,7 @@ class PodEnum extends PodType {
     }
   }
 
-  String get typeName => toString();
+  String get typeName => name;
   toString() => brCompact([
         'PodEnum($id:[${values.join(", ")}])',
         doc == null ? null : blockComment(doc)
@@ -89,7 +89,7 @@ class StrType extends VariableSizeType {
 
   StrType._([maxLength, this.doc]) : super(maxLength);
   toString() => 'StrType($maxLength)';
-  get typeName => toString();
+  get typeName => maxLength == null ? 'str' : 'str($maxLength)';
 
   // end <class StrType>
 
@@ -109,7 +109,7 @@ class BinaryDataType extends VariableSizeType {
 
   BinaryDataType._([maxLength, this.doc]) : super(maxLength);
   toString() => 'BinaryDataType($maxLength)';
-  get typeName => toString();
+  get typeName => maxLength == null ? 'binary_data' : 'binary_data($maxLength)';
 
   // end <class BinaryDataType>
 
@@ -135,7 +135,7 @@ class PodArray extends VariableSizeType {
   }
 
   toString() => 'PodArray(${referredType.typeName})';
-  get typeName => toString();
+  get typeName => referredType.typeName;
   bool get isFixedSize => maxLength > 0;
 
   // end <class PodArray>
@@ -150,7 +150,6 @@ class PodTypeRef {
   int get hashCode => hash2(_packageName, _typeName);
 
   PackageName get packageName => _packageName;
-  Id get typeName => _typeName;
 
   // custom <class PodTypeRef>
 
@@ -161,7 +160,9 @@ class PodTypeRef {
     _typeName = makeId(packageNameParts.last);
   }
 
-  toString() => 'PodTypeRef($packageName:$typeName)';
+  get typeName => _typeName.snake;
+  get qualifiedTypeName => '$packageName.$typeName';
+  toString() => 'PodTypeRef($qualifiedTypeName)';
 
   // end <class PodTypeRef>
 
@@ -216,6 +217,7 @@ class PodField {
 
   bool get isFixedSize => podType.isFixedSize;
   String get name => _id.snake;
+  String get typeName => podType.typeName;
 
   // end <class PodField>
 
@@ -247,12 +249,12 @@ class PodObject extends PodType {
   }
 
   get name => id.snake;
-  get typeName => 'PodObject($_id)';
+  get typeName => name;
 
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
   toString() => brCompact([
-        'PodObject($id)',
+        'PodObject($typeName)',
         indentBlock(blockComment(doc)),
         indentBlock(brCompact(fields.map((pf) => [
               '${pf.id}:${pf.podType.typeName}',
@@ -304,6 +306,8 @@ class PackageName {
                 ' - not ${path.runtimeType}');
   }
 
+  bool get isQualified => path.isEmpty;
+
   toString() => path.join('.');
 
   // end <class PackageName>
@@ -331,7 +335,6 @@ class PodPackage extends Entity {
   }
 
   set imports(Iterable imports) {
-    print('Imports set: $imports');
     this._imports =
         imports.map((i) => i is PackageName ? i : new PackageName(i)).toList();
   }
@@ -342,6 +345,7 @@ class PodPackage extends Entity {
 
   set namedTypes(Iterable<PodType> namedTypes) {
     _namedTypes = _checkNamedTypes(namedTypes);
+    _logger.info('!!Namedtypes => ${_namedTypes.map((t) => t.typeName)}');
     _allTypes = null;
   }
 
@@ -357,7 +361,12 @@ class PodPackage extends Entity {
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
 
-    visitType(PodType podType) {
+    visitType(podType) {
+      if (podType is PodTypeRef) {
+        _resolveType(podType);
+        return;
+      }
+
       if (!visitedTypes.contains(podType)) {
         if (func != null) func(podType);
         visitedTypes.add(podType);
@@ -365,19 +374,39 @@ class PodPackage extends Entity {
     }
 
     for (var podType in _namedTypes) {
-      visitType(podType);
       if (podType is PodObject) {
         for (var field in (podType as PodObject).fields) {
           visitType(field.podType);
         }
       }
+      visitType(podType);
     }
     return visitedTypes;
+  }
+
+  _resolveType(PodTypeRef podTypeRef) {
+    if (podTypeRef.packageName.isQualified) {
+      _logger.info('Look for ${podTypeRef.typeName} in *this* package');
+      _logger.info('Typenames => ${namedTypes.map((t) => t.typeName)}');
+      final found = namedTypes.firstWhere(
+          (t) => t.typeName == podTypeRef.typeName,
+          orElse: () => null);
+      _logger.info('Search result $podTypeRef -> $found');
+      return found;
+    } else {
+      _logger.info('Look for $podTypeRef in imported packages');
+    }
   }
 
   toString() => brCompact([
         'PodPackage($name)',
         indentBlock(brCompact(allTypes.map((t) => t.typeName)))
+      ]);
+
+  get details => brCompact([
+        'PodPackage($name)',
+        indentBlock(br(allTypes.map((t) => t.toString()),
+            '\n----------------------------------\n'))
       ]);
 
   _checkNamedTypes(namedTypes) {
@@ -404,7 +433,8 @@ class DoubleType extends FixedSizeType {
   // end <class DoubleType>
 
   DoubleType._();
-  get typeName => 'DoubleType';
+  get typeName => 'double';
+  toString() => typeName;
 }
 
 class ObjectIdType extends FixedSizeType {
@@ -412,7 +442,8 @@ class ObjectIdType extends FixedSizeType {
   // end <class ObjectIdType>
 
   ObjectIdType._();
-  get typeName => 'ObjectIdType';
+  get typeName => 'object_id';
+  toString() => typeName;
 }
 
 class BooleanType extends FixedSizeType {
@@ -420,7 +451,8 @@ class BooleanType extends FixedSizeType {
   // end <class BooleanType>
 
   BooleanType._();
-  get typeName => 'BooleanType';
+  get typeName => 'boolean';
+  toString() => typeName;
 }
 
 class DateType extends FixedSizeType {
@@ -428,7 +460,8 @@ class DateType extends FixedSizeType {
   // end <class DateType>
 
   DateType._();
-  get typeName => 'DateType';
+  get typeName => 'date';
+  toString() => typeName;
 }
 
 class NullType extends FixedSizeType {
@@ -436,7 +469,8 @@ class NullType extends FixedSizeType {
   // end <class NullType>
 
   NullType._();
-  get typeName => 'NullType';
+  get typeName => 'null';
+  toString() => typeName;
 }
 
 class RegexType extends FixedSizeType {
@@ -444,7 +478,8 @@ class RegexType extends FixedSizeType {
   // end <class RegexType>
 
   RegexType._();
-  get typeName => 'RegexType';
+  get typeName => 'regex';
+  toString() => typeName;
 }
 
 class Int32Type extends FixedSizeType {
@@ -452,7 +487,8 @@ class Int32Type extends FixedSizeType {
   // end <class Int32Type>
 
   Int32Type._();
-  get typeName => 'Int32Type';
+  get typeName => 'int32';
+  toString() => typeName;
 }
 
 class Int64Type extends FixedSizeType {
@@ -460,7 +496,8 @@ class Int64Type extends FixedSizeType {
   // end <class Int64Type>
 
   Int64Type._();
-  get typeName => 'Int64Type';
+  get typeName => 'int64';
+  toString() => typeName;
 }
 
 class TimestampType extends FixedSizeType {
@@ -468,7 +505,8 @@ class TimestampType extends FixedSizeType {
   // end <class TimestampType>
 
   TimestampType._();
-  get typeName => 'TimestampType';
+  get typeName => 'timestamp';
+  toString() => typeName;
 }
 
 // custom <library ebisu_pod>

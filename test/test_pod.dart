@@ -80,7 +80,7 @@ main([List<String> args]) {
             .packageName
             .toString(),
         'foo.goo');
-    expect(new PodTypeRef.fromQualifiedName('foo.goo.some_type').typeName.snake,
+    expect(new PodTypeRef.fromQualifiedName('foo.goo.some_type').typeName,
         'some_type');
   });
 
@@ -178,7 +178,16 @@ main([List<String> args]) {
         object('y', [field('a'), field('b', Double), field('c')]),
       ];
 
-    print(podPackage);
+    expect(podPackage.allTypes.first is PodEnum, true);
+    expect(podPackage.allTypes.first.typeName, 'color');
+    expect(podPackage.allTypes.last.typeName, 'y');
+    expect(podPackage.allTypes.last.fields.first.name, 'a');
+    expect(podPackage.allTypes.last.fields.first.podType, Str);
+    expect(podPackage.allTypes.last.fields.first.typeName, 'str');
+
+    expect(podPackage.allTypes.last.fields[1].name, 'b');
+    expect(podPackage.allTypes.last.fields[1].podType, Double);
+    expect(podPackage.allTypes.last.fields[1].typeName, 'double');
   });
 
 // end <main>

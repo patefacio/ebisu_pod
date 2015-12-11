@@ -118,7 +118,7 @@ by allocating space for strings inline.
           ..defaultMemberAccess = RO
           ..members = [
             member('package_name')..type = 'PackageName',
-            member('type_name')..type = 'Id',
+            member('type_name')..type = 'Id'..access = IA,
           ],
 
           class_('pod_field')
@@ -214,7 +214,8 @@ They can be constructed from and represented by the common dotted form:
             ..extend = 'FixedSizeType'
             ..withClass((c) => c.customCodeBlock.snippets.add('''
 ${c.name}._();
-get typeName => '${c.name}';
+get typeName => '$t';
+toString() => typeName;
 ''')))),
 
       library('pod_cpp')
@@ -243,6 +244,7 @@ get typeName => '${c.name}';
 
       library('balance_sheet')
         ..imports = ['package:ebisu_pod/ebisu_pod.dart']
+        ..includesLogger = true
         ..includesMain = true
         ..path = path.join(_topDir, 'lib/example'),
     ];
