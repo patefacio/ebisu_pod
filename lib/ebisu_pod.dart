@@ -281,6 +281,8 @@ class PodObject extends PodType {
 
   bool get hasArray => fields.any((pf) => pf.podType is PodArray);
 
+  bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
+
   // end <class PodObject>
 
   Id _id;

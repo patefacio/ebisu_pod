@@ -37,12 +37,15 @@ class PodCppMapper {
   }
 
   _makeClass(PodObject po) {
-    final result = new Class(po.id);
+    final result = new Class(po.id)
+      ..isStreamable = true
+      ..usesStreamers = po.hasArray;
     result.members = po.fields.map((f) => _makeMember(po, f));
     return result;
   }
 
   _makeEnum(PodEnum pe) => new Enum(pe.id)
+    ..isStreamable = true
     ..values = pe.values;
 
   _makeMember(PodObject po, PodField field) =>

@@ -55,6 +55,16 @@ main([List<String> args]) {
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
 
+  test('pod object knows if it has an array', () {
+    expect(object('x', [ field('arr', doubleArray) ]).hasArray, true);
+    expect(object('x', [ field('arr', Double) ]).hasArray, false);
+  });
+
+  test('pod object knows if it has fields with default', () {
+    expect(object('x', [ field('arr', Double)..defaultValue = 3.14 ]).hasDefaultedField, true);
+    expect(object('x', [ field('arr', Double) ]).hasDefaultedField, false);
+  });
+
   test('fields can have type that is ref', () {
     expect(
         new PodTypeRef.fromQualifiedName('foo.goo.some_type')
