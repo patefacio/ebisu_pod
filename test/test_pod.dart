@@ -40,23 +40,22 @@ main([List<String> args]) {
     expect(field('field', Int64).podType, Int64);
     expect(field('field', Timestamp).podType, Timestamp);
 
-    expect(field('field', doubleArray).podType, doubleArray);
-    expect(field('field', stringArray).podType, stringArray);
-    expect(field('field', binaryDataArray).podType, binaryDataArray);
-    expect(field('field', objectIdArray).podType, objectIdArray);
-    expect(field('field', booleanArray).podType, booleanArray);
-    expect(field('field', dateArray).podType, dateArray);
-    expect(field('field', nullArray).podType, nullArray);
-    expect(field('field', regexArray).podType, regexArray);
-    expect(field('field', int32Array).podType, int32Array);
-    expect(field('field', int64Array).podType, int64Array);
-    expect(field('field', timestampArray).podType, timestampArray);
+    expect(field('field', DoubleArray).podType, DoubleArray);
+    expect(field('field', StringArray).podType, StringArray);
+    expect(field('field', BinaryDataArray).podType, BinaryDataArray);
+    expect(field('field', ObjectIdArray).podType, ObjectIdArray);
+    expect(field('field', BooleanArray).podType, BooleanArray);
+    expect(field('field', DateArray).podType, DateArray);
+    expect(field('field', RegexArray).podType, RegexArray);
+    expect(field('field', Int32Array).podType, Int32Array);
+    expect(field('field', Int64Array).podType, Int64Array);
+    expect(field('field', TimestampArray).podType, TimestampArray);
 
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
 
   test('pod object knows if it has an array', () {
-    expect(object('x', [field('arr', doubleArray)]).hasArray, true);
+    expect(object('x', [field('arr', DoubleArray)]).hasArray, true);
     expect(object('x', [field('arr', Double)]).hasArray, false);
   });
 
@@ -136,7 +135,7 @@ main([List<String> args]) {
     final referred = object('referred');
     final obj = object('obj', [
       field('scalar'),
-      field('array', int32Array),
+      field('array', Int32Array),
       field('object', referred)
     ]);
     expect(obj.fields.first.podType == Str, true);

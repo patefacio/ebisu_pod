@@ -562,17 +562,16 @@ final Int32 = new Int32Type._();
 final Int64 = new Int64Type._();
 final Timestamp = new TimestampType._();
 
-final doubleArray = new PodArray(Double, doc: 'Array<double>');
-final stringArray = new PodArray(Str, doc: 'Array<Str>');
-final binaryDataArray = new PodArray(BinaryData, doc: 'Array<BinaryData>');
-final objectIdArray = new PodArray(ObjectId, doc: 'Array<ObjectId>');
-final booleanArray = new PodArray(Boolean, doc: 'Array<Boolean>');
-final dateArray = new PodArray(Date, doc: 'Array<Date>');
-final nullArray = new PodArray(Null, doc: 'Array<Null>');
-final regexArray = new PodArray(Regex, doc: 'Array<Regex>');
-final int32Array = new PodArray(Int32, doc: 'Array<Int32>');
-final int64Array = new PodArray(Int64, doc: 'Array<Int64>');
-final timestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
+final DoubleArray = new PodArray(Double, doc: 'Array<double>');
+final StringArray = new PodArray(Str, doc: 'Array<Str>');
+final BinaryDataArray = new PodArray(BinaryData, doc: 'Array<BinaryData>');
+final ObjectIdArray = new PodArray(ObjectId, doc: 'Array<ObjectId>');
+final BooleanArray = new PodArray(Boolean, doc: 'Array<Boolean>');
+final DateArray = new PodArray(Date, doc: 'Array<Date>');
+final RegexArray = new PodArray(Regex, doc: 'Array<Regex>');
+final Int32Array = new PodArray(Int32, doc: 'Array<Int32>');
+final Int64Array = new PodArray(Int64, doc: 'Array<Int64>');
+final TimestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
