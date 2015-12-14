@@ -28,16 +28,18 @@ class PodCppMapper {
       final podEnums = _package.namedTypes.where((t) => t is PodEnum);
       final ns = new Namespace(path.sublist(0, path.length - 1));
       _header = new Header(path.last)
-        ..namespace = ns
+        ..namespace = ns;
+
+      _header
         ..classes = podObjects.map(_makeClass)
         ..enums = podEnums.map(_makeEnum);
-
     }
     return _header;
   }
 
   _makeClass(PodObject po) {
     final result = new Class(po.id)
+      ..isStruct = true
       ..isStreamable = true
       ..usesStreamers = po.hasArray;
     result.members = po.fields.map((f) => _makeMember(po, f));
@@ -46,10 +48,19 @@ class PodCppMapper {
 
   _makeEnum(PodEnum pe) => new Enum(pe.id)
     ..isStreamable = true
+    ..isClass = true
     ..values = pe.values;
 
-  _makeMember(PodObject po, PodField field) =>
-    new Member(field.id)..type = _cppType(package.getFieldType(po.id.snake, field.name));
+  _makeMember(PodObject po, PodField field) {
+    final result = new Member(field.id)
+      ..cppAccess = public
+      ..type = _cppType(package.getFieldType(po.id.snake, field.name));
+
+    if(result.type == 'boost::gregorian::date') {
+      _header.includes.add('boost/date_time/gregorian/gregorian.hpp');
+    }
+    return result;
+  }
 
   final _cppTypeMap = {
     'date' : 'boost::gregorian::date',

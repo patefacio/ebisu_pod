@@ -376,6 +376,9 @@ class PodPackage extends Entity {
     return _allTypes;
   }
 
+  get podObjects => namedTypes.where((t) => t is PodObject);
+  get podEnums => namedTypes.where((t) => t is PodEnum);
+
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
 
