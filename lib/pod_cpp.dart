@@ -27,8 +27,7 @@ class PodCppMapper {
       final podObjects = _package.namedTypes.where((t) => t is PodObject);
       final podEnums = _package.namedTypes.where((t) => t is PodEnum);
       final ns = new Namespace(path.sublist(0, path.length - 1));
-      _header = new Header(path.last)
-        ..namespace = ns;
+      _header = new Header(path.last)..namespace = ns;
 
       _header
         ..classes = podObjects.map(_makeClass)
@@ -56,31 +55,30 @@ class PodCppMapper {
       ..cppAccess = public
       ..type = _cppType(package.getFieldType(po.id.snake, field.name));
 
-    if(result.type == 'boost::gregorian::date') {
+    if (result.type == 'boost::gregorian::date') {
       _header.includes.add('boost/date_time/gregorian/gregorian.hpp');
     }
     return result;
   }
 
   final _cppTypeMap = {
-    'date' : 'boost::gregorian::date',
-    'int' : 'int',
-    'int32' : 'std::int32_t',
-    'int64' : 'std::int64_t',
+    'date': 'boost::gregorian::date',
+    'int': 'int',
+    'int32': 'std::int32_t',
+    'int64': 'std::int64_t',
     'double': 'double',
-    'str' : 'std::string',
-    'boolean' : 'bool',
+    'str': 'std::string',
+    'boolean': 'bool',
   };
 
   _cppType(PodType podType) {
     final podTypeName = podType.typeName;
     var cppType = _cppTypeMap[podTypeName];
-    if(cppType == null) {
+    if (cppType == null) {
       cppType = defaultNamer.nameClass(podType.id);
     }
     return cppType;
   }
-
 
   // end <class PodCppMapper>
 

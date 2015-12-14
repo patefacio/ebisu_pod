@@ -31,7 +31,7 @@ code generators.
     ..includesHop = true
     ..license = 'boost'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.1'
+    ..pubSpec.version = '0.0.2'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose

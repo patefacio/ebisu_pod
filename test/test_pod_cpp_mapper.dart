@@ -27,12 +27,13 @@ main([List<String> args]) {
 
   test('pod cpp mapper', () {
     final header = mapper.header;
-    final holdingTypeEnum = header.enums.singleWhere((e) => e.id.snake == 'holding_type');
-    final holdingClass = header.classes.singleWhere((c) => c.id.snake == 'holding');
-    print(holdingTypeEnum);
+    final holdingTypeEnum =
+        header.enums.singleWhere((e) => e.id.snake == 'holding_type');
+    final holdingClass =
+        header.classes.singleWhere((c) => c.id.snake == 'holding');
+    expect(holdingTypeEnum.values.first.id.snake, 'other');
+    expect(holdingClass.members.first.id.snake, 'holding_type');
   });
-
-  print(mapper.header.contents);
 
 // end <main>
 }
