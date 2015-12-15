@@ -168,7 +168,7 @@ class PodTypeRef {
   get isArray => _resolvedType.isArray;
   get isObject => _resolvedType.isObject;
   get typeName => _typeName.snake;
-  get podType => _resolvedType;
+  get podType => _resolvedType == null? qualifiedTypeName : _resolvedType;
 
   // custom <class PodTypeRef>
 

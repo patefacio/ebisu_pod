@@ -114,7 +114,7 @@ main([List<String> args]) {
     expect(o.fields.first.name, 'x');
     expect(o.fields.first.podType, object('deep'));
     expect(o.fields.last.name, 'y');
-    expect(o.fields.last.podType, new PodTypeRef.fromQualifiedName('a.b.c'));
+    expect(o.fields.last.podType, 'a.b.c');
   });
 
   final address = object('address')
