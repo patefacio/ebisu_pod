@@ -156,11 +156,19 @@ class PodArray extends VariableSizeType {
 class PodTypeRef {
   bool operator ==(PodTypeRef other) =>
       identical(this, other) ||
-      _packageName == other._packageName && _typeName == other._typeName;
+      _packageName == other._packageName &&
+          _typeName == other._typeName &&
+          _resolvedType == other._resolvedType;
 
-  int get hashCode => hash2(_packageName, _typeName);
+  int get hashCode => hash3(_packageName, _typeName, _resolvedType);
 
   PackageName get packageName => _packageName;
+  PodType get resolvedType => _resolvedType;
+
+  get isArray => _resolvedType.isArray;
+  get isObject => _resolvedType.isObject;
+  get typeName => _typeName.snake;
+  get podType => _resolvedType;
 
   // custom <class PodTypeRef>
 
@@ -171,7 +179,6 @@ class PodTypeRef {
     _typeName = makeId(packageNameParts.last);
   }
 
-  get typeName => _typeName.snake;
   get qualifiedTypeName => '$packageName.$typeName';
   toString() => 'PodTypeRef($qualifiedTypeName)';
 
@@ -179,6 +186,7 @@ class PodTypeRef {
 
   PackageName _packageName;
   Id _typeName;
+  PodType _resolvedType;
 }
 
 class PodField {
@@ -201,7 +209,9 @@ class PodField {
   ///
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
-  dynamic get podType => _podType;
+  dynamic get podType => _podType is PodTypeRef?
+    _podType.podType : _podType;
+
   dynamic defaultValue;
 
   /// Documentation for the field
@@ -340,7 +350,9 @@ class PodPackage extends Entity {
   PodPackage(name, {Iterable imports, Iterable<PodType> namedTypes}) {
     this.name = name;
     this.imports = (imports != null) ? imports : [];
-    this.namedTypes = (namedTypes != null) ? namedTypes : [];
+    this._namedTypes = (namedTypes != null) ? namedTypes : [];
+    _checkNamedTypes();
+    _allTypes = visitTypes(null);
   }
 
   set imports(Iterable imports) {
@@ -361,12 +373,6 @@ class PodPackage extends Entity {
     return fieldType is PodTypeRef ? _resolveType(fieldType) : fieldType;
   }
 
-  set namedTypes(Iterable<PodType> namedTypes) {
-    _namedTypes = namedTypes.toList();
-    _checkNamedTypes();
-    _allTypes = null;
-  }
-
   /// All types within the package including *anonymous* types
   Set get allTypes {
     if (_allTypes == null) {
@@ -383,13 +389,15 @@ class PodPackage extends Entity {
     Set visitedTypes = new Set();
 
     visitType(podType) {
+      assert(podType != null);
       if (podType is PodTypeRef) {
-        visitType(_resolveType(podType));
+        podType._resolvedType = _resolveType(podType);
+        visitType(podType._resolvedType);
       } else {
         if (!visitedTypes.contains(podType)) {
           if (podType is PodObject) {
             for (var field in (podType as PodObject).fields) {
-              visitType(field.podType);
+              visitType(field._podType);
             }
           }
 

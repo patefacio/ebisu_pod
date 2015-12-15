@@ -122,6 +122,7 @@ by allocating space for strings inline.
           ..members = [
             member('package_name')..type = 'PackageName',
             member('type_name')..type = 'Id'..access = IA,
+            member('resolved_type')..type = 'PodType',
           ],
 
           class_('pod_field')

@@ -32,6 +32,15 @@ class PodCppMapper {
       _header
         ..classes = podObjects.map(_makeClass)
         ..enums = podEnums.map(_makeEnum);
+
+      for(var type in _package.allTypes) {
+        if (type is DateType) {
+          _header.includes.add('boost/date_time/gregorian/gregorian.hpp');
+        }
+        if(type.isArray) {
+          _header.includes.add('ebisu/utils/streamers/vector.hpp');
+        }
+      }
     }
     return _header;
   }
@@ -50,15 +59,22 @@ class PodCppMapper {
     ..isClass = true
     ..values = pe.values;
 
-  _makeMember(PodObject po, PodField field) {
-    final result = new Member(field.id)
-      ..cppAccess = public
-      ..type = _cppType(package.getFieldType(po.id.snake, field.name));
+  _makeMember(PodObject po, PodField field) => field.podType.isArray?
+    _makeArrayMember(po, field) : _makeScalarMember(po, field);
 
-    if (result.type == 'boost::gregorian::date') {
-      _header.includes.add('boost/date_time/gregorian/gregorian.hpp');
-    }
-    return result;
+  _makeScalarMember(PodObject po, PodField field) {
+    var cppType = _cppType(field.podType);
+    return new Member(field.id)
+      ..cppAccess = public
+      ..type = cppType;
+  }
+
+  _makeArrayMember(PodObject po, PodField field) {
+    var cppType = _cppType(field.podType);
+    return new Member(field.id)
+      ..cppAccess = public
+      ..isByRef = true
+      ..type = 'std::vector<$cppType>';
   }
 
   final _cppTypeMap = {
