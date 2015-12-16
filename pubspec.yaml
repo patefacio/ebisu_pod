@@ -29,6 +29,9 @@ dev_dependencies:
 # custom <ebisu_pod dev dependencies>
 
   test: "^0.12.0"
+
+environment:
+  sdk: ">=1.8.0 <2.0.0"
   
 # end <ebisu_pod dev dependencies>
 
