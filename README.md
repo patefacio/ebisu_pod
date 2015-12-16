@@ -29,7 +29,7 @@ declarative instantiations of that *meta-data*. The process of
 creating a *PodPackage* is analagous to creating an instance of an
 IDL. The benefit of this approach include:
 
-- *Competitive Selection*: Decisions on serialization solutions can
+- *Competitive Selection*: Decisions on serialization solutions can be
   informed by having multiple approaches tried against the same data
   set.
 
@@ -38,8 +38,12 @@ IDL. The benefit of this approach include:
   for network communication.
 
 - *Programatic Control*: Because the meta-language is implemented with
-  a library programatic creation of models from structured data sets
-  is simplified.
+  a library programatic creation of large-scale models from structured
+  data sets is simplified.
+
+- *Model Interogation*: Since the model is stored in Dart and
+  accessible via dart, you can easily query/iterate on types, generate
+  diagrams, etc.
 
 ## Types
 
@@ -61,13 +65,21 @@ These types are created with an [Id] instance identifying the type.
 ```
 | Built-In Type | Literal Name |
 |---------------+--------------|
+| StrType       | Str          |
+| BooleanType   | Boolean      |
 | DoubleType    | Double       |
+| Int8Type      | Int8         |
+| Int16Type     | Int16        |
 | Int32Type     | Int32        |
 | Int64Type     | Int64        |
+| Uint8Type     | Uint8        |
+| Uint16Type    | Uint16       |
+| Uint32Type    | Uint32       |
+| Uint64Type    | Uint64       |
 | DateType      | Date         |
-| RegexType     | Regex        |
+| DateTimeType  | DateTime     |
 | TimestampType | Timestamp    |
-| StrType       | Str          |
+| RegexType     | Regex        |
 ```
 
 For these built-in types, there is an actual Dart type
@@ -128,7 +140,7 @@ package('sports.baseball',
       field('batting_average', Double),
     ]),
     object('player_stat', [
-      field('player'),
+      field('player'),                       // type unspecified defaults to [Str]
       field('player_stats', 'player_stats')
     ]),
     object('player_stats_map', [
@@ -153,7 +165,7 @@ For modeling purposes, these types support specification of
 
 ```dart
 object('person', [
-  field('name'),                      // If no type is specified, default is [Str]
+  field('name'),                      
   field('children', array('person'))  // Types may be referenced by name (ie literal string)
 ])
 

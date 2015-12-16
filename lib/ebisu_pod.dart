@@ -530,6 +530,26 @@ class RegexType extends FixedSizeType {
   toString() => typeName;
 }
 
+class Int8Type extends FixedSizeType {
+  final Id id = makeId("int8");
+
+  // custom <class Int8Type>
+  // end <class Int8Type>
+
+  Int8Type._();
+  toString() => typeName;
+}
+
+class Int16Type extends FixedSizeType {
+  final Id id = makeId("int16");
+
+  // custom <class Int16Type>
+  // end <class Int16Type>
+
+  Int16Type._();
+  toString() => typeName;
+}
+
 class Int32Type extends FixedSizeType {
   final Id id = makeId("int32");
 
@@ -547,6 +567,56 @@ class Int64Type extends FixedSizeType {
   // end <class Int64Type>
 
   Int64Type._();
+  toString() => typeName;
+}
+
+class Uint8Type extends FixedSizeType {
+  final Id id = makeId("uint8");
+
+  // custom <class Uint8Type>
+  // end <class Uint8Type>
+
+  Uint8Type._();
+  toString() => typeName;
+}
+
+class Uint16Type extends FixedSizeType {
+  final Id id = makeId("uint16");
+
+  // custom <class Uint16Type>
+  // end <class Uint16Type>
+
+  Uint16Type._();
+  toString() => typeName;
+}
+
+class Uint32Type extends FixedSizeType {
+  final Id id = makeId("uint32");
+
+  // custom <class Uint32Type>
+  // end <class Uint32Type>
+
+  Uint32Type._();
+  toString() => typeName;
+}
+
+class Uint64Type extends FixedSizeType {
+  final Id id = makeId("uint64");
+
+  // custom <class Uint64Type>
+  // end <class Uint64Type>
+
+  Uint64Type._();
+  toString() => typeName;
+}
+
+class DateTimeType extends FixedSizeType {
+  final Id id = makeId("date_time");
+
+  // custom <class DateTimeType>
+  // end <class DateTimeType>
+
+  DateTimeType._();
   toString() => typeName;
 }
 
@@ -571,8 +641,16 @@ final Boolean = new BooleanType._();
 final Date = new DateType._();
 final Null = new NullType._();
 final Regex = new RegexType._();
+final Int8 = new Int8Type._();
+final Int16 = new Int16Type._();
 final Int32 = new Int32Type._();
 final Int64 = new Int64Type._();
+
+final Uint8 = new Uint8Type._();
+final Uint16 = new Uint16Type._();
+final Uint32 = new Uint32Type._();
+final Uint64 = new Uint64Type._();
+final DateTime = new DateTimeType._();
 final Timestamp = new TimestampType._();
 
 final DoubleArray = array(Double, doc: 'Array<double>');
@@ -582,8 +660,17 @@ final ObjectIdArray = array(ObjectId, doc: 'Array<ObjectId>');
 final BooleanArray = array(Boolean, doc: 'Array<Boolean>');
 final DateArray = array(Date, doc: 'Array<Date>');
 final RegexArray = array(Regex, doc: 'Array<Regex>');
+
+final Int8Array = array(Int8, doc: 'Array<Int8>');
+final Int16Array = array(Int16, doc: 'Array<Int16>');
 final Int32Array = array(Int32, doc: 'Array<Int32>');
 final Int64Array = array(Int64, doc: 'Array<Int64>');
+
+final Uint8Array = array(Uint8, doc: 'Array<Uint8>');
+final Uint16Array = array(Uint16, doc: 'Array<Uint16>');
+final Uint32Array = array(Uint32, doc: 'Array<Uint32>');
+final Uint64Array = array(Uint64, doc: 'Array<Uint64>');
+final DateTimeArray = array(DateTime, doc: 'Array<DateTime>');
 final TimestampArray = array(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);

@@ -36,8 +36,17 @@ main([List<String> args]) {
     expect(field('field', Date).podType, Date);
     expect(field('field', Null).podType, Null);
     expect(field('field', Regex).podType, Regex);
+
+    expect(field('field', Int8).podType, Int8);
+    expect(field('field', Int16).podType, Int16);
     expect(field('field', Int32).podType, Int32);
     expect(field('field', Int64).podType, Int64);
+
+    expect(field('field', Uint8).podType, Uint8);
+    expect(field('field', Uint16).podType, Uint16);
+    expect(field('field', Uint32).podType, Uint32);
+    expect(field('field', Uint64).podType, Uint64);
+
     expect(field('field', Timestamp).podType, Timestamp);
 
     expect(field('field', DoubleArray).podType, DoubleArray);

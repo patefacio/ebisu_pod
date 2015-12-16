@@ -31,7 +31,7 @@ code generators.
     ..includesHop = true
     ..license = 'boost'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.2'
+    ..pubSpec.version = '0.0.3'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
@@ -208,8 +208,15 @@ They can be constructed from and represented by the common dotted form:
           'date',
           'null',
           'regex',
+          'int8',
+          'int16',
           'int32',
           'int64',
+          'uint8',
+          'uint16',
+          'uint32',
+          'uint64',
+          'date_time',
           'timestamp'
         ].map((var t) => class_('${t}_type')
           ..extend = 'FixedSizeType'
