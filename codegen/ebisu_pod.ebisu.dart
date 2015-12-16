@@ -60,21 +60,20 @@ code generators.
                 ..classInit = [],
               member('doc')..doc = 'Documentation for the enum',
             ],
-
           class_('fixed_size_type')
-          ..extend = 'PodType'
-          ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
-
+            ..extend = 'PodType'
+            ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
           class_('variable_size_type')
-          ..extend = 'PodType'
-          ..customCodeBlock.snippets.add('bool get isFixedSize => maxLength != null;')
-          ..members = [
-            member('max_length')
-            ..doc = 'If non-0 indicates length capped to [max_length]'
-            ..type = 'int'
-            ..ctors = ['']
-          ],
-
+            ..extend = 'PodType'
+            ..customCodeBlock
+                .snippets
+                .add('bool get isFixedSize => maxLength != null;')
+            ..members = [
+              member('max_length')
+                ..doc = 'If non-0 indicates length capped to [max_length]'
+                ..type = 'int'
+                ..ctors = ['']
+            ],
           class_('str_type')
             ..doc = '''
 Used to define string types, which may have a fixed type.
@@ -93,7 +92,6 @@ by allocating space for strings inline.
                 ..type = 'Map<int, Str>'
                 ..classInit = 'new Map<int, Str>()',
             ],
-
           class_('binary_data_type')
             ..doc = 'Stores binary data as array of bytes'
             ..extend = 'VariableSizeType'
@@ -106,25 +104,26 @@ by allocating space for strings inline.
                 ..type = 'Map<int, BinaryData>'
                 ..classInit = 'new Map<int, BinaryData>()',
             ],
-
-          class_('pod_array')
+          class_('pod_array_type')
             ..extend = 'VariableSizeType'
             ..hasOpEquals = true
             ..members = [
               member('referred_type')..type = 'PodType',
               member('doc')..doc = 'Documentation for the array',
             ],
-
           class_('pod_type_ref')
-          ..doc = 'Combination of owning package name and name of a type within it'
-          ..hasOpEquals = true
-          ..defaultMemberAccess = RO
-          ..members = [
-            member('package_name')..type = 'PackageName',
-            member('type_name')..type = 'Id'..access = IA,
-            member('resolved_type')..type = 'PodType',
-          ],
-
+            ..extend = 'PodType'
+            ..doc =
+                'Combination of owning package name and name of a type within it'
+            ..hasOpEquals = true
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('package_name')..type = 'PackageName',
+              member('type_name')
+                ..type = 'Id'
+                ..access = IA,
+              member('resolved_type')..type = 'PodType',
+            ],
           class_('pod_field')
             ..hasOpEquals = true
             ..members = [
@@ -135,19 +134,18 @@ by allocating space for strings inline.
                 ..doc = 'If true the field is defined as index'
                 ..classInit = false,
               member('pod_type')
-              ..doc = '''
+                ..doc = '''
 Type associated with the field.
 
 May be a PodType, PodTypeRef, or a String.
 If it is a String it is converted to a PodTypeRef
 '''
-              ..type = 'dynamic'
-              ..isInHashCode = false
-              ..access = RO,
+                ..type = 'dynamic'
+                ..isInHashCode = false
+                ..access = IA,
               member('default_value')..type = 'dynamic',
               member('doc')..doc = 'Documentation for the field',
             ],
-
           class_('pod_object')
             ..extend = 'PodType'
             ..hasOpEquals = true
@@ -160,9 +158,8 @@ If it is a String it is converted to a PodTypeRef
                 ..classInit = [],
               member('doc')..doc = 'Documentation for the object',
             ],
-
           class_('package_name')
-          ..doc = '''
+            ..doc = '''
 Package names are effectively a list of Id isntances.
 
 They can be constructed from and represented by the common dotted form:
@@ -171,30 +168,38 @@ They can be constructed from and represented by the common dotted form:
 
    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 '''
-          ..hasOpEquals = true
-          ..members = [
-            member('path')..type = 'List<Id>'..classInit = []..access = RO,
-          ],
-
+            ..hasOpEquals = true
+            ..members = [
+              member('path')
+                ..type = 'List<Id>'
+                ..classInit = []
+                ..access = RO,
+            ],
           class_('pod_package')
-          ..doc = 'Package structure to support organization of pod definitions'
-          ..extend = 'Entity'
-          ..defaultMemberAccess = RO
-          ..members = [
-            member('name')
-            ..doc = 'Name of package'
-            ..type = 'PackageName',
-            member('imports')
-            ..doc = 'Packages required by (ie containing referenced types) this package'
-            ..type = 'List<PodPackage>'..classInit = [],
-            member('named_types')
-            ..doc = 'The named and therefore referencable types within the package'
-            ..type = 'List<PodType>'..classInit = [],
-            member('all_types')
-            ..doc = 'All types within the package including *anonymous* types'
-            ..type = 'Set'..access = IA,
-          ],
-
+            ..doc =
+                'Package structure to support organization of pod definitions'
+            ..extend = 'Entity'
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('name')
+                ..doc = 'Name of package'
+                ..type = 'PackageName',
+              member('imports')
+                ..doc =
+                    'Packages required by (ie containing referenced types) this package'
+                ..type = 'List<PodPackage>'
+                ..classInit = [],
+              member('named_types')
+                ..doc =
+                    'The named and therefore referencable types within the package'
+                ..type = 'List<PodType>'
+                ..classInit = [],
+              member('all_types')
+                ..doc =
+                    'All types within the package including *anonymous* types'
+                ..type = 'Set'
+                ..access = IA,
+            ],
         ]
         ..classes.addAll([
           'double',
@@ -207,13 +212,12 @@ They can be constructed from and represented by the common dotted form:
           'int64',
           'timestamp'
         ].map((var t) => class_('${t}_type')
-            ..extend = 'FixedSizeType'
-            ..withClass((c) => c.customCodeBlock.snippets.add('''
+          ..extend = 'FixedSizeType'
+            ..members = [ member('id')..type = 'Id'..classInit = 'makeId("$t")'..isFinal = true ]
+          ..withClass((c) => c.customCodeBlock.snippets.add('''
 ${c.name}._();
-get typeName => '$t';
 toString() => typeName;
 ''')))),
-
       library('pod_cpp')
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'
         ..imports = [
@@ -222,28 +226,24 @@ toString() => typeName;
           'package:ebisu_cpp/ebisu_cpp.dart',
           'package:id/id.dart',
         ]
-      ..classes = [
-
-        class_('pod_cpp_mapper')
-        ..doc = 'Given a pod package, maps the data definitions to C++'
-        ..defaultMemberAccess = RO
-        ..members = [
-          member('package')
-          ..doc = 'Package to generate basic C++ mappings for'
-          ..type = 'PodPackage'
-          ..ctors = [''],
-          member('namespace')
-          ..doc = 'Napespace into which to place the type hierarchy'
-          ..type = 'Napespace',
-          member('header')
-          ..doc = 'C++ header with all PodObject and PodEnum definitions'
-          ..type = 'Header'
-          ..access = IA,
-        ]
-
-      ],
-
-
+        ..classes = [
+          class_('pod_cpp_mapper')
+            ..doc = 'Given a pod package, maps the data definitions to C++'
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('package')
+                ..doc = 'Package to generate basic C++ mappings for'
+                ..type = 'PodPackage'
+                ..ctors = [''],
+              member('namespace')
+                ..doc = 'Napespace into which to place the type hierarchy'
+                ..type = 'Napespace',
+              member('header')
+                ..doc = 'C++ header with all PodObject and PodEnum definitions'
+                ..type = 'Header'
+                ..access = IA,
+            ]
+        ],
       library('balance_sheet')
         ..imports = ['package:ebisu_pod/ebisu_pod.dart']
         ..includesLogger = true

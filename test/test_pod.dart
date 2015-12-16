@@ -131,7 +131,7 @@ main([List<String> args]) {
     expect(address.fields.last, field('state', Str));
   });
 
-  test('fields can be Builtin, PodArray or PodObject', () {
+  test('fields can be Builtin, PodArrayType or PodObject', () {
     final referred = object('referred');
     final obj = object('obj', [
       field('scalar'),
@@ -139,7 +139,7 @@ main([List<String> args]) {
       field('object', referred)
     ]);
     expect(obj.fields.first.podType == Str, true);
-    expect(obj.fields[1].podType is PodArray, true);
+    expect(obj.fields[1].podType is PodArrayType, true);
     expect(obj.fields.last.podType is PodObject, true);
   });
 
@@ -155,10 +155,10 @@ main([List<String> args]) {
   test('pod types can be self referential', () {
     final o = object('o');
     o.fields.add(field('children', array(o)));
-    expect(o.fields.first.podType is PodArray, true);
+    expect(o.fields.first.podType is PodArrayType, true);
     expect(o.fields.first.podType.referredType, o);
-    o.fields.add(arrayField('siblings', o));
-    expect(o.fields.last.podType is PodArray, true);
+    o.fields.add(field('siblings', array(o)));
+    expect(o.fields.last.podType is PodArrayType, true);
     expect(o.fields.last.podType.referredType, o);
   });
 

@@ -15,12 +15,14 @@ class PodType {
   // custom <class PodType>
 
   PodType();
-  get isArray => this is PodArray;
-  get isObject => this is PodObject;
 
-  String get doc;
-  String get typeName;
+  get isArray => this is PodArrayType;
+  get isObject => this is PodObject;
   bool get isFixedSize;
+
+  Id get id;
+  String get doc;
+  String get typeName => id.snake;
 
   // end <class PodType>
 
@@ -44,15 +46,12 @@ class PodEnum extends PodType {
 
   // custom <class PodEnum>
 
-  get name => id.snake;
-
   PodEnum(this._id, [this.values]) {
     if (values == null) {
       values = [];
     }
   }
 
-  String get typeName => name;
   toString() => chomp(brCompact([
         'PodEnum($id:[${values.join(", ")}])',
         doc == null ? null : blockComment(doc)
@@ -126,8 +125,8 @@ class BinaryDataType extends VariableSizeType {
   static Map<int, BinaryData> _typeCache = new Map<int, BinaryData>();
 }
 
-class PodArray extends VariableSizeType {
-  bool operator ==(PodArray other) =>
+class PodArrayType extends VariableSizeType {
+  bool operator ==(PodArrayType other) =>
       identical(this, other) ||
       referredType == other.referredType && doc == other.doc;
 
@@ -138,22 +137,22 @@ class PodArray extends VariableSizeType {
   /// Documentation for the array
   String doc;
 
-  // custom <class PodArray>
+  // custom <class PodArrayType>
 
-  PodArray(this.referredType, {this.doc, maxLength}) : super(maxLength) {
+  PodArrayType(this.referredType, {this.doc, maxLength}) : super(maxLength) {
     if (this.maxLength == null) this.maxLength = 0;
   }
 
-  toString() => 'PodArray(${referredType.typeName})';
+  toString() => 'PodArrayType(${referredType.typeName})';
   get typeName => referredType.typeName;
   bool get isFixedSize => maxLength > 0;
 
-  // end <class PodArray>
+  // end <class PodArrayType>
 
 }
 
 /// Combination of owning package name and name of a type within it
-class PodTypeRef {
+class PodTypeRef extends PodType {
   bool operator ==(PodTypeRef other) =>
       identical(this, other) ||
       _packageName == other._packageName &&
@@ -165,12 +164,13 @@ class PodTypeRef {
   PackageName get packageName => _packageName;
   PodType get resolvedType => _resolvedType;
 
+  // custom <class PodTypeRef>
+
+  get doc => _resolvedType.doc;
   get isArray => _resolvedType.isArray;
   get isObject => _resolvedType.isObject;
   get typeName => _typeName.snake;
-  get podType => _resolvedType == null? qualifiedTypeName : _resolvedType;
-
-  // custom <class PodTypeRef>
+  get podType => _resolvedType == null ? qualifiedTypeName : _resolvedType;
 
   PodTypeRef.fromQualifiedName(String qualifiedName) {
     final packageNameParts = qualifiedName.split('.');
@@ -204,20 +204,14 @@ class PodField {
 
   /// If true the field is defined as index
   bool isIndex = false;
-
-  /// Type associated with the field.
-  ///
-  /// May be a PodType, PodTypeRef, or a String.
-  /// If it is a String it is converted to a PodTypeRef
-  dynamic get podType => _podType is PodTypeRef?
-    _podType.podType : _podType;
-
   dynamic defaultValue;
 
   /// Documentation for the field
   String doc;
 
   // custom <class PodField>
+
+  dynamic get podType => _podType is PodTypeRef ? _podType.podType : _podType;
 
   PodField(this._id, [podType]) {
     this.podType = podType;
@@ -244,6 +238,11 @@ class PodField {
   // end <class PodField>
 
   Id _id;
+
+  /// Type associated with the field.
+  ///
+  /// May be a PodType, PodTypeRef, or a String.
+  /// If it is a String it is converted to a PodTypeRef
   dynamic _podType;
 }
 
@@ -271,9 +270,6 @@ class PodObject extends PodType {
     }
   }
 
-  get name => id.snake;
-  get typeName => name;
-
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
   getField(fieldName) => fields.firstWhere((f) => f.name == fieldName,
@@ -284,12 +280,12 @@ class PodObject extends PodType {
         'PodObject($typeName)',
         indentBlock(blockComment(doc)),
         indentBlock(brCompact(fields.map((pf) => [
-              '${pf.id}:${pf.podType.typeName}',
+              '${pf.id}:${pf.podType}',
               pf.doc == null ? null : blockComment(pf.doc)
             ])))
       ]);
 
-  bool get hasArray => fields.any((pf) => pf.podType is PodArray);
+  bool get hasArray => fields.any((pf) => pf.podType is PodArrayType);
 
   bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
 
@@ -475,83 +471,92 @@ class PodPackage extends Entity {
 }
 
 class DoubleType extends FixedSizeType {
+  final Id id = makeId("double");
+
   // custom <class DoubleType>
   // end <class DoubleType>
 
   DoubleType._();
-  get typeName => 'double';
   toString() => typeName;
 }
 
 class ObjectIdType extends FixedSizeType {
+  final Id id = makeId("object_id");
+
   // custom <class ObjectIdType>
   // end <class ObjectIdType>
 
   ObjectIdType._();
-  get typeName => 'object_id';
   toString() => typeName;
 }
 
 class BooleanType extends FixedSizeType {
+  final Id id = makeId("boolean");
+
   // custom <class BooleanType>
   // end <class BooleanType>
 
   BooleanType._();
-  get typeName => 'boolean';
   toString() => typeName;
 }
 
 class DateType extends FixedSizeType {
+  final Id id = makeId("date");
+
   // custom <class DateType>
   // end <class DateType>
 
   DateType._();
-  get typeName => 'date';
   toString() => typeName;
 }
 
 class NullType extends FixedSizeType {
+  final Id id = makeId("null");
+
   // custom <class NullType>
   // end <class NullType>
 
   NullType._();
-  get typeName => 'null';
   toString() => typeName;
 }
 
 class RegexType extends FixedSizeType {
+  final Id id = makeId("regex");
+
   // custom <class RegexType>
   // end <class RegexType>
 
   RegexType._();
-  get typeName => 'regex';
   toString() => typeName;
 }
 
 class Int32Type extends FixedSizeType {
+  final Id id = makeId("int32");
+
   // custom <class Int32Type>
   // end <class Int32Type>
 
   Int32Type._();
-  get typeName => 'int32';
   toString() => typeName;
 }
 
 class Int64Type extends FixedSizeType {
+  final Id id = makeId("int64");
+
   // custom <class Int64Type>
   // end <class Int64Type>
 
   Int64Type._();
-  get typeName => 'int64';
   toString() => typeName;
 }
 
 class TimestampType extends FixedSizeType {
+  final Id id = makeId("timestamp");
+
   // custom <class TimestampType>
   // end <class TimestampType>
 
   TimestampType._();
-  get typeName => 'timestamp';
   toString() => typeName;
 }
 
@@ -570,16 +575,16 @@ final Int32 = new Int32Type._();
 final Int64 = new Int64Type._();
 final Timestamp = new TimestampType._();
 
-final DoubleArray = new PodArray(Double, doc: 'Array<double>');
-final StringArray = new PodArray(Str, doc: 'Array<Str>');
-final BinaryDataArray = new PodArray(BinaryData, doc: 'Array<BinaryData>');
-final ObjectIdArray = new PodArray(ObjectId, doc: 'Array<ObjectId>');
-final BooleanArray = new PodArray(Boolean, doc: 'Array<Boolean>');
-final DateArray = new PodArray(Date, doc: 'Array<Date>');
-final RegexArray = new PodArray(Regex, doc: 'Array<Regex>');
-final Int32Array = new PodArray(Int32, doc: 'Array<Int32>');
-final Int64Array = new PodArray(Int64, doc: 'Array<Int64>');
-final TimestampArray = new PodArray(Timestamp, doc: 'Array<Timestamp>');
+final DoubleArray = array(Double, doc: 'Array<double>');
+final StringArray = array(Str, doc: 'Array<Str>');
+final BinaryDataArray = array(BinaryData, doc: 'Array<BinaryData>');
+final ObjectIdArray = array(ObjectId, doc: 'Array<ObjectId>');
+final BooleanArray = array(Boolean, doc: 'Array<Boolean>');
+final DateArray = array(Date, doc: 'Array<Date>');
+final RegexArray = array(Regex, doc: 'Array<Regex>');
+final Int32Array = array(Int32, doc: 'Array<Int32>');
+final Int64Array = array(Int64, doc: 'Array<Int64>');
+final TimestampArray = array(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
@@ -588,10 +593,8 @@ PodField field(id, [podType]) =>
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArray array(dynamic referredType, {String doc, int maxLength}) =>
-    new PodArray(referredType, doc: doc, maxLength: maxLength);
-
-PodField arrayField(id, referredType) => field(id, array(referredType));
+PodArrayType array(dynamic referredType, {String doc, int maxLength}) =>
+    new PodArrayType(referredType, doc: doc, maxLength: maxLength);
 
 StrType fixedStr(int maxLength) => new StrType(maxLength);
 

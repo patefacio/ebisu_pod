@@ -55,17 +55,16 @@ main([List<String> args]) {
   });
 
   test('pod package', () {
-    final podPackage = new PodPackage('p',
-        namedTypes: [
-        enum_('color', ['red', 'white', 'blue']),
-        enum_('usa', ['red', 'white', 'blue']),
-        object('z', [field('x', 'x')]),
-        object('x', [field('a'), field('b', Double), field('c')]),
-        object('a', [
-          field('b', object('ax', [field('c')]))
-        ]),
-        object('y', [field('a'), field('b', Double), field('c')]),
-        ]);
+    final podPackage = new PodPackage('p', namedTypes: [
+      enum_('color', ['red', 'white', 'blue']),
+      enum_('usa', ['red', 'white', 'blue']),
+      object('z', [field('x', 'x')]),
+      object('x', [field('a'), field('b', Double), field('c')]),
+      object('a', [
+        field('b', object('ax', [field('c')]))
+      ]),
+      object('y', [field('a'), field('b', Double), field('c')]),
+    ]);
 
     expect(podPackage.allTypes.first is PodEnum, true);
     expect(podPackage.allTypes.first.typeName, 'color');
