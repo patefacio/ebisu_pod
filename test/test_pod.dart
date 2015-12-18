@@ -28,6 +28,7 @@ main([List<String> args]) {
   test('fields carry type info', () {
     final e = enum_('color', ['red', 'white', 'blue']);
     expect(field('field', e).podType is PodEnum, true);
+    expect(field('field', Char).podType, Char);
     expect(field('field', Double).podType, Double);
     expect(field('field', Str).podType, Str);
     expect(field('field', BinaryData).podType, BinaryData);

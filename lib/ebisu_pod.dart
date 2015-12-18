@@ -470,6 +470,16 @@ class PodPackage extends Entity {
   Set _allTypes;
 }
 
+class CharType extends FixedSizeType {
+  final Id id = makeId("char");
+
+  // custom <class CharType>
+  // end <class CharType>
+
+  CharType._();
+  toString() => typeName;
+}
+
 class DoubleType extends FixedSizeType {
   final Id id = makeId("double");
 
@@ -635,6 +645,7 @@ class TimestampType extends FixedSizeType {
 final Str = new StrType();
 final BinaryData = new BinaryDataType();
 
+final Char = new CharType._();
 final Double = new DoubleType._();
 final ObjectId = new ObjectIdType._();
 final Boolean = new BooleanType._();

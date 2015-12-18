@@ -202,6 +202,7 @@ They can be constructed from and represented by the common dotted form:
             ],
         ]
         ..classes.addAll([
+          'char',
           'double',
           'object_id',
           'boolean',
