@@ -1,17 +1,21 @@
-import "dart:io";
-import "package:path/path.dart" as path;
-import "package:ebisu/ebisu.dart";
-import "package:ebisu/ebisu_dart_meta.dart";
-import "package:logging/logging.dart";
+#!/usr/bin/env dart
+import 'dart:io';
+import 'package:args/args.dart';
+import 'package:ebisu/ebisu.dart';
+import 'package:ebisu/ebisu_dart_meta.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart';
+// custom <additional imports>
+// end <additional imports>
+final _logger = new Logger('ebisuPodEbisuDart');
 
-String _topDir;
-
-final _logger = new Logger('ebisu_pod');
-
-void main() {
-  Logger.root.onRecord.listen(
-      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
-  String here = path.absolute(Platform.script.toFilePath());
+main(List<String> args) {
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.level = Level.OFF;
+  useDartFormatter = true;
+  String here = absolute(Platform.script.toFilePath());
+  // custom <ebisuPodEbisuDart main>
 
   Logger.root.level = Level.OFF;
 
@@ -25,7 +29,7 @@ The goal is a simple modeling API that can then be used as inputs to
 code generators.
 ''';
 
-  _topDir = path.dirname(path.dirname(here));
+  String _topDir = dirname(dirname(here));
   useDartFormatter = true;
   System ebisu = system('ebisu_pod')
     ..includesHop = true
@@ -256,7 +260,7 @@ toString() => typeName;
         ..imports = ['package:ebisu_pod/ebisu_pod.dart']
         ..includesLogger = true
         ..includesMain = true
-        ..path = path.join(_topDir, 'lib/example'),
+        ..path = join(_topDir, 'lib/example'),
     ];
 
   ebisu.generate();
@@ -265,4 +269,10 @@ toString() => typeName;
 **** NON GENERATED FILES ****
 ${indentBlock(brCompact(nonGeneratedFiles))}
 ''');
+
+  // end <ebisuPodEbisuDart main>
 }
+
+// custom <ebisuPodEbisuDart global>
+// end <ebisuPodEbisuDart global>
+
