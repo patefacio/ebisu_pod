@@ -2,7 +2,7 @@
 
   *Pre-Alpha*
 
-[![Build Status](https://drone.io/github.com/patefacio/ebisu_pod/status.png)](https://drone.io/github.com/patefacio/ebisu_pod/latest)
+![Build Status](https://travis-ci.org/patefacio/ebisu_pod.svg)
 
 Dart modeling for *Plain Old Data*
 
