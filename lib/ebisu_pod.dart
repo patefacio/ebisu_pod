@@ -26,8 +26,8 @@ const PropertyType fieldProperty = PropertyType.fieldProperty;
 const PropertyType packageProperty = PropertyType.packageProperty;
 
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
-class PropertyId {
-  bool operator ==(PropertyId other) =>
+class PropertyDefinition {
+  bool operator ==(PropertyDefinition other) =>
       identical(this, other) ||
       _id == other._id &&
           _propertyType == other._propertyType &&
@@ -41,22 +41,22 @@ class PropertyId {
   /// Id associated with property
   Id get id => _id;
 
-  /// What this [PropertyId] is associated with: [PodType], [PodField] or [PodPackage]
+  /// What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]
   PropertyType get propertyType => _propertyType;
 
-  /// Documentation for the [PropertyId]/[Property].
+  /// Documentation for the [PropertyDefinition]/[Property].
   String get doc => _doc;
 
-  /// The default value for a [Property] associated with *this* [PropertyId]
+  /// The default value for a [Property] associated with *this* [PropertyDefinition]
   dynamic get defaultValue => _defaultValue;
 
-  /// Predicate to determine of [Property] identified by [PropertyId] is valid
+  /// Predicate to determine of [Property] identified by [PropertyDefinition] is valid
   PropertyValueValidPredicate get isValueValidPredicate =>
       _isValueValidPredicate;
 
-  // custom <class PropertyId>
+  // custom <class PropertyDefinition>
 
-  PropertyId(dynamic id, this._propertyType, String thisDoc,
+  PropertyDefinition(dynamic id, this._propertyType, String thisDoc,
       {dynamic defaultValue,
       PropertyValueValidPredicate isValueValidPredicate: allPropertiesValid})
       : this._id = makeId(id),
@@ -64,17 +64,15 @@ class PropertyId {
         _isValueValidPredicate = isValueValidPredicate;
 
   bool isValueValid(dynamic value) =>
-    _isValueValidPredicate == null? true : _isValueValidPredicate(value);
+      _isValueValidPredicate == null ? true : _isValueValidPredicate(value);
 
   toString() => brCompact([
-    'PropertyId(${_id.snake}:$propertyType)',
-    indentBlock(brCompact(
-            ['----- defaultValue ----',
-              defaultValue,
-              '---- doc ----',
-              doc]))]);
+        'PropertyDefinition(${_id.snake}:$propertyType)',
+        indentBlock(brCompact(
+            ['----- defaultValue ----', defaultValue, '---- doc ----', doc]))
+      ]);
 
-  // end <class PropertyId>
+  // end <class PropertyDefinition>
 
   Id _id;
   PropertyType _propertyType;
@@ -87,23 +85,24 @@ class PropertyId {
 class Property {
   bool operator ==(Property other) =>
       identical(this, other) ||
-      _propertyId == other._propertyId && _value == other._value;
+      _propertyDefinition == other._propertyDefinition &&
+          _value == other._value;
 
-  int get hashCode => hash2(_propertyId, _value);
+  int get hashCode => hash2(_propertyDefinition, _value);
 
-  /// Reference [PropertyId] for this property
-  PropertyId get propertyId => _propertyId;
+  /// Reference [PropertyDefinition] for this property
+  PropertyDefinition get propertyDefinition => _propertyDefinition;
 
   /// Value of the property
   dynamic get value => _value;
 
   // custom <class Property>
 
-  Property(this._propertyId, this._value);
+  Property(this._propertyDefinition, this._value);
 
   // end <class Property>
 
-  PropertyId _propertyId;
+  PropertyDefinition _propertyDefinition;
   dynamic _value;
 }
 
@@ -111,17 +110,18 @@ class Property {
 class PropertySet {
   // custom <class PropertySet>
 
-  addProperty(PropertyId propertyId, dynamic value) {
-    if (!propertyId.isValueValid(value)) {
+  addProperty(PropertyDefinition propertyDefinition, dynamic value) {
+    if (!propertyDefinition.isValueValid(value)) {
       throw new ArgumentError(
-          'Failed value: $value is invalid for $propertyId');
+          'Failed value: $value is invalid for $propertyDefinition');
     }
-    _properties.add(new Property(propertyId, value));
+    _properties.add(new Property(propertyDefinition, value));
   }
 
   getPropertyValue(property) {
-    final propertyId = makeId(property);
-    final prop = _properties.firstWhere((prop) => prop.propertyId.id == propertyId,
+    final propertyDefinition = makeId(property);
+    final prop = _properties.firstWhere(
+        (prop) => prop.propertyDefinition.id == propertyDefinition,
         orElse: () => null);
     if (prop != null) {
       return prop.value;
@@ -135,17 +135,14 @@ class PropertySet {
 }
 
 /// A collection of properties that may be associated with elements in a [PodPackage]
-class PackagePropertyIdSet {
-  /// Set of [PropertyId]s
-  Set<PropertyId> get propertyIds => _propertyIds;
+class PackagePropertyDefinintionSet {
+  /// Set of [PropertyDefinition]s
+  Set<PropertyDefinition> get propertyDefinitions => _propertyDefinitions;
 
-  // custom <class PackagePropertyIdSet>
+  // custom <class PackagePropertyDefinintionSet>
+  // end <class PackagePropertyDefinintionSet>
 
-  addPropertyId(PropertyId propertyId) => _propertyIds.add(propertyId);
-
-  // end <class PackagePropertyIdSet>
-
-  Set<PropertyId> _propertyIds = new Set();
+  Set<PropertyDefinition> _propertyDefinitions = new Set();
 }
 
 /// Base class for all [PodType]s
@@ -170,14 +167,14 @@ class PodType {
 class PodUserDefinedType extends PodType {
   // custom <class PodUserDefinedType>
 
-  setProperty(PropertyId propertyId, dynamic value) {
-    if (propertyId.propertyType != typeProperty) {
+  setProperty(PropertyDefinition propertyDefinition, dynamic value) {
+    if (propertyDefinition.propertyType != typeProperty) {
       throw new ArgumentError('''
 Properties assigned to user defined types must be associated with *typeProperty*.
-Failed trying to set value ($value) to $propertyId
+Failed trying to set value ($value) to $propertyDefinition
 ''');
     }
-    _propertySet.addProperty(propertyId, value);
+    _propertySet.addProperty(propertyDefinition, value);
   }
 
   getPropertyValue(property) => _propertySet.getPropertyValue(property);
@@ -877,34 +874,34 @@ _makeValidPath(path) => path.map(_makeValidIdPart).toList();
 typedef bool PropertyRequiredPredicate(Property);
 typedef bool PropertyValueValidPredicate(dynamic value);
 
-bool allPropertiesValid(PropertyId id, Property) => true;
+bool allPropertiesValid(PropertyDefinition id, Property) => true;
 
-bool propertyValueRequired(PropertyId id, Property property) =>
+bool propertyValueRequired(PropertyDefinition id, Property property) =>
     property != null &&
     (id.defaultValue == null ||
         (id.defaultValue.runtimeType == property.value.runtimeType));
 
-PropertyId defineTypeProperty(id, String doc,
+PropertyDefinition defineTypeProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyId(id, typeProperty, doc,
+    new PropertyDefinition(id, typeProperty, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 
-PropertyId defineFieldProperty(id, String doc,
+PropertyDefinition defineFieldProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyId(id, fieldProperty, doc,
+    new PropertyDefinition(id, fieldProperty, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 
-PropertyId definePackageProperty(id, String doc,
+PropertyDefinition definePackageProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyId(id, packageProperty, doc,
+    new PropertyDefinition(id, packageProperty, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 

@@ -57,7 +57,7 @@ code generators.
           ..hasLibraryScopedValues = true
         ]
         ..classes = [
-          class_('property_id')
+          class_('property_definition')
             ..doc =
                 'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'
             ..defaultMemberAccess = RO
@@ -69,17 +69,17 @@ code generators.
               ..type = 'Id',
               member('property_type')
                 ..doc =
-                    'What this [PropertyId] is associated with: [PodType], [PodField] or [PodPackage]'
+                    'What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]'
                 ..type = 'PropertyType',
               member('doc')
-                ..doc = 'Documentation for the [PropertyId]/[Property].',
+                ..doc = 'Documentation for the [PropertyDefinition]/[Property].',
               member('default_value')
                 ..doc =
-                    'The default value for a [Property] associated with *this* [PropertyId]'
+                    'The default value for a [Property] associated with *this* [PropertyDefinition]'
                 ..type = 'dynamic',
               member('is_value_valid_predicate')
                 ..doc =
-                    'Predicate to determine of [Property] identified by [PropertyId] is valid'
+                    'Predicate to determine of [Property] identified by [PropertyDefinition] is valid'
                 ..type = 'PropertyValueValidPredicate',
             ],
           class_('property')
@@ -87,10 +87,10 @@ code generators.
                 'A property associated with a [PodType], [PodField] or [PodPackage]'
             ..hasOpEquals = true
             ..members = [
-              member('property_id')
-                ..doc = 'Reference [PropertyId] for this property'
+              member('property_definition')
+                ..doc = 'Reference [PropertyDefinition] for this property'
                 ..access = RO
-                ..type = 'PropertyId',
+                ..type = 'PropertyDefinition',
               member('value')
                 ..doc = 'Value of the property'
                 ..access = RO
@@ -105,13 +105,13 @@ code generators.
                 ..access = IA
                 ..classInit = 'new Set<Property>()'
             ],
-          class_('package_property_id_set')
+          class_('package_property_definintion_set')
             ..doc =
                 'A collection of properties that may be associated with elements in a [PodPackage]'
             ..members = [
-              member('property_ids')
-                ..doc = 'Set of [PropertyId]s'
-                ..type = 'Set<PropertyId>'
+              member('property_definitions')
+                ..doc = 'Set of [PropertyDefinition]s'
+                ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',
             ],
