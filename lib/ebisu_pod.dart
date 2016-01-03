@@ -11,6 +11,144 @@ import 'package:quiver/core.dart';
 
 final _logger = new Logger('ebisu_pod');
 
+enum PropertyType { typeProperty, fieldProperty, packageProperty }
+
+/// Convenient access to PropertyType.typeProperty with *typeProperty* see [PropertyType].
+///
+const PropertyType typeProperty = PropertyType.typeProperty;
+
+/// Convenient access to PropertyType.fieldProperty with *fieldProperty* see [PropertyType].
+///
+const PropertyType fieldProperty = PropertyType.fieldProperty;
+
+/// Convenient access to PropertyType.packageProperty with *packageProperty* see [PropertyType].
+///
+const PropertyType packageProperty = PropertyType.packageProperty;
+
+/// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
+class PropertyId {
+  bool operator ==(PropertyId other) =>
+      identical(this, other) ||
+      _id == other._id &&
+          _propertyType == other._propertyType &&
+          _doc == other._doc &&
+          _defaultValue == other._defaultValue &&
+          _isValueValidPredicate == other._isValueValidPredicate;
+
+  int get hashCode => hashObjects(
+      [_id, _propertyType, _doc, _defaultValue, _isValueValidPredicate]);
+
+  /// Id associated with property
+  Id get id => _id;
+
+  /// What this [PropertyId] is associated with: [PodType], [PodField] or [PodPackage]
+  PropertyType get propertyType => _propertyType;
+
+  /// Documentation for the [PropertyId]/[Property].
+  String get doc => _doc;
+
+  /// The default value for a [Property] associated with *this* [PropertyId]
+  dynamic get defaultValue => _defaultValue;
+
+  /// Predicate to determine of [Property] identified by [PropertyId] is valid
+  PropertyValueValidPredicate get isValueValidPredicate =>
+      _isValueValidPredicate;
+
+  // custom <class PropertyId>
+
+  PropertyId(dynamic id, this._propertyType, String thisDoc,
+      {dynamic defaultValue,
+      PropertyValueValidPredicate isValueValidPredicate: allPropertiesValid})
+      : this._id = makeId(id),
+        _defaultValue = defaultValue,
+        _isValueValidPredicate = isValueValidPredicate;
+
+  bool isValueValid(dynamic value) =>
+    _isValueValidPredicate == null? true : _isValueValidPredicate(value);
+
+  toString() => brCompact([
+    'PropertyId(${_id.snake}:$propertyType)',
+    indentBlock(brCompact(
+            ['----- defaultValue ----',
+              defaultValue,
+              '---- doc ----',
+              doc]))]);
+
+  // end <class PropertyId>
+
+  Id _id;
+  PropertyType _propertyType;
+  String _doc;
+  dynamic _defaultValue;
+  PropertyValueValidPredicate _isValueValidPredicate;
+}
+
+/// A property associated with a [PodType], [PodField] or [PodPackage]
+class Property {
+  bool operator ==(Property other) =>
+      identical(this, other) ||
+      _propertyId == other._propertyId && _value == other._value;
+
+  int get hashCode => hash2(_propertyId, _value);
+
+  /// Reference [PropertyId] for this property
+  PropertyId get propertyId => _propertyId;
+
+  /// Value of the property
+  dynamic get value => _value;
+
+  // custom <class Property>
+
+  Property(this._propertyId, this._value);
+
+  // end <class Property>
+
+  PropertyId _propertyId;
+  dynamic _value;
+}
+
+/// A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]
+class PropertySet {
+  // custom <class PropertySet>
+
+  addProperty(PropertyId propertyId, dynamic value) {
+    if (!propertyId.isValueValid(value)) {
+      throw new ArgumentError(
+          'Failed value: $value is invalid for $propertyId');
+    }
+    _properties.add(new Property(propertyId, value));
+  }
+
+  getPropertyValue(property) {
+    final propertyId = makeId(property);
+    final prop = _properties.firstWhere((prop) => prop.propertyId.id == propertyId,
+        orElse: () => null);
+    if (prop != null) {
+      return prop.value;
+    }
+    return null;
+  }
+
+  // end <class PropertySet>
+
+  Set<Property> _properties = new Set<Property>();
+}
+
+/// A collection of properties that may be associated with elements in a [PodPackage]
+class PackagePropertyIdSet {
+  /// Set of [PropertyId]s
+  Set<PropertyId> get propertyIds => _propertyIds;
+
+  // custom <class PackagePropertyIdSet>
+
+  addPropertyId(PropertyId propertyId) => _propertyIds.add(propertyId);
+
+  // end <class PackagePropertyIdSet>
+
+  Set<PropertyId> _propertyIds = new Set();
+}
+
+/// Base class for all [PodType]s
 class PodType {
   // custom <class PodType>
 
@@ -28,7 +166,30 @@ class PodType {
 
 }
 
-class PodEnum extends PodType {
+/// Base class for user defined types
+class PodUserDefinedType extends PodType {
+  // custom <class PodUserDefinedType>
+
+  setProperty(PropertyId propertyId, dynamic value) {
+    if (propertyId.propertyType != typeProperty) {
+      throw new ArgumentError('''
+Properties assigned to user defined types must be associated with *typeProperty*.
+Failed trying to set value ($value) to $propertyId
+''');
+    }
+    _propertySet.addProperty(propertyId, value);
+  }
+
+  getPropertyValue(property) => _propertySet.getPropertyValue(property);
+
+  // end <class PodUserDefinedType>
+
+  /// Any properties associated with this type
+  PropertySet _propertySet = new PropertySet();
+}
+
+/// Represents an enumeration
+class PodEnum extends PodUserDefinedType {
   bool operator ==(PodEnum other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -62,6 +223,7 @@ class PodEnum extends PodType {
   Id _id;
 }
 
+/// Base class for [PodType]s that may have a fixed size specified
 class FixedSizeType extends PodType {
   // custom <class FixedSizeType>
   // end <class FixedSizeType>
@@ -125,6 +287,7 @@ class BinaryDataType extends VariableSizeType {
   static Map<int, BinaryData> _typeCache = new Map<int, BinaryData>();
 }
 
+/// A [PodType] that is an array of some [referencedType].
 class PodArrayType extends VariableSizeType {
   bool operator ==(PodArrayType other) =>
       identical(this, other) ||
@@ -189,25 +352,28 @@ class PodTypeRef extends PodType {
   PodType _resolvedType;
 }
 
+/// A field, which is a named and type entry, in a [PodObject]
 class PodField {
   bool operator ==(PodField other) =>
       identical(this, other) ||
       _id == other._id &&
+          doc == other.doc &&
           isIndex == other.isIndex &&
           _podType == other._podType &&
           defaultValue == other.defaultValue &&
-          doc == other.doc;
+          _propertySet == other._propertySet;
 
-  int get hashCode => hash4(_id, isIndex, defaultValue, doc);
+  int get hashCode =>
+      hashObjects([_id, doc, isIndex, defaultValue, _propertySet]);
 
   Id get id => _id;
+
+  /// Documentation for the field
+  String doc;
 
   /// If true the field is defined as index
   bool isIndex = false;
   dynamic defaultValue;
-
-  /// Documentation for the field
-  String doc;
 
   // custom <class PodField>
 
@@ -244,9 +410,12 @@ class PodField {
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
   dynamic _podType;
+
+  /// Any properties associated with this type
+  String _propertySet = 'new PropertySet()';
 }
 
-class PodObject extends PodType {
+class PodObject extends PodUserDefinedType {
   bool operator ==(PodObject other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -468,6 +637,9 @@ class PodPackage extends Entity {
 
   /// All types within the package including *anonymous* types
   Set _allTypes;
+
+  /// Any properties associated with this type
+  PropertySet _propertySet = new PropertySet();
 }
 
 class CharType extends FixedSizeType {
@@ -701,5 +873,39 @@ PodPackage package(packageName, {imports, namedTypes}) =>
 
 _makeValidIdPart(part) => makeId(part);
 _makeValidPath(path) => path.map(_makeValidIdPart).toList();
+
+typedef bool PropertyRequiredPredicate(Property);
+typedef bool PropertyValueValidPredicate(dynamic value);
+
+bool allPropertiesValid(PropertyId id, Property) => true;
+
+bool propertyValueRequired(PropertyId id, Property property) =>
+    property != null &&
+    (id.defaultValue == null ||
+        (id.defaultValue.runtimeType == property.value.runtimeType));
+
+PropertyId defineTypeProperty(id, String doc,
+        {dynamic defaultValue,
+        PropertyValueValidPredicate isValueValidPredicate:
+            allPropertiesValid}) =>
+    new PropertyId(id, typeProperty, doc,
+        defaultValue: defaultValue,
+        isValueValidPredicate: isValueValidPredicate);
+
+PropertyId defineFieldProperty(id, String doc,
+        {dynamic defaultValue,
+        PropertyValueValidPredicate isValueValidPredicate:
+            allPropertiesValid}) =>
+    new PropertyId(id, fieldProperty, doc,
+        defaultValue: defaultValue,
+        isValueValidPredicate: isValueValidPredicate);
+
+PropertyId definePackageProperty(id, String doc,
+        {dynamic defaultValue,
+        PropertyValueValidPredicate isValueValidPredicate:
+            allPropertiesValid}) =>
+    new PropertyId(id, packageProperty, doc,
+        defaultValue: defaultValue,
+        isValueValidPredicate: isValueValidPredicate);
 
 // end <library ebisu_pod>

@@ -5,13 +5,14 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen(
+      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -44,16 +45,94 @@ code generators.
       library('test_package'),
       library('test_example'),
       library('test_pod_cpp_mapper'),
+      library('test_properties'),
     ]
     ..libraries = [
       library('ebisu_pod')
         ..includesLogger = true
         ..imports = ['package:ebisu/ebisu.dart', 'package:id/id.dart',]
-        ..enums = []
+        ..enums = [
+          enum_('property_type')
+            ..values = ['type_property', 'field_property', 'package_property']
+          ..hasLibraryScopedValues = true
+        ]
         ..classes = [
-          class_('pod_type')..members = [],
+          class_('property_id')
+            ..doc =
+                'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'
+            ..defaultMemberAccess = RO
+            ..hasOpEquals = true
+            ..members = [
+              member('id')
+              ..doc = 'Id associated with property'
+              ..access = RO
+              ..type = 'Id',
+              member('property_type')
+                ..doc =
+                    'What this [PropertyId] is associated with: [PodType], [PodField] or [PodPackage]'
+                ..type = 'PropertyType',
+              member('doc')
+                ..doc = 'Documentation for the [PropertyId]/[Property].',
+              member('default_value')
+                ..doc =
+                    'The default value for a [Property] associated with *this* [PropertyId]'
+                ..type = 'dynamic',
+              member('is_value_valid_predicate')
+                ..doc =
+                    'Predicate to determine of [Property] identified by [PropertyId] is valid'
+                ..type = 'PropertyValueValidPredicate',
+            ],
+          class_('property')
+            ..doc =
+                'A property associated with a [PodType], [PodField] or [PodPackage]'
+            ..hasOpEquals = true
+            ..members = [
+              member('property_id')
+                ..doc = 'Reference [PropertyId] for this property'
+                ..access = RO
+                ..type = 'PropertyId',
+              member('value')
+                ..doc = 'Value of the property'
+                ..access = RO
+                ..type = 'dynamic',
+            ],
+          class_('property_set')
+            ..doc =
+                'A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]'
+            ..members = [
+              member('properties')
+                ..type = 'Set<Property>'
+                ..access = IA
+                ..classInit = 'new Set<Property>()'
+            ],
+          class_('package_property_id_set')
+            ..doc =
+                'A collection of properties that may be associated with elements in a [PodPackage]'
+            ..members = [
+              member('property_ids')
+                ..doc = 'Set of [PropertyId]s'
+                ..type = 'Set<PropertyId>'
+                ..access = RO
+                ..classInit = 'new Set()',
+            ],
+          class_('pod_type')
+            ..doc = 'Base class for all [PodType]s'
+            ..members = [
+            ],
+          class_('pod_user_defined_type')
+          ..extend = 'PodType'
+          ..doc = 'Base class for user defined types'
+          ..members = [
+              member('property_set')
+                ..doc = 'Any properties associated with this type'
+                ..access = IA
+                ..type = 'PropertySet'
+                ..classInit = 'new PropertySet()',
+          ],
+
           class_('pod_enum')
-            ..extend = 'PodType'
+            ..doc = 'Represents an enumeration'
+            ..extend = 'PodUserDefinedType'
             ..hasOpEquals = true
             ..members = [
               member('id')
@@ -65,6 +144,8 @@ code generators.
               member('doc')..doc = 'Documentation for the enum',
             ],
           class_('fixed_size_type')
+            ..doc =
+                'Base class for [PodType]s that may have a fixed size specified'
             ..extend = 'PodType'
             ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
           class_('variable_size_type')
@@ -109,6 +190,7 @@ by allocating space for strings inline.
                 ..classInit = 'new Map<int, BinaryData>()',
             ],
           class_('pod_array_type')
+            ..doc = 'A [PodType] that is an array of some [referencedType].'
             ..extend = 'VariableSizeType'
             ..hasOpEquals = true
             ..members = [
@@ -116,9 +198,9 @@ by allocating space for strings inline.
               member('doc')..doc = 'Documentation for the array',
             ],
           class_('pod_type_ref')
-            ..extend = 'PodType'
             ..doc =
                 'Combination of owning package name and name of a type within it'
+            ..extend = 'PodType'
             ..hasOpEquals = true
             ..defaultMemberAccess = RO
             ..members = [
@@ -129,11 +211,13 @@ by allocating space for strings inline.
               member('resolved_type')..type = 'PodType',
             ],
           class_('pod_field')
+            ..doc = 'A field, which is a named and type entry, in a [PodObject]'
             ..hasOpEquals = true
             ..members = [
               member('id')
                 ..type = 'Id'
                 ..access = RO,
+              member('doc')..doc = 'Documentation for the field',
               member('is_index')
                 ..doc = 'If true the field is defined as index'
                 ..classInit = false,
@@ -148,10 +232,13 @@ If it is a String it is converted to a PodTypeRef
                 ..isInHashCode = false
                 ..access = IA,
               member('default_value')..type = 'dynamic',
-              member('doc')..doc = 'Documentation for the field',
+              member('property_set')
+                ..doc = 'Any properties associated with this type'
+                ..access = IA
+                ..classInit = 'new PropertySet()',
             ],
           class_('pod_object')
-            ..extend = 'PodType'
+            ..extend = 'PodUserDefinedType'
             ..hasOpEquals = true
             ..members = [
               member('id')
@@ -203,6 +290,11 @@ They can be constructed from and represented by the common dotted form:
                     'All types within the package including *anonymous* types'
                 ..type = 'Set'
                 ..access = IA,
+              member('property_set')
+                ..doc = 'Any properties associated with this type'
+                ..access = IA
+                ..type = 'PropertySet'
+                ..classInit = 'new PropertySet()',
             ],
         ]
         ..classes.addAll([
@@ -225,7 +317,12 @@ They can be constructed from and represented by the common dotted form:
           'timestamp'
         ].map((var t) => class_('${t}_type')
           ..extend = 'FixedSizeType'
-            ..members = [ member('id')..type = 'Id'..classInit = 'makeId("$t")'..isFinal = true ]
+          ..members = [
+            member('id')
+              ..type = 'Id'
+              ..classInit = 'makeId("$t")'
+              ..isFinal = true
+          ]
           ..withClass((c) => c.customCodeBlock.snippets.add('''
 ${c.name}._();
 toString() => typeName;
@@ -275,4 +372,3 @@ ${indentBlock(brCompact(nonGeneratedFiles))}
 
 // custom <ebisuPodEbisuDart global>
 // end <ebisuPodEbisuDart global>
-
