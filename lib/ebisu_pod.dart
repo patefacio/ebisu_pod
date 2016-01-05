@@ -652,6 +652,16 @@ class PodPackage extends Entity with PropertySet {
     }
   }
 
+  setProperty(PropertyDefinition propertyDefinition, dynamic value) {
+    if (propertyDefinition.propertyType != packageProperty) {
+      throw new ArgumentError('''
+Properties assigned to PodPackage must be associated with *packageProperty*.
+Failed trying to set value ($value) to $propertyDefinition
+''');
+    }
+    super.setProperty(propertyDefinition, value);
+  }
+
   // end <class PodPackage>
 
   PackageName _name;

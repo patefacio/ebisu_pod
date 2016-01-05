@@ -31,6 +31,10 @@ main([List<String> args]) {
       'serializable', 'indicates type is serializable',
       isValueValidPredicate: (Color value) => true);
 
+  final packageProperty = definePackageProperty(
+      'serializable', 'indicates type is serializable',
+      isValueValidPredicate: (Color value) => true);
+
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
       final t = object('o')..setProperty(udtProperty, Color.blue);
@@ -54,6 +58,19 @@ main([List<String> args]) {
           throwsArgumentError);
     });
   });
+
+  group('package properties', () {
+    test('basic setProperty on package', () {
+      final t = package('p')..setProperty(packageProperty, Color.blue);
+      expect(t.getPropertyValue('serializable'), Color.blue);
+    });
+
+    test('setProperty throws on type mismatch', () {
+      expect(() => package('p')..setProperty(udtProperty, Color.blue),
+          throwsArgumentError);
+    });
+  });
+
 
 // end <main>
 }
