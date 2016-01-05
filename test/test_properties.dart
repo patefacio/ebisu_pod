@@ -27,18 +27,30 @@ main([List<String> args]) {
       'serializable', 'indicates type is serializable',
       isValueValidPredicate: (Color value) => true);
 
-  final typeProperty = defineTypeProperty(
+  final udtProperty = defineUdtProperty(
       'serializable', 'indicates type is serializable',
       isValueValidPredicate: (Color value) => true);
 
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
-      final t = object('o')..setProperty(typeProperty, Color.blue);
+      final t = object('o')..setProperty(udtProperty, Color.blue);
       expect(t.getPropertyValue('serializable'), Color.blue);
     });
 
     test('setProperty throws on type mismatch', () {
       expect(() => object('o')..setProperty(fieldProperty, Color.blue),
+          throwsArgumentError);
+    });
+  });
+
+  group('field type properties', () {
+    test('basic setProperty on field', () {
+      final t = field('f', Str)..setProperty(fieldProperty, Color.blue);
+      expect(t.getPropertyValue('serializable'), Color.blue);
+    });
+
+    test('setProperty throws on type mismatch', () {
+      expect(() => field('o', Str)..setProperty(udtProperty, Color.blue),
           throwsArgumentError);
     });
   });

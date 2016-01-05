@@ -11,17 +11,32 @@ import 'package:quiver/core.dart';
 
 final _logger = new Logger('ebisu_pod');
 
-enum PropertyType { typeProperty, fieldProperty, packageProperty }
+enum PropertyType {
+  /// Property for annotating UDTs ([PodEnum] and [PodObject])
+  udtProperty,
 
-/// Convenient access to PropertyType.typeProperty with *typeProperty* see [PropertyType].
+  /// Property for annotating [PodField]
+  fieldProperty,
+
+  /// Property for annotating [PodPackage]
+  packageProperty
+}
+
+/// Convenient access to PropertyType.udtProperty with *udtProperty* see [PropertyType].
 ///
-const PropertyType typeProperty = PropertyType.typeProperty;
+/// Property for annotating UDTs ([PodEnum] and [PodObject])
+///
+const PropertyType udtProperty = PropertyType.udtProperty;
 
 /// Convenient access to PropertyType.fieldProperty with *fieldProperty* see [PropertyType].
+///
+/// Property for annotating [PodField]
 ///
 const PropertyType fieldProperty = PropertyType.fieldProperty;
 
 /// Convenient access to PropertyType.packageProperty with *packageProperty* see [PropertyType].
+///
+/// Property for annotating [PodPackage]
 ///
 const PropertyType packageProperty = PropertyType.packageProperty;
 
@@ -110,7 +125,7 @@ class Property {
 class PropertySet {
   // custom <class PropertySet>
 
-  addProperty(PropertyDefinition propertyDefinition, dynamic value) {
+  setProperty(PropertyDefinition propertyDefinition, dynamic value) {
     if (!propertyDefinition.isValueValid(value)) {
       throw new ArgumentError(
           'Failed value: $value is invalid for $propertyDefinition');
@@ -164,25 +179,21 @@ class PodType {
 }
 
 /// Base class for user defined types
-class PodUserDefinedType extends PodType {
+class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
-    if (propertyDefinition.propertyType != typeProperty) {
+    if (propertyDefinition.propertyType != udtProperty) {
       throw new ArgumentError('''
-Properties assigned to user defined types must be associated with *typeProperty*.
+Properties assigned to user defined types must be associated with *udtProperty*.
 Failed trying to set value ($value) to $propertyDefinition
 ''');
     }
-    _propertySet.addProperty(propertyDefinition, value);
+    super.setProperty(propertyDefinition, value);
   }
-
-  getPropertyValue(property) => _propertySet.getPropertyValue(property);
 
   // end <class PodUserDefinedType>
 
-  /// Any properties associated with this type
-  PropertySet _propertySet = new PropertySet();
 }
 
 /// Represents an enumeration
@@ -350,7 +361,7 @@ class PodTypeRef extends PodType {
 }
 
 /// A field, which is a named and type entry, in a [PodObject]
-class PodField {
+class PodField extends Object with PropertySet {
   bool operator ==(PodField other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -394,9 +405,24 @@ class PodField {
         indentBlock(blockComment(doc))
       ]);
 
+  /// Returns true if the type is fixed size
   bool get isFixedSize => podType.isFixedSize;
+
+  /// Returns name of [PodField] in *snake_case*
   String get name => _id.snake;
+
+  /// Returns type of [PodField]
   String get typeName => podType.typeName;
+
+  setProperty(PropertyDefinition propertyDefinition, dynamic value) {
+    if (propertyDefinition.propertyType != fieldProperty) {
+      throw new ArgumentError('''
+Properties assigned to a PodField must be associated with *fieldProperty*.
+Failed trying to set value ($value) to $propertyDefinition
+''');
+    }
+    super.setProperty(propertyDefinition, value);
+  }
 
   // end <class PodField>
 
@@ -497,7 +523,7 @@ class PackageName {
 }
 
 /// Package structure to support organization of pod definitions
-class PodPackage extends Entity {
+class PodPackage extends Entity with PropertySet {
   /// Name of package
   PackageName get name => _name;
 
@@ -881,11 +907,11 @@ bool propertyValueRequired(PropertyDefinition id, Property property) =>
     (id.defaultValue == null ||
         (id.defaultValue.runtimeType == property.value.runtimeType));
 
-PropertyDefinition defineTypeProperty(id, String doc,
+PropertyDefinition defineUdtProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyDefinition(id, typeProperty, doc,
+    new PropertyDefinition(id, udtProperty, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 

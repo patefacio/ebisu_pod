@@ -5,14 +5,13 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
-
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen(
-      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -53,7 +52,14 @@ code generators.
         ..imports = ['package:ebisu/ebisu.dart', 'package:id/id.dart',]
         ..enums = [
           enum_('property_type')
-            ..values = ['type_property', 'field_property', 'package_property']
+            ..values = [
+              enumValue('udt_property')
+              ..doc = 'Property for annotating UDTs ([PodEnum] and [PodObject])',
+              enumValue('field_property')
+              ..doc = 'Property for annotating [PodField]',
+              enumValue('package_property')
+              ..doc = 'Property for annotating [PodPackage]',
+            ]
           ..hasLibraryScopedValues = true
         ]
         ..classes = [
@@ -119,15 +125,12 @@ code generators.
             ..doc = 'Base class for all [PodType]s'
             ..members = [
             ],
+
           class_('pod_user_defined_type')
           ..extend = 'PodType'
           ..doc = 'Base class for user defined types'
+          ..mixins = [ 'PropertySet' ]
           ..members = [
-              member('property_set')
-                ..doc = 'Any properties associated with this type'
-                ..access = IA
-                ..type = 'PropertySet'
-                ..classInit = 'new PropertySet()',
           ],
 
           class_('pod_enum')
@@ -212,6 +215,7 @@ by allocating space for strings inline.
             ],
           class_('pod_field')
             ..doc = 'A field, which is a named and type entry, in a [PodObject]'
+            ..mixins = [ 'PropertySet' ]
             ..hasOpEquals = true
             ..members = [
               member('id')
@@ -270,6 +274,7 @@ They can be constructed from and represented by the common dotted form:
             ..doc =
                 'Package structure to support organization of pod definitions'
             ..extend = 'Entity'
+            ..mixins = [ 'PropertySet' ]
             ..defaultMemberAccess = RO
             ..members = [
               member('name')
