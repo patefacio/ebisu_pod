@@ -71,6 +71,11 @@ main([List<String> args]) {
     });
   });
 
+  group('as literal', () {
+    test('property definition', () {
+      print(udtProperty.asLiteral);
+    });
+  });
 
 // end <main>
 }

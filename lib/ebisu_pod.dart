@@ -11,37 +11,76 @@ import 'package:quiver/core.dart';
 
 final _logger = new Logger('ebisu_pod');
 
-enum PropertyType {
-  /// Property for annotating UDTs ([PodEnum] and [PodObject])
-  udtProperty,
+class PropertyType implements Comparable<PropertyType> {
+  static const UDT_PROPERTY = const PropertyType._(0);
+  static const FIELD_PROPERTY = const PropertyType._(1);
+  static const PACKAGE_PROPERTY = const PropertyType._(2);
 
-  /// Property for annotating [PodField]
-  fieldProperty,
+  static get values => [UDT_PROPERTY, FIELD_PROPERTY, PACKAGE_PROPERTY];
 
-  /// Property for annotating [PodPackage]
-  packageProperty
+  final int value;
+
+  int get hashCode => value;
+
+  const PropertyType._(this.value);
+
+  copy() => this;
+
+  int compareTo(PropertyType other) => value.compareTo(other.value);
+
+  String toString() {
+    switch (this) {
+      case UDT_PROPERTY:
+        return "UDT_PROPERTY";
+      case FIELD_PROPERTY:
+        return "FIELD_PROPERTY";
+      case PACKAGE_PROPERTY:
+        return "PACKAGE_PROPERTY";
+    }
+    return null;
+  }
+
+  static PropertyType fromString(String s) {
+    if (s == null) return null;
+    switch (s) {
+      case "UDT_PROPERTY":
+        return UDT_PROPERTY;
+      case "FIELD_PROPERTY":
+        return FIELD_PROPERTY;
+      case "PACKAGE_PROPERTY":
+        return PACKAGE_PROPERTY;
+      default:
+        return null;
+    }
+  }
 }
 
-/// Convenient access to PropertyType.udtProperty with *udtProperty* see [PropertyType].
+/// Convenient access to PropertyType.UDT_PROPERTY with *UDT_PROPERTY* see [PropertyType].
 ///
 /// Property for annotating UDTs ([PodEnum] and [PodObject])
 ///
-const PropertyType udtProperty = PropertyType.udtProperty;
+const PropertyType UDT_PROPERTY = PropertyType.UDT_PROPERTY;
 
-/// Convenient access to PropertyType.fieldProperty with *fieldProperty* see [PropertyType].
+/// Convenient access to PropertyType.FIELD_PROPERTY with *FIELD_PROPERTY* see [PropertyType].
 ///
 /// Property for annotating [PodField]
 ///
-const PropertyType fieldProperty = PropertyType.fieldProperty;
+const PropertyType FIELD_PROPERTY = PropertyType.FIELD_PROPERTY;
 
-/// Convenient access to PropertyType.packageProperty with *packageProperty* see [PropertyType].
+/// Convenient access to PropertyType.PACKAGE_PROPERTY with *PACKAGE_PROPERTY* see [PropertyType].
 ///
 /// Property for annotating [PodPackage]
 ///
-const PropertyType packageProperty = PropertyType.packageProperty;
+const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
+
+abstract class AsLiteral {
+  // custom <class AsLiteral>
+  // end <class AsLiteral>
+
+}
 
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
-class PropertyDefinition {
+class PropertyDefinition implements AsLiteral {
   bool operator ==(PropertyDefinition other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -86,6 +125,16 @@ class PropertyDefinition {
         indentBlock(brCompact(
             ['----- defaultValue ----', defaultValue, '---- doc ----', doc]))
       ]);
+
+  String get asLiteral => brCompact(_propertyType == UDT_PROPERTY
+      ? _defineUdtProperty
+      : _propertyType == FIELD_PROPERTY
+          ? _defineFieldProperty
+          : _definePackageProperty);
+
+  get _defineUdtProperty => 'defineUdtProperty(\'${id.snake}\',';
+  get _defineFieldProperty => 'defineFieldProperty(\'${id.snake}\',';
+  get _definePackageProperty => 'definePackageProperty(\'${id.snake}\',';
 
   // end <class PropertyDefinition>
 
@@ -183,9 +232,9 @@ class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
-    if (propertyDefinition.propertyType != udtProperty) {
+    if (propertyDefinition.propertyType != UDT_PROPERTY) {
       throw new ArgumentError('''
-Properties assigned to user defined types must be associated with *udtProperty*.
+Properties assigned to user defined types must be associated with *UDT_PROPERTY*.
 Failed trying to set value ($value) to $propertyDefinition
 ''');
     }
@@ -415,9 +464,9 @@ class PodField extends Object with PropertySet {
   String get typeName => podType.typeName;
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
-    if (propertyDefinition.propertyType != fieldProperty) {
+    if (propertyDefinition.propertyType != FIELD_PROPERTY) {
       throw new ArgumentError('''
-Properties assigned to a PodField must be associated with *fieldProperty*.
+Properties assigned to a PodField must be associated with *FIELD_PROPERTY*.
 Failed trying to set value ($value) to $propertyDefinition
 ''');
     }
@@ -523,7 +572,7 @@ class PackageName {
 }
 
 /// Package structure to support organization of pod definitions
-class PodPackage extends Entity with PropertySet {
+class PodPackage extends Entity with PropertySet implements AsLiteral {
   /// Name of package
   PackageName get name => _name;
 
@@ -653,14 +702,16 @@ class PodPackage extends Entity with PropertySet {
   }
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
-    if (propertyDefinition.propertyType != packageProperty) {
+    if (propertyDefinition.propertyType != PACKAGE_PROPERTY) {
       throw new ArgumentError('''
-Properties assigned to PodPackage must be associated with *packageProperty*.
+Properties assigned to PodPackage must be associated with *PACKAGE_PROPERTY*.
 Failed trying to set value ($value) to $propertyDefinition
 ''');
     }
     super.setProperty(propertyDefinition, value);
   }
+
+  get toLiteral {}
 
   // end <class PodPackage>
 
@@ -921,7 +972,7 @@ PropertyDefinition defineUdtProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyDefinition(id, udtProperty, doc,
+    new PropertyDefinition(id, UDT_PROPERTY, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 
@@ -929,7 +980,7 @@ PropertyDefinition defineFieldProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyDefinition(id, fieldProperty, doc,
+    new PropertyDefinition(id, FIELD_PROPERTY, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 
@@ -937,7 +988,7 @@ PropertyDefinition definePackageProperty(id, String doc,
         {dynamic defaultValue,
         PropertyValueValidPredicate isValueValidPredicate:
             allPropertiesValid}) =>
-    new PropertyDefinition(id, packageProperty, doc,
+    new PropertyDefinition(id, PACKAGE_PROPERTY, doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 

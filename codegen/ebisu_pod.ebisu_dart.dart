@@ -5,13 +5,14 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen(
+      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -54,35 +55,45 @@ code generators.
           enum_('property_type')
             ..values = [
               enumValue('udt_property')
-              ..doc = 'Property for annotating UDTs ([PodEnum] and [PodObject])',
+                ..doc =
+                    'Property for annotating UDTs ([PodEnum] and [PodObject])',
               enumValue('field_property')
-              ..doc = 'Property for annotating [PodField]',
+                ..doc = 'Property for annotating [PodField]',
+
               enumValue('package_property')
-              ..doc = 'Property for annotating [PodPackage]',
+                ..doc = 'Property for annotating [PodPackage]',
             ]
-          ..hasLibraryScopedValues = true
+            ..requiresClass = true
+            ..isSnakeString = true
+            ..hasLibraryScopedValues = true
         ]
         ..classes = [
+          class_('as_literal')..isAbstract = true,
           class_('property_definition')
             ..doc =
                 'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'
             ..defaultMemberAccess = RO
+            ..implement = ['AsLiteral']
             ..hasOpEquals = true
             ..members = [
               member('id')
-              ..doc = 'Id associated with property'
-              ..access = RO
-              ..type = 'Id',
+                ..doc = 'Id associated with property'
+                ..access = RO
+                ..type = 'Id', // Booya
               member('property_type')
                 ..doc =
                     'What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]'
                 ..type = 'PropertyType',
+
               member('doc')
-                ..doc = 'Documentation for the [PropertyDefinition]/[Property].',
+                ..doc =
+                    'Documentation for the [PropertyDefinition]/[Property].',
+
               member('default_value')
                 ..doc =
                     'The default value for a [Property] associated with *this* [PropertyDefinition]'
                 ..type = 'dynamic',
+
               member('is_value_valid_predicate')
                 ..doc =
                     'Predicate to determine of [Property] identified by [PropertyDefinition] is valid'
@@ -123,16 +134,12 @@ code generators.
             ],
           class_('pod_type')
             ..doc = 'Base class for all [PodType]s'
-            ..members = [
-            ],
-
+            ..members = [],
           class_('pod_user_defined_type')
-          ..extend = 'PodType'
-          ..doc = 'Base class for user defined types'
-          ..mixins = [ 'PropertySet' ]
-          ..members = [
-          ],
-
+            ..extend = 'PodType'
+            ..doc = 'Base class for user defined types'
+            ..mixins = ['PropertySet']
+            ..members = [],
           class_('pod_enum')
             ..doc = 'Represents an enumeration'
             ..extend = 'PodUserDefinedType'
@@ -215,7 +222,7 @@ by allocating space for strings inline.
             ],
           class_('pod_field')
             ..doc = 'A field, which is a named and type entry, in a [PodObject]'
-            ..mixins = [ 'PropertySet' ]
+            ..mixins = ['PropertySet']
             ..hasOpEquals = true
             ..members = [
               member('id')
@@ -274,7 +281,8 @@ They can be constructed from and represented by the common dotted form:
             ..doc =
                 'Package structure to support organization of pod definitions'
             ..extend = 'Entity'
-            ..mixins = [ 'PropertySet' ]
+            ..implement = ['AsLiteral']
+            ..mixins = ['PropertySet']
             ..defaultMemberAccess = RO
             ..members = [
               member('name')
