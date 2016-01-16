@@ -92,6 +92,7 @@ class PodCppMapper {
     final podTypeName = podType.typeName;
     var cppType = _cppTypeMap[podTypeName];
     if (cppType == null) {
+
       cppType = defaultNamer.nameClass(podType.id);
     }
     return cppType;

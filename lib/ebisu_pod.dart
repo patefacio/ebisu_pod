@@ -961,7 +961,7 @@ _makeValidPath(path) => path.map(_makeValidIdPart).toList();
 typedef bool PropertyRequiredPredicate(Property);
 typedef bool PropertyValueValidPredicate(dynamic value);
 
-bool allPropertiesValid(PropertyDefinition id, Property) => true;
+bool allPropertiesValid(Property) => true;
 
 bool propertyValueRequired(PropertyDefinition id, Property property) =>
     property != null &&
