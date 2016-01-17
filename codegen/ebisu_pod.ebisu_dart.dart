@@ -134,10 +134,12 @@ code generators.
             ],
           class_('pod_type')
             ..doc = 'Base class for all [PodType]s'
+            ..isAbstract = true
             ..members = [],
           class_('pod_user_defined_type')
             ..extend = 'PodType'
             ..doc = 'Base class for user defined types'
+            ..isAbstract = true
             ..mixins = ['PropertySet']
             ..members = [],
           class_('pod_enum')
@@ -157,9 +159,11 @@ code generators.
             ..doc =
                 'Base class for [PodType]s that may have a fixed size specified'
             ..extend = 'PodType'
+            ..isAbstract = true
             ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
           class_('variable_size_type')
             ..extend = 'PodType'
+            ..isAbstract = true
             ..customCodeBlock
                 .snippets
                 .add('bool get isFixedSize => maxLength != null;')
@@ -180,6 +184,9 @@ by allocating space for strings inline.
             ..extend = 'VariableSizeType'
             ..members = [
               member('doc')..doc = 'Documentation for fixed size string',
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
               member('type_cache')
                 ..doc = 'Cache of all fixed size strings'
                 ..access = IA

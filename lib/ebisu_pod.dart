@@ -210,7 +210,7 @@ class PackagePropertyDefinintionSet {
 }
 
 /// Base class for all [PodType]s
-class PodType {
+abstract class PodType {
   // custom <class PodType>
 
   PodType();
@@ -228,7 +228,7 @@ class PodType {
 }
 
 /// Base class for user defined types
-class PodUserDefinedType extends PodType with PropertySet {
+abstract class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
@@ -270,6 +270,8 @@ class PodEnum extends PodUserDefinedType {
     }
   }
 
+  bool get isFixedSize => true;
+
   toString() => chomp(brCompact([
         'PodEnum($id:[${values.join(", ")}])',
         doc == null ? null : blockComment(doc)
@@ -281,14 +283,14 @@ class PodEnum extends PodUserDefinedType {
 }
 
 /// Base class for [PodType]s that may have a fixed size specified
-class FixedSizeType extends PodType {
+abstract class FixedSizeType extends PodType {
   // custom <class FixedSizeType>
   // end <class FixedSizeType>
 
   bool get isFixedSize => true;
 }
 
-class VariableSizeType extends PodType {
+abstract class VariableSizeType extends PodType {
   VariableSizeType(this.maxLength);
 
   /// If non-0 indicates length capped to [max_length]
@@ -308,17 +310,22 @@ class VariableSizeType extends PodType {
 class StrType extends VariableSizeType {
   /// Documentation for fixed size string
   String doc;
+  Id get id => _id;
 
   // custom <class StrType>
 
-  factory StrType([maxLength, doc]) =>
-      _typeCache.putIfAbsent(maxLength, () => new StrType._(maxLength, doc));
+  factory StrType([maxLength, doc]) => _typeCache.putIfAbsent(
+      maxLength,
+      () => new StrType._(makeId(maxLength == null ? 'vlen' : 'len_$maxLength'),
+          maxLength, doc));
 
-  StrType._([maxLength, this.doc]) : super(maxLength);
+  StrType._(this._id, [maxLength, this.doc]) : super(maxLength);
   toString() => 'StrType($maxLength)';
   get typeName => maxLength == null ? 'str' : 'str($maxLength)';
 
   // end <class StrType>
+
+  Id _id;
 
   /// Cache of all fixed size strings
   static Map<int, Str> _typeCache = new Map<int, Str>();
