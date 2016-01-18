@@ -211,25 +211,37 @@ class PackagePropertyDefinintionSet {
 
 /// Base class for all [PodType]s
 abstract class PodType {
+  Id get id => _id;
+
+  /// Documentation for fixed size string
+  String doc;
+
   // custom <class PodType>
 
-  PodType();
+  PodType(id) : _id = makeId(id);
+
+  bool operator ==(PodType other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType && _id == other._id;
+
+  int get hashCode => _id.hashCode;
 
   get isArray => this is PodArrayType;
   get isObject => this is PodObject;
   bool get isFixedSize;
 
-  Id get id;
-  String get doc;
   String get typeName => id.snake;
 
   // end <class PodType>
 
+  Id _id;
 }
 
 /// Base class for user defined types
 abstract class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
+
+  PodUserDefinedType(id) : super(id);
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
     if (propertyDefinition.propertyType != UDT_PROPERTY) {
@@ -247,24 +259,19 @@ Failed trying to set value ($value) to $propertyDefinition
 
 /// Represents an enumeration
 class PodEnum extends PodUserDefinedType {
-  bool operator ==(PodEnum other) =>
-      identical(this, other) ||
-      _id == other._id &&
-          const ListEquality().equals(values, other.values) &&
-          doc == other.doc;
-
-  int get hashCode =>
-      hash3(_id, const ListEquality<String>().hash(values), doc);
-
-  Id get id => _id;
   List<String> values = [];
-
-  /// Documentation for the enum
-  String doc;
 
   // custom <class PodEnum>
 
-  PodEnum(this._id, [this.values]) {
+  bool operator ==(PodEnum other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType && _id == other._id &&
+      const ListEquality().equals(values, other.values);
+
+  int get hashCode =>
+      hash2(super.hashCode, const ListEquality<String>().hash(values).hashCode);
+
+  PodEnum(id, [this.values]) : super(id) {
     if (values == null) {
       values = [];
     }
@@ -279,27 +286,39 @@ class PodEnum extends PodUserDefinedType {
 
   // end <class PodEnum>
 
-  Id _id;
 }
 
 /// Base class for [PodType]s that may have a fixed size specified
 abstract class FixedSizeType extends PodType {
   // custom <class FixedSizeType>
+
+  FixedSizeType(id) : super(id);
+
   // end <class FixedSizeType>
 
   bool get isFixedSize => true;
 }
 
 abstract class VariableSizeType extends PodType {
-  VariableSizeType(this.maxLength);
-
   /// If non-0 indicates length capped to [max_length]
-  int maxLength;
+  int get maxLength => _maxLength;
 
   // custom <class VariableSizeType>
+
+  VariableSizeType(id, this._maxLength) : super(id);
+
+  bool operator ==(VariableSizeType other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType && _id == other._id &&
+      _maxLength == other._maxLength;
+
+  int get hashCode => hash2(_maxLength, super.hashCode);
+
   // end <class VariableSizeType>
 
   bool get isFixedSize => maxLength != null;
+
+  int _maxLength;
 }
 
 /// Used to define string types, which may have a fixed type.
@@ -308,74 +327,79 @@ abstract class VariableSizeType extends PodType {
 /// more general string type is so code generators may optimize for speed
 /// by allocating space for strings inline.
 class StrType extends VariableSizeType {
-  /// Documentation for fixed size string
-  String doc;
-  Id get id => _id;
-
   // custom <class StrType>
 
-  factory StrType([maxLength, doc]) => _typeCache.putIfAbsent(
-      maxLength,
-      () => new StrType._(makeId(maxLength == null ? 'vlen' : 'len_$maxLength'),
-          maxLength, doc));
+  factory StrType([maxLength, doc]) =>
+      _typeCache.putIfAbsent(maxLength, () => new StrType._(maxLength, doc));
 
-  StrType._(this._id, [maxLength, this.doc]) : super(maxLength);
-  toString() => 'StrType($maxLength)';
+  StrType._([maxLength, doc]) : super(_makeTypeId(maxLength), maxLength) {
+    this.doc = doc;
+  }
+
+  static _makeTypeId(maxLength) =>
+      makeId(maxLength == null ? 'str' : 'str_of_${maxLength}');
+
+  toString() => _maxLength == null ? 'Str(VarLen)' : 'StrType($maxLength)';
+
   get typeName => maxLength == null ? 'str' : 'str($maxLength)';
 
   // end <class StrType>
 
-  Id _id;
-
   /// Cache of all fixed size strings
-  static Map<int, Str> _typeCache = new Map<int, Str>();
+  static Map<int, StrType> _typeCache = new Map<int, StrType>();
 }
 
 /// Stores binary data as array of bytes
 class BinaryDataType extends VariableSizeType {
-  /// Documentation for the binary data type
-  String doc;
-
   // custom <class BinaryDataType>
 
   factory BinaryDataType([maxLength, doc]) => _typeCache.putIfAbsent(
       maxLength, () => new BinaryDataType._(maxLength, doc));
 
-  BinaryDataType._([maxLength, this.doc]) : super(maxLength);
+  BinaryDataType._([maxLength, doc])
+      : super(_makeTypeId(maxLength), maxLength) {
+    this.doc = doc;
+  }
+
+  static _makeTypeId(maxLength) =>
+      makeId(maxLength == null ? 'binary_data' : 'binary_data_of_${maxLength}');
+
   toString() => 'BinaryDataType($maxLength)';
   get typeName => maxLength == null ? 'binary_data' : 'binary_data($maxLength)';
 
   // end <class BinaryDataType>
 
   /// Cache of all fixed size BinaryData types
-  static Map<int, BinaryData> _typeCache = new Map<int, BinaryData>();
+  static Map<int, BinaryDataType> _typeCache = new Map<int, BinaryDataType>();
 }
 
 /// A [PodType] that is an array of some [referencedType].
 class PodArrayType extends VariableSizeType {
   bool operator ==(PodArrayType other) =>
-      identical(this, other) ||
-      referredType == other.referredType && doc == other.doc;
+      identical(this, other) || _referredType == other._referredType;
 
-  int get hashCode => hash2(referredType, doc);
+  int get hashCode => _referredType.hashCode;
 
-  PodType referredType;
-
-  /// Documentation for the array
-  String doc;
+  PodType get referredType => _referredType;
 
   // custom <class PodArrayType>
 
-  PodArrayType(this.referredType, {this.doc, maxLength}) : super(maxLength) {
-    if (this.maxLength == null) this.maxLength = 0;
+  PodArrayType(referredType, {doc, maxLength})
+      : super(_makeTypeId(referredType.id, maxLength), maxLength) {
+    this._referredType = referredType;
   }
 
-  toString() => 'PodArrayType(${referredType.typeName})';
+  static _makeTypeId(Id referredTypeId, maxLength) => makeId(maxLength == null
+      ? 'pod_type_array_of_${referredTypeId.snake}'
+      : 'pod_type_array_of_${maxLength}_${referredTypeId.snake}');
+
+  toString() => 'PodArrayType($typeName)';
   get typeName => referredType.typeName;
-  bool get isFixedSize => maxLength > 0;
+  bool get isFixedSize => maxLength != null;
 
   // end <class PodArrayType>
 
+  PodType _referredType;
 }
 
 /// Combination of owning package name and name of a type within it
@@ -383,28 +407,29 @@ class PodTypeRef extends PodType {
   bool operator ==(PodTypeRef other) =>
       identical(this, other) ||
       _packageName == other._packageName &&
-          _typeName == other._typeName &&
           _resolvedType == other._resolvedType;
 
-  int get hashCode => hash3(_packageName, _typeName, _resolvedType);
+  int get hashCode => hash2(_packageName, _resolvedType);
 
   PackageName get packageName => _packageName;
   PodType get resolvedType => _resolvedType;
 
   // custom <class PodTypeRef>
 
+  get isFixedSize => _resolvedType.isFixedSize;
   get doc => _resolvedType.doc;
   get isArray => _resolvedType.isArray;
   get isObject => _resolvedType.isObject;
-  get typeName => _typeName.snake;
   get podType => _resolvedType == null ? qualifiedTypeName : _resolvedType;
 
-  PodTypeRef.fromQualifiedName(String qualifiedName) {
+  PodTypeRef.fromQualifiedName(String qualifiedName)
+      : super(_makeTypeId(qualifiedName)) {
     final packageNameParts = qualifiedName.split('.');
     _packageName = new PackageName(
         packageNameParts.sublist(0, packageNameParts.length - 1));
-    _typeName = makeId(packageNameParts.last);
   }
+
+  static _makeTypeId(qualifiedName) => qualifiedName.split('.').last;
 
   get qualifiedTypeName => '$packageName.$typeName';
   toString() => 'PodTypeRef($qualifiedTypeName)';
@@ -412,7 +437,6 @@ class PodTypeRef extends PodType {
   // end <class PodTypeRef>
 
   PackageName _packageName;
-  Id _typeName;
   PodType _resolvedType;
 }
 
@@ -495,34 +519,29 @@ Failed trying to set value ($value) to $propertyDefinition
 }
 
 class PodObject extends PodUserDefinedType {
-  bool operator ==(PodObject other) =>
-      identical(this, other) ||
-      _id == other._id &&
-          const ListEquality().equals(fields, other.fields) &&
-          doc == other.doc;
-
-  int get hashCode =>
-      hash3(_id, const ListEquality<PodField>().hash(fields), doc);
-
-  Id get id => _id;
   List<PodField> fields = [];
-
-  /// Documentation for the object
-  String doc;
 
   // custom <class PodObject>
 
-  PodObject(this._id, [this.fields]) {
+  PodObject(id, [this.fields]) : super(id) {
     if (fields == null) {
       fields = [];
     }
   }
 
+  bool operator ==(PodObject other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType && _id == other._id &&
+      const ListEquality().equals(fields, other.fields);
+
+  int get hashCode => hash2(
+      super.hashCode, const ListEquality<PodField>().hash(fields).hashCode);
+
   bool get isFixedSize => fields.every((f) => f.isFixedSize);
 
   getField(fieldName) => fields.firstWhere((f) => f.name == fieldName,
       orElse: () =>
-          throw new ArgumentError('No field $fieldName in package $name'));
+          throw new ArgumentError('No field $fieldName in object $typeName'));
 
   toString() => brCompact([
         'PodObject($typeName)',
@@ -539,7 +558,6 @@ class PodObject extends PodUserDefinedType {
 
   // end <class PodObject>
 
-  Id _id;
 }
 
 /// Package names are effectively a list of Id isntances.
@@ -595,8 +613,8 @@ class PodPackage extends Entity with PropertySet implements AsLiteral {
     this.name = name;
     this.imports = (imports != null) ? imports : [];
     this._namedTypes = (namedTypes != null) ? namedTypes : [];
-    _checkNamedTypes();
     _allTypes = visitTypes(null);
+    _checkNamedTypes();
   }
 
   set imports(Iterable imports) {
@@ -734,198 +752,74 @@ Failed trying to set value ($value) to $propertyDefinition
 }
 
 class CharType extends FixedSizeType {
-  final Id id = makeId("char");
-
-  // custom <class CharType>
-  // end <class CharType>
-
-  CharType._();
-  toString() => typeName;
+  CharType._() : super(new Id('char')) {}
 }
 
 class DoubleType extends FixedSizeType {
-  final Id id = makeId("double");
-
-  // custom <class DoubleType>
-  // end <class DoubleType>
-
-  DoubleType._();
-  toString() => typeName;
+  DoubleType._() : super(new Id('double')) {}
 }
 
 class ObjectIdType extends FixedSizeType {
-  final Id id = makeId("object_id");
-
-  // custom <class ObjectIdType>
-  // end <class ObjectIdType>
-
-  ObjectIdType._();
-  toString() => typeName;
+  ObjectIdType._() : super(new Id('object_id')) {}
 }
 
 class BooleanType extends FixedSizeType {
-  final Id id = makeId("boolean");
-
-  // custom <class BooleanType>
-  // end <class BooleanType>
-
-  BooleanType._();
-  toString() => typeName;
+  BooleanType._() : super(new Id('boolean')) {}
 }
 
 class DateType extends FixedSizeType {
-  final Id id = makeId("date");
-
-  // custom <class DateType>
-  // end <class DateType>
-
-  DateType._();
-  toString() => typeName;
+  DateType._() : super(new Id('date')) {}
 }
 
 class NullType extends FixedSizeType {
-  final Id id = makeId("null");
-
-  // custom <class NullType>
-  // end <class NullType>
-
-  NullType._();
-  toString() => typeName;
+  NullType._() : super(new Id('null')) {}
 }
 
 class RegexType extends FixedSizeType {
-  final Id id = makeId("regex");
-
-  // custom <class RegexType>
-  // end <class RegexType>
-
-  RegexType._();
-  toString() => typeName;
+  RegexType._() : super(new Id('regex')) {}
 }
 
 class Int8Type extends FixedSizeType {
-  final Id id = makeId("int8");
-
-  // custom <class Int8Type>
-  // end <class Int8Type>
-
-  Int8Type._();
-  toString() => typeName;
+  Int8Type._() : super(new Id('int8')) {}
 }
 
 class Int16Type extends FixedSizeType {
-  final Id id = makeId("int16");
-
-  // custom <class Int16Type>
-  // end <class Int16Type>
-
-  Int16Type._();
-  toString() => typeName;
+  Int16Type._() : super(new Id('int16')) {}
 }
 
 class Int32Type extends FixedSizeType {
-  final Id id = makeId("int32");
-
-  // custom <class Int32Type>
-  // end <class Int32Type>
-
-  Int32Type._();
-  toString() => typeName;
+  Int32Type._() : super(new Id('int32')) {}
 }
 
 class Int64Type extends FixedSizeType {
-  final Id id = makeId("int64");
-
-  // custom <class Int64Type>
-  // end <class Int64Type>
-
-  Int64Type._();
-  toString() => typeName;
+  Int64Type._() : super(new Id('int64')) {}
 }
 
 class Uint8Type extends FixedSizeType {
-  final Id id = makeId("uint8");
-
-  // custom <class Uint8Type>
-  // end <class Uint8Type>
-
-  Uint8Type._();
-  toString() => typeName;
+  Uint8Type._() : super(new Id('uint8')) {}
 }
 
 class Uint16Type extends FixedSizeType {
-  final Id id = makeId("uint16");
-
-  // custom <class Uint16Type>
-  // end <class Uint16Type>
-
-  Uint16Type._();
-  toString() => typeName;
+  Uint16Type._() : super(new Id('uint16')) {}
 }
 
 class Uint32Type extends FixedSizeType {
-  final Id id = makeId("uint32");
-
-  // custom <class Uint32Type>
-  // end <class Uint32Type>
-
-  Uint32Type._();
-  toString() => typeName;
+  Uint32Type._() : super(new Id('uint32')) {}
 }
 
 class Uint64Type extends FixedSizeType {
-  final Id id = makeId("uint64");
-
-  // custom <class Uint64Type>
-  // end <class Uint64Type>
-
-  Uint64Type._();
-  toString() => typeName;
+  Uint64Type._() : super(new Id('uint64')) {}
 }
 
 class DateTimeType extends FixedSizeType {
-  final Id id = makeId("date_time");
-
-  // custom <class DateTimeType>
-  // end <class DateTimeType>
-
-  DateTimeType._();
-  toString() => typeName;
+  DateTimeType._() : super(new Id('date_time')) {}
 }
 
 class TimestampType extends FixedSizeType {
-  final Id id = makeId("timestamp");
-
-  // custom <class TimestampType>
-  // end <class TimestampType>
-
-  TimestampType._();
-  toString() => typeName;
+  TimestampType._() : super(new Id('timestamp')) {}
 }
 
 // custom <library ebisu_pod>
-
-final Str = new StrType();
-final BinaryData = new BinaryDataType();
-
-final Char = new CharType._();
-final Double = new DoubleType._();
-final ObjectId = new ObjectIdType._();
-final Boolean = new BooleanType._();
-final Date = new DateType._();
-final Null = new NullType._();
-final Regex = new RegexType._();
-final Int8 = new Int8Type._();
-final Int16 = new Int16Type._();
-final Int32 = new Int32Type._();
-final Int64 = new Int64Type._();
-
-final Uint8 = new Uint8Type._();
-final Uint16 = new Uint16Type._();
-final Uint32 = new Uint32Type._();
-final Uint64 = new Uint64Type._();
-final DateTime = new DateTimeType._();
-final Timestamp = new TimestampType._();
 
 final DoubleArray = array(Double, doc: 'Array<double>');
 final StringArray = array(Str, doc: 'Array<Str>');
@@ -999,4 +893,25 @@ PropertyDefinition definePackageProperty(id, String doc,
         defaultValue: defaultValue,
         isValueValidPredicate: isValueValidPredicate);
 
+final Str = new StrType._(null);
+final BinaryData = new BinaryDataType._(null);
+
 // end <library ebisu_pod>
+
+final Char = new CharType._();
+final Double = new DoubleType._();
+final ObjectId = new ObjectIdType._();
+final Boolean = new BooleanType._();
+final Date = new DateType._();
+final Null = new NullType._();
+final Regex = new RegexType._();
+final Int8 = new Int8Type._();
+final Int16 = new Int16Type._();
+final Int32 = new Int32Type._();
+final Int64 = new Int64Type._();
+final Uint8 = new Uint8Type._();
+final Uint16 = new Uint16Type._();
+final Uint32 = new Uint32Type._();
+final Uint64 = new Uint64Type._();
+final DateTime = new DateTimeType._();
+final Timestamp = new TimestampType._();

@@ -55,7 +55,7 @@ main([List<String> args]) {
   });
 
   test('pod package', () {
-    final podPackage = new PodPackage('p', namedTypes: [
+    final namedTypes = [
       enum_('color', ['red', 'white', 'blue']),
       enum_('usa', ['red', 'white', 'blue']),
       object('z', [field('x', 'x')]),
@@ -64,7 +64,9 @@ main([List<String> args]) {
         field('b', object('ax', [field('c')]))
       ]),
       object('y', [field('a'), field('b', Double), field('c')]),
-    ]);
+    ];
+
+    final podPackage = new PodPackage('p', namedTypes: namedTypes);
 
     expect(podPackage.allTypes.first is PodEnum, true);
     expect(podPackage.allTypes.first.typeName, 'color');

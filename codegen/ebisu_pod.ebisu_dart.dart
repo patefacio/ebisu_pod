@@ -30,6 +30,26 @@ The goal is a simple modeling API that can then be used as inputs to
 code generators.
 ''';
 
+  final podFundamentals = [
+    'char',
+    'double',
+    'object_id',
+    'boolean',
+    'date',
+    'null',
+    'regex',
+    'int8',
+    'int16',
+    'int32',
+    'int64',
+    'uint8',
+    'uint16',
+    'uint32',
+    'uint64',
+    'date_time',
+    'timestamp'
+  ];
+
   String _topDir = dirname(dirname(here));
   useDartFormatter = true;
   System ebisu = system('ebisu_pod')
@@ -59,7 +79,6 @@ code generators.
                     'Property for annotating UDTs ([PodEnum] and [PodObject])',
               enumValue('field_property')
                 ..doc = 'Property for annotating [PodField]',
-
               enumValue('package_property')
                 ..doc = 'Property for annotating [PodPackage]',
             ]
@@ -135,7 +154,12 @@ code generators.
           class_('pod_type')
             ..doc = 'Base class for all [PodType]s'
             ..isAbstract = true
-            ..members = [],
+            ..members = [
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
+              member('doc')..doc = 'Documentation for fixed size string',
+            ],
           class_('pod_user_defined_type')
             ..extend = 'PodType'
             ..doc = 'Base class for user defined types'
@@ -145,15 +169,10 @@ code generators.
           class_('pod_enum')
             ..doc = 'Represents an enumeration'
             ..extend = 'PodUserDefinedType'
-            ..hasOpEquals = true
             ..members = [
-              member('id')
-                ..type = 'Id'
-                ..access = RO,
               member('values')
                 ..type = 'List<String>'
                 ..classInit = [],
-              member('doc')..doc = 'Documentation for the enum',
             ],
           class_('fixed_size_type')
             ..doc =
@@ -171,7 +190,7 @@ code generators.
               member('max_length')
                 ..doc = 'If non-0 indicates length capped to [max_length]'
                 ..type = 'int'
-                ..ctors = ['']
+                ..access = RO,
             ],
           class_('str_type')
             ..doc = '''
@@ -183,37 +202,29 @@ by allocating space for strings inline.
 '''
             ..extend = 'VariableSizeType'
             ..members = [
-              member('doc')..doc = 'Documentation for fixed size string',
-              member('id')
-                ..type = 'Id'
-                ..access = RO,
               member('type_cache')
                 ..doc = 'Cache of all fixed size strings'
                 ..access = IA
                 ..isStatic = true
-                ..type = 'Map<int, Str>'
-                ..classInit = 'new Map<int, Str>()',
+                ..type = 'Map<int, StrType>'
+                ..classInit = 'new Map<int, StrType>()',
             ],
           class_('binary_data_type')
             ..doc = 'Stores binary data as array of bytes'
             ..extend = 'VariableSizeType'
             ..members = [
-              member('doc')..doc = 'Documentation for the binary data type',
               member('type_cache')
                 ..doc = 'Cache of all fixed size BinaryData types'
                 ..access = IA
                 ..isStatic = true
-                ..type = 'Map<int, BinaryData>'
-                ..classInit = 'new Map<int, BinaryData>()',
+                ..type = 'Map<int, BinaryDataType>'
+                ..classInit = 'new Map<int, BinaryDataType>()',
             ],
           class_('pod_array_type')
             ..doc = 'A [PodType] that is an array of some [referencedType].'
             ..extend = 'VariableSizeType'
             ..hasOpEquals = true
-            ..members = [
-              member('referred_type')..type = 'PodType',
-              member('doc')..doc = 'Documentation for the array',
-            ],
+            ..members = [member('referred_type')..type = 'PodType'..access = RO,],
           class_('pod_type_ref')
             ..doc =
                 'Combination of owning package name and name of a type within it'
@@ -222,9 +233,6 @@ by allocating space for strings inline.
             ..defaultMemberAccess = RO
             ..members = [
               member('package_name')..type = 'PackageName',
-              member('type_name')
-                ..type = 'Id'
-                ..access = IA,
               member('resolved_type')..type = 'PodType',
             ],
           class_('pod_field')
@@ -257,15 +265,10 @@ If it is a String it is converted to a PodTypeRef
             ],
           class_('pod_object')
             ..extend = 'PodUserDefinedType'
-            ..hasOpEquals = true
             ..members = [
-              member('id')
-                ..type = 'Id'
-                ..access = RO,
               member('fields')
                 ..type = 'List<PodField>'
                 ..classInit = [],
-              member('doc')..doc = 'Documentation for the object',
             ],
           class_('package_name')
             ..doc = '''
@@ -317,67 +320,22 @@ They can be constructed from and represented by the common dotted form:
                 ..classInit = 'new PropertySet()',
             ],
         ]
-        ..classes.addAll([
-          'char',
-          'double',
-          'object_id',
-          'boolean',
-          'date',
-          'null',
-          'regex',
-          'int8',
-          'int16',
-          'int32',
-          'int64',
-          'uint8',
-          'uint16',
-          'uint32',
-          'uint64',
-          'date_time',
-          'timestamp'
-        ].map((var t) => class_('${t}_type')
+        ..classes.addAll(podFundamentals.map((var t) => class_('${t}_type')
           ..extend = 'FixedSizeType'
-          ..members = [
-            member('id')
-              ..type = 'Id'
-              ..classInit = 'makeId("$t")'
-              ..isFinal = true
-          ]
-          ..withClass((c) => c.customCodeBlock.snippets.add('''
-${c.name}._();
-toString() => typeName;
-''')))),
-      library('pod_cpp')
-        ..doc = 'Consistent mapping of *plain old data* to C++ structs'
-        ..imports = [
-          'package:ebisu/ebisu.dart',
-          'package:ebisu_pod/ebisu_pod.dart',
-          'package:ebisu_cpp/ebisu_cpp.dart',
-          'package:id/id.dart',
-        ]
-        ..classes = [
-          class_('pod_cpp_mapper')
-            ..doc = 'Given a pod package, maps the data definitions to C++'
-            ..defaultMemberAccess = RO
-            ..members = [
-              member('package')
-                ..doc = 'Package to generate basic C++ mappings for'
-                ..type = 'PodPackage'
-                ..ctors = [''],
-              member('namespace')
-                ..doc = 'Napespace into which to place the type hierarchy'
-                ..type = 'Napespace',
-              member('header')
-                ..doc = 'C++ header with all PodObject and PodEnum definitions'
-                ..type = 'Header'
-                ..access = IA,
-            ]
-        ],
-      library('balance_sheet')
-        ..imports = ['package:ebisu_pod/ebisu_pod.dart']
-        ..includesLogger = true
-        ..includesMain = true
-        ..path = join(_topDir, 'lib/example'),
+          ..withClass((Class cls) {
+            cls.withCustomBlock((cb) {
+              cb
+                ..tag = null // No need for custom block
+                ..snippets.add(
+                    "${cls.id.capCamel}._() : super(new Id('${makeId(t).snake}')) {}");
+            });
+          })))
+        ..withCustomBlock(
+            (cb) => cb.snippets.add(brCompact(podFundamentals.map((f) {
+                  final clsId = makeId(f);
+                  final clsName = clsId.capCamel;
+                  return "final $clsName = new ${clsName}Type._();";
+                }))))
     ];
 
   ebisu.generate();
