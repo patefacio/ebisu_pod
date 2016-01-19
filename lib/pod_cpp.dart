@@ -79,10 +79,21 @@ class PodCppMapper {
   }
 
   final _cppTypeMap = {
+    'char': 'char',
     'date': 'boost::gregorian::date',
+    'regex' : 'boost::regex',
     'int': 'int',
+    'int8': 'std::int8_t',
+    'int16': 'std::int16_t',
     'int32': 'std::int32_t',
     'int64': 'std::int64_t',
+
+    'uint': 'uint',
+    'uint8': 'std::uint8_t',
+    'uint16': 'std::uint16_t',
+    'uint32': 'std::uint32_t',
+    'uint64': 'std::uint64_t',
+
     'double': 'double',
     'str': 'std::string',
     'boolean': 'bool',
@@ -91,6 +102,7 @@ class PodCppMapper {
   _cppType(PodType podType) {
     final podTypeName = podType.typeName;
     var cppType = _cppTypeMap[podTypeName];
+    print('PT $podType => $cppType');
     if (cppType == null) {
       cppType = defaultNamer.nameClass(podType.id);
     }

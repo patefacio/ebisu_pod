@@ -87,12 +87,10 @@ code generators.
             ..hasLibraryScopedValues = true
         ]
         ..classes = [
-          class_('as_literal')..isAbstract = true,
           class_('property_definition')
             ..doc =
                 'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'
             ..defaultMemberAccess = RO
-            ..implement = ['AsLiteral']
             ..hasOpEquals = true
             ..members = [
               member('id')
@@ -291,7 +289,6 @@ They can be constructed from and represented by the common dotted form:
             ..doc =
                 'Package structure to support organization of pod definitions'
             ..extend = 'Entity'
-            ..implement = ['AsLiteral']
             ..mixins = ['PropertySet']
             ..defaultMemberAccess = RO
             ..members = [

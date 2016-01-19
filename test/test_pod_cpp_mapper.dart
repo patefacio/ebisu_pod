@@ -35,5 +35,31 @@ main([List<String> args]) {
     expect(holdingClass.members.first.id.snake, 'holding_type');
   });
 
+  test('field types', () {
+    final po = object('all_types', [
+      field('char', Char),
+      field('double', Double),
+      field('object_id', ObjectId),
+      field('boolean', Boolean),
+      field('date', Date),
+      field('null', Null),
+      field('regex', Regex),
+      field('int8', Int8),
+      field('int16', Int16),
+      field('int32', Int32),
+      field('int64', Int64),
+      field('uint8', Uint8),
+      field('uint16', Uint16),
+      field('uint32', Uint32),
+      field('uint64', Uint64),
+      field('date_time', DateTime),
+      field('timestamp', Timestamp)
+    ]);
+
+    final pkg = new PodPackage('sample', namedTypes: [ po ]);
+    final mapper = new PodCppMapper(pkg);
+    print(mapper.header.contents);
+  });
+
 // end <main>
 }

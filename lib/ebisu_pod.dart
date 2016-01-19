@@ -73,14 +73,8 @@ const PropertyType FIELD_PROPERTY = PropertyType.FIELD_PROPERTY;
 ///
 const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
 
-abstract class AsLiteral {
-  // custom <class AsLiteral>
-  // end <class AsLiteral>
-
-}
-
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
-class PropertyDefinition implements AsLiteral {
+class PropertyDefinition {
   bool operator ==(PropertyDefinition other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -125,16 +119,6 @@ class PropertyDefinition implements AsLiteral {
         indentBlock(brCompact(
             ['----- defaultValue ----', defaultValue, '---- doc ----', doc]))
       ]);
-
-  String get asLiteral => brCompact(_propertyType == UDT_PROPERTY
-      ? _defineUdtProperty
-      : _propertyType == FIELD_PROPERTY
-          ? _defineFieldProperty
-          : _definePackageProperty);
-
-  get _defineUdtProperty => 'defineUdtProperty(\'${id.snake}\',';
-  get _defineFieldProperty => 'defineFieldProperty(\'${id.snake}\',';
-  get _definePackageProperty => 'definePackageProperty(\'${id.snake}\',';
 
   // end <class PropertyDefinition>
 
@@ -265,8 +249,9 @@ class PodEnum extends PodUserDefinedType {
 
   bool operator ==(PodEnum other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType && _id == other._id &&
-      const ListEquality().equals(values, other.values);
+      runtimeType == other.runtimeType &&
+          _id == other._id &&
+          const ListEquality().equals(values, other.values);
 
   int get hashCode =>
       hash2(super.hashCode, const ListEquality<String>().hash(values).hashCode);
@@ -309,8 +294,9 @@ abstract class VariableSizeType extends PodType {
 
   bool operator ==(VariableSizeType other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType && _id == other._id &&
-      _maxLength == other._maxLength;
+      runtimeType == other.runtimeType &&
+          _id == other._id &&
+          _maxLength == other._maxLength;
 
   int get hashCode => hash2(_maxLength, super.hashCode);
 
@@ -531,8 +517,9 @@ class PodObject extends PodUserDefinedType {
 
   bool operator ==(PodObject other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType && _id == other._id &&
-      const ListEquality().equals(fields, other.fields);
+      runtimeType == other.runtimeType &&
+          _id == other._id &&
+          const ListEquality().equals(fields, other.fields);
 
   int get hashCode => hash2(
       super.hashCode, const ListEquality<PodField>().hash(fields).hashCode);
@@ -597,7 +584,7 @@ class PackageName {
 }
 
 /// Package structure to support organization of pod definitions
-class PodPackage extends Entity with PropertySet implements AsLiteral {
+class PodPackage extends Entity with PropertySet {
   /// Name of package
   PackageName get name => _name;
 
