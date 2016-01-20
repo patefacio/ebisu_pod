@@ -56,7 +56,7 @@ main([List<String> args]) {
       field('timestamp', Timestamp)
     ]);
 
-    final pkg = new PodPackage('sample', namedTypes: [ po ]);
+    final pkg = new PodPackage('sample', namedTypes: [po]);
     final mapper = new PodCppMapper(pkg);
     print(mapper.header.contents);
   });

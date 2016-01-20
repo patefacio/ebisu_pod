@@ -70,7 +70,11 @@ code generators.
     ..libraries = [
       library('ebisu_pod')
         ..includesLogger = true
-        ..imports = ['package:ebisu/ebisu.dart', 'package:id/id.dart',]
+        ..imports = [
+          'mirrors',
+          'package:ebisu/ebisu.dart',
+          'package:id/id.dart',
+        ]
         ..enums = [
           enum_('property_type')
             ..values = [
@@ -135,15 +139,28 @@ code generators.
                 'A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]'
             ..members = [
               member('properties')
-                ..type = 'Set<Property>'
+                ..type = 'Map<String /* Property Name */, Property>'
                 ..access = IA
-                ..classInit = 'new Set<Property>()'
+                ..classInit = {},
+              member('supported_properties')
+              ..type = 'List<PropertyDefinitionSet>'
+              ..classInit = [],
             ],
           class_('package_property_definintion_set')
             ..doc =
                 'A collection of properties that may be associated with elements in a [PodPackage]'
             ..members = [
-              member('property_definitions')
+              member('field_property_definitions')
+                ..doc = 'Set of [PropertyDefinition]s'
+                ..type = 'Set<PropertyDefinition>'
+                ..access = RO
+                ..classInit = 'new Set()',
+              member('object_property_definitions')
+                ..doc = 'Set of [PropertyDefinition]s'
+                ..type = 'Set<PropertyDefinition>'
+                ..access = RO
+                ..classInit = 'new Set()',
+              member('package_property_definitions')
                 ..doc = 'Set of [PropertyDefinition]s'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO

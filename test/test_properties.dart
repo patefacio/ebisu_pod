@@ -71,5 +71,13 @@ main([List<String> args]) {
     });
   });
 
+  group('properties and noSuchMethod', () {
+    test('catches property get', () {
+      final t = package('p')..setProperty(packageProperty, Color.blue);
+      expect(t.getPropertyValue('serializable'), Color.blue);
+      print('Found prop: ${t.serializable.value}');
+    });
+  });
+
 // end <main>
 }

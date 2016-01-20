@@ -1,5 +1,6 @@
 library ebisu_pod.ebisu_pod;
 
+import 'dart:mirrors';
 import 'package:collection/equality.dart';
 import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
@@ -156,6 +157,8 @@ class Property {
 
 /// A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]
 class PropertySet {
+  List<PropertyDefinitionSet> supportedProperties = [];
+
   // custom <class PropertySet>
 
   setProperty(PropertyDefinition propertyDefinition, dynamic value) {
@@ -163,34 +166,59 @@ class PropertySet {
       throw new ArgumentError(
           'Failed value: $value is invalid for $propertyDefinition');
     }
-    _properties.add(new Property(propertyDefinition, value));
+    _properties[propertyDefinition.id.snake] =
+        new Property(propertyDefinition, value);
   }
 
   getPropertyValue(property) {
-    final propertyDefinition = makeId(property);
-    final prop = _properties.firstWhere(
-        (prop) => prop.propertyDefinition.id == propertyDefinition,
-        orElse: () => null);
+    final prop = _properties[property is PropertyDefinition
+        ? property.id
+        : property is String
+            ? property
+            : throw new ArgumentError(
+                'Property value access requires name of property or PropertyDefinition')];
     if (prop != null) {
       return prop.value;
     }
     return null;
   }
 
+  noSuchMethod(Invocation invocation) {
+    if (invocation.isGetter) {
+      String field = MirrorSystem.getName(invocation.memberName);
+      print('go keys ${_properties.keys.toList()}');
+      final prop = _properties[field];
+      if (prop != null) return prop;
+    }
+
+    return super.noSuchMethod(invocation);
+  }
+
   // end <class PropertySet>
 
-  Set<Property> _properties = new Set<Property>();
+  Map<String /* Property Name */, Property> _properties = {};
 }
 
 /// A collection of properties that may be associated with elements in a [PodPackage]
 class PackagePropertyDefinintionSet {
   /// Set of [PropertyDefinition]s
-  Set<PropertyDefinition> get propertyDefinitions => _propertyDefinitions;
+  Set<PropertyDefinition> get fieldPropertyDefinitions =>
+      _fieldPropertyDefinitions;
+
+  /// Set of [PropertyDefinition]s
+  Set<PropertyDefinition> get objectPropertyDefinitions =>
+      _objectPropertyDefinitions;
+
+  /// Set of [PropertyDefinition]s
+  Set<PropertyDefinition> get packagePropertyDefinitions =>
+      _packagePropertyDefinitions;
 
   // custom <class PackagePropertyDefinintionSet>
   // end <class PackagePropertyDefinintionSet>
 
-  Set<PropertyDefinition> _propertyDefinitions = new Set();
+  Set<PropertyDefinition> _fieldPropertyDefinitions = new Set();
+  Set<PropertyDefinition> _objectPropertyDefinitions = new Set();
+  Set<PropertyDefinition> _packagePropertyDefinitions = new Set();
 }
 
 /// Base class for all [PodType]s
