@@ -143,8 +143,8 @@ code generators.
                 ..access = IA
                 ..classInit = {},
               member('supported_properties')
-              ..type = 'List<PropertyDefinitionSet>'
-              ..classInit = [],
+                ..type = 'List<PropertyDefinitionSet>'
+                ..classInit = [],
             ],
           class_('package_property_definintion_set')
             ..doc =
@@ -239,7 +239,11 @@ by allocating space for strings inline.
             ..doc = 'A [PodType] that is an array of some [referencedType].'
             ..extend = 'VariableSizeType'
             ..hasOpEquals = true
-            ..members = [member('referred_type')..type = 'PodType'..access = RO,],
+            ..members = [
+              member('referred_type')
+                ..type = 'PodType'
+                ..access = RO,
+            ],
           class_('pod_type_ref')
             ..doc =
                 'Combination of owning package name and name of a type within it'
@@ -349,7 +353,33 @@ They can be constructed from and represented by the common dotted form:
                   final clsId = makeId(f);
                   final clsName = clsId.capCamel;
                   return "final $clsName = new ${clsName}Type._();";
-                }))))
+                })))),
+      library('pod_cpp')
+        ..doc = 'Consistent mapping of *plain old data* to C++ structs'
+        ..imports = [
+          'package:ebisu/ebisu.dart',
+          'package:ebisu_pod/ebisu_pod.dart',
+          'package:ebisu_cpp/ebisu_cpp.dart',
+          'package:id/id.dart',
+        ]
+        ..classes = [
+          class_('pod_cpp_mapper')
+            ..doc = 'Given a pod package, maps the data definitions to C++'
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('package')
+                ..doc = 'Package to generate basic C++ mappings for'
+                ..type = 'PodPackage'
+                ..ctors = [''],
+              member('namespace')
+                ..doc = 'Napespace into which to place the type hierarchy'
+                ..type = 'Namespace',
+              member('header')
+                ..doc = 'C++ header with all PodObject and PodEnum definitions'
+                ..type = 'Header'
+                ..access = IA,
+            ],
+        ]
     ];
 
   ebisu.generate();
