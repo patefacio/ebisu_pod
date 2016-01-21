@@ -143,7 +143,7 @@ code generators.
                 ..access = IA
                 ..classInit = {},
             ],
-          class_('property_definintion_set')
+          class_('property_definition_set')
             ..doc =
                 'A collection of properties that may be associated with elements in a [PodPackage]'
             ..defaultMemberAccess = RO
@@ -159,17 +159,17 @@ the conventinos required by *capnp*.
 '''
               ..type = 'Id',
               member('field_property_definitions')
-                ..doc = 'Set of [PropertyDefinition]s'
+                ..doc = 'Set of [PropertyDefinition]s for fields'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',
-              member('object_property_definitions')
-                ..doc = 'Set of [PropertyDefinition]s'
+              member('udt_property_definitions')
+                ..doc = 'Set of [PropertyDefinition]s for udts [objects and enums]'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',
               member('package_property_definitions')
-                ..doc = 'Set of [PropertyDefinition]s'
+                ..doc = 'Set of [PropertyDefinition]s for packages'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',

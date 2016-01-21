@@ -191,7 +191,7 @@ class PropertySet {
 
 
 /// A collection of properties that may be associated with elements in a [PodPackage]
-class PropertyDefinintionSet {
+class PropertyDefinitionSet {
 
   /// Indentifier for the set of properties.
   ///
@@ -200,22 +200,20 @@ class PropertyDefinintionSet {
   /// that case the fields might have a *numeric* property to correspond to
   /// the conventinos required by *capnp*.
   Id get id => _id;
-  /// Set of [PropertyDefinition]s
+  /// Set of [PropertyDefinition]s for fields
   Set<PropertyDefinition> get fieldPropertyDefinitions => _fieldPropertyDefinitions;
-  /// Set of [PropertyDefinition]s
-  Set<PropertyDefinition> get objectPropertyDefinitions => _objectPropertyDefinitions;
-  /// Set of [PropertyDefinition]s
+  /// Set of [PropertyDefinition]s for udts [objects and enums]
+  Set<PropertyDefinition> get udtPropertyDefinitions => _udtPropertyDefinitions;
+  /// Set of [PropertyDefinition]s for packages
   Set<PropertyDefinition> get packagePropertyDefinitions => _packagePropertyDefinitions;
 
-  // custom <class PropertyDefinintionSet>
-
-  PropertyDefinintionSet(id) => _id = makeId(id);
-
-  // end <class PropertyDefinintionSet>
+  // custom <class PropertyDefinitionSet>
+  PropertyDefinitionSet(id) : _id = makeId(id);
+  // end <class PropertyDefinitionSet>
 
   Id _id;
   Set<PropertyDefinition> _fieldPropertyDefinitions = new Set();
-  Set<PropertyDefinition> _objectPropertyDefinitions = new Set();
+  Set<PropertyDefinition> _udtPropertyDefinitions = new Set();
   Set<PropertyDefinition> _packagePropertyDefinitions = new Set();
 
 }
@@ -990,3 +988,5 @@ final BinaryData = new BinaryDataType._(null);
   final Uint64 = new Uint64Type._();
   final DateTime = new DateTimeType._();
   final Timestamp = new TimestampType._();
+
+

@@ -23,30 +23,11 @@ main([List<String> args]) {
   Logger.root.level = Level.OFF;
 // custom <main>
 
-  final fieldProperty = defineFieldProperty(
-      'serializable', 'indicates type is serializable',
-      isValueValidPredicate: (Color value) => true);
-
-  final udtProperty = defineUdtProperty(
-      'serializable', 'indicates type is serializable',
-      isValueValidPredicate: (Color value) => true);
-
-  final packageProperty = definePackageProperty(
-      'serializable', 'indicates type is serializable',
-      isValueValidPredicate: (Color value) => true);
-
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
       final t = object('o')..serializable = Color.blue;
       expect(t.serializable, Color.blue);
     });
-
-    /*
-    test('setProperty throws on type mismatch', () {
-      expect(() => object('o')..serializable = Color.blue,
-          throwsArgumentError);
-    });
-    */
   });
 
   group('field type properties', () {
@@ -54,13 +35,6 @@ main([List<String> args]) {
       final t = field('f', Str)..serializable = Color.blue;
       expect(t.serializable, Color.blue);
     });
-
-    /*
-    test('setProperty throws on type mismatch', () {
-      expect(() => field('o', Str)..serializable = Color.blue,
-          throwsArgumentError);
-    });
-    */
   });
 
   group('package properties', () {
@@ -68,13 +42,6 @@ main([List<String> args]) {
       final t = package('p')..serializable = Color.blue;
       expect(t.serializable, Color.blue);
     });
-
-    /*
-    test('setProperty throws on type mismatch', () {
-      expect(() => package('p')..serializable = Color.blue,
-          throwsArgumentError);
-    });
-    */
   });
 
   group('properties and noSuchMethod', () {
@@ -88,6 +55,37 @@ main([List<String> args]) {
       final f = field('o', Str)..donkeys = 'ehh-haw';
       print('f props => ${f.propertyNames}');
     });
+  });
+
+  group('property validations', () {
+    final fieldProperty = defineFieldProperty(
+        'serializable', 'indicates type is serializable',
+        isValueValidPredicate: (Color value) => true);
+
+    final udtProperty = defineUdtProperty(
+        'serializable', 'indicates type is serializable',
+        isValueValidPredicate: (Color value) => true);
+
+    final packageProperty = definePackageProperty(
+        'serializable', 'indicates type is serializable',
+        isValueValidPredicate: (Color value) => true);
+
+    var pds = new PropertyDefinitionSet('serializable_props')
+      ..fieldPropertyDefinitions.add(fieldProperty)
+      ..udtPropertyDefinitions.add(udtProperty)
+      ..packagePropertyDefinitions.add(packageProperty);
+
+    final pkg = package('my_data', namedTypes: [
+      object('o', [
+        field('f1', Int32)
+          ..serializable = true
+          ..badProp = false
+      ])
+        ..serializable = true
+        ..badProp = false
+    ])
+      ..serializable = true
+      ..badProp = false;
   });
 
 // end <main>
