@@ -17,11 +17,7 @@ class PropertyType implements Comparable<PropertyType> {
   static const FIELD_PROPERTY = const PropertyType._(1);
   static const PACKAGE_PROPERTY = const PropertyType._(2);
 
-  static get values => [
-    UDT_PROPERTY,
-    FIELD_PROPERTY,
-    PACKAGE_PROPERTY
-  ];
+  static get values => [UDT_PROPERTY, FIELD_PROPERTY, PACKAGE_PROPERTY];
 
   final int value;
 
@@ -34,24 +30,30 @@ class PropertyType implements Comparable<PropertyType> {
   int compareTo(PropertyType other) => value.compareTo(other.value);
 
   String toString() {
-    switch(this) {
-      case UDT_PROPERTY: return "UDT_PROPERTY";
-      case FIELD_PROPERTY: return "FIELD_PROPERTY";
-      case PACKAGE_PROPERTY: return "PACKAGE_PROPERTY";
+    switch (this) {
+      case UDT_PROPERTY:
+        return "UDT_PROPERTY";
+      case FIELD_PROPERTY:
+        return "FIELD_PROPERTY";
+      case PACKAGE_PROPERTY:
+        return "PACKAGE_PROPERTY";
     }
     return null;
   }
 
   static PropertyType fromString(String s) {
-    if(s == null) return null;
-    switch(s) {
-      case "UDT_PROPERTY": return UDT_PROPERTY;
-      case "FIELD_PROPERTY": return FIELD_PROPERTY;
-      case "PACKAGE_PROPERTY": return PACKAGE_PROPERTY;
-      default: return null;
+    if (s == null) return null;
+    switch (s) {
+      case "UDT_PROPERTY":
+        return UDT_PROPERTY;
+      case "FIELD_PROPERTY":
+        return FIELD_PROPERTY;
+      case "PACKAGE_PROPERTY":
+        return PACKAGE_PROPERTY;
+      default:
+        return null;
     }
   }
-
 }
 
 /// Convenient access to PropertyType.UDT_PROPERTY with *UDT_PROPERTY* see [PropertyType].
@@ -74,32 +76,32 @@ const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
 
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
 class PropertyDefinition {
+  bool operator ==(PropertyDefinition other) =>
+      identical(this, other) ||
+      _id == other._id &&
+          _propertyType == other._propertyType &&
+          _doc == other._doc &&
+          _defaultValue == other._defaultValue &&
+          _isValueValidPredicate == other._isValueValidPredicate;
 
-  bool operator==(PropertyDefinition other) =>
-    identical(this, other) ||
-    _id == other._id &&
-    _propertyType == other._propertyType &&
-    _doc == other._doc &&
-    _defaultValue == other._defaultValue &&
-    _isValueValidPredicate == other._isValueValidPredicate;
-
-  int get hashCode => hashObjects([
-    _id,
-    _propertyType,
-    _doc,
-    _defaultValue,
-    _isValueValidPredicate]);
+  int get hashCode => hashObjects(
+      [_id, _propertyType, _doc, _defaultValue, _isValueValidPredicate]);
 
   /// Id associated with property
   Id get id => _id;
+
   /// What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]
   PropertyType get propertyType => _propertyType;
+
   /// Documentation for the [PropertyDefinition]/[Property].
   String get doc => _doc;
+
   /// The default value for a [Property] associated with *this* [PropertyDefinition]
   dynamic get defaultValue => _defaultValue;
+
   /// Predicate to determine of [Property] identified by [PropertyDefinition] is valid
-  PropertyValueValidPredicate get isValueValidPredicate => _isValueValidPredicate;
+  PropertyValueValidPredicate get isValueValidPredicate =>
+      _isValueValidPredicate;
 
   // custom <class PropertyDefinition>
 
@@ -126,22 +128,20 @@ class PropertyDefinition {
   String _doc;
   dynamic _defaultValue;
   PropertyValueValidPredicate _isValueValidPredicate;
-
 }
-
 
 /// A property associated with a [PodType], [PodField] or [PodPackage]
 class Property {
-
-  bool operator==(Property other) =>
-    identical(this, other) ||
-    _propertyDefinition == other._propertyDefinition &&
-    _value == other._value;
+  bool operator ==(Property other) =>
+      identical(this, other) ||
+      _propertyDefinition == other._propertyDefinition &&
+          _value == other._value;
 
   int get hashCode => hash2(_propertyDefinition, _value);
 
   /// Reference [PropertyDefinition] for this property
   PropertyDefinition get propertyDefinition => _propertyDefinition;
+
   /// Value of the property
   dynamic get value => _value;
 
@@ -153,13 +153,10 @@ class Property {
 
   PropertyDefinition _propertyDefinition;
   dynamic _value;
-
 }
-
 
 /// A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]
 class PropertySet {
-
   // custom <class PropertySet>
 
   Iterable get propertyNames => _properties.keys;
@@ -186,13 +183,10 @@ class PropertySet {
   // end <class PropertySet>
 
   Map<String /* Property Name */, Property> _properties = {};
-
 }
-
 
 /// A collection of properties that may be associated with elements in a [PodPackage]
 class PropertyDefinitionSet {
-
   /// Indentifier for the set of properties.
   ///
   /// For example, there might be a *capnpPropertyDefinitionSet* designed to
@@ -200,12 +194,17 @@ class PropertyDefinitionSet {
   /// that case the fields might have a *numeric* property to correspond to
   /// the conventinos required by *capnp*.
   Id get id => _id;
+
   /// Set of [PropertyDefinition]s for fields
-  Set<PropertyDefinition> get fieldPropertyDefinitions => _fieldPropertyDefinitions;
+  Set<PropertyDefinition> get fieldPropertyDefinitions =>
+      _fieldPropertyDefinitions;
+
   /// Set of [PropertyDefinition]s for udts [objects and enums]
   Set<PropertyDefinition> get udtPropertyDefinitions => _udtPropertyDefinitions;
+
   /// Set of [PropertyDefinition]s for packages
-  Set<PropertyDefinition> get packagePropertyDefinitions => _packagePropertyDefinitions;
+  Set<PropertyDefinition> get packagePropertyDefinitions =>
+      _packagePropertyDefinitions;
 
   // custom <class PropertyDefinitionSet>
   PropertyDefinitionSet(id) : _id = makeId(id);
@@ -215,14 +214,12 @@ class PropertyDefinitionSet {
   Set<PropertyDefinition> _fieldPropertyDefinitions = new Set();
   Set<PropertyDefinition> _udtPropertyDefinitions = new Set();
   Set<PropertyDefinition> _packagePropertyDefinitions = new Set();
-
 }
-
 
 /// Base class for all [PodType]s
 abstract class PodType {
-
   Id get id => _id;
+
   /// Documentation for fixed size string
   String doc;
 
@@ -245,13 +242,10 @@ abstract class PodType {
   // end <class PodType>
 
   Id _id;
-
 }
-
 
 /// Base class for user defined types
 abstract class PodUserDefinedType extends PodType with PropertySet {
-
   // custom <class PodUserDefinedType>
 
   PodUserDefinedType(id) : super(id);
@@ -260,10 +254,8 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
 
 }
 
-
 /// Represents an enumeration
 class PodEnum extends PodUserDefinedType {
-
   List<String> values = [];
 
   // custom <class PodEnum>
@@ -294,10 +286,8 @@ class PodEnum extends PodUserDefinedType {
 
 }
 
-
 /// Base class for [PodType]s that may have a fixed size specified
 abstract class FixedSizeType extends PodType {
-
   // custom <class FixedSizeType>
 
   FixedSizeType(id) : super(id);
@@ -305,12 +295,9 @@ abstract class FixedSizeType extends PodType {
   // end <class FixedSizeType>
 
   bool get isFixedSize => true;
-
 }
 
-
 abstract class VariableSizeType extends PodType {
-
   /// If non-0 indicates length capped to [max_length]
   int get maxLength => _maxLength;
 
@@ -331,9 +318,7 @@ abstract class VariableSizeType extends PodType {
   bool get isFixedSize => maxLength != null;
 
   int _maxLength;
-
 }
-
 
 /// Used to define string types, which may have a fixed type.
 ///
@@ -341,7 +326,6 @@ abstract class VariableSizeType extends PodType {
 /// more general string type is so code generators may optimize for speed
 /// by allocating space for strings inline.
 class StrType extends VariableSizeType {
-
   // custom <class StrType>
 
   factory StrType([maxLength, doc]) =>
@@ -362,13 +346,10 @@ class StrType extends VariableSizeType {
 
   /// Cache of all fixed size strings
   static Map<int, StrType> _typeCache = new Map<int, StrType>();
-
 }
-
 
 /// Stores binary data as array of bytes
 class BinaryDataType extends VariableSizeType {
-
   // custom <class BinaryDataType>
 
   factory BinaryDataType([maxLength, doc]) => _typeCache.putIfAbsent(
@@ -389,22 +370,19 @@ class BinaryDataType extends VariableSizeType {
 
   /// Cache of all fixed size BinaryData types
   static Map<int, BinaryDataType> _typeCache = new Map<int, BinaryDataType>();
-
 }
-
 
 /// A [PodType] that is an array of some [referencedType].
 class PodArrayType extends VariableSizeType {
-
-  bool operator==(PodArrayType other) =>
-    identical(this, other) ||
-    _referredType == other._referredType;
-
-  int get hashCode => _referredType.hashCode;
-
   PodType get referredType => _referredType;
 
   // custom <class PodArrayType>
+
+  bool operator ==(other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType && _referredType == other._referredType;
+
+  int get hashCode => _referredType.hashCode;
 
   PodArrayType(referredType, {doc, maxLength})
       : super(_makeTypeId(referredType.id, maxLength), maxLength) {
@@ -416,23 +394,20 @@ class PodArrayType extends VariableSizeType {
       : 'pod_type_array_of_${maxLength}_${referredTypeId.snake}');
 
   toString() => 'PodArrayType($typeName)';
-  get typeName => referredType.typeName;
+
   bool get isFixedSize => maxLength != null;
 
   // end <class PodArrayType>
 
   PodType _referredType;
-
 }
-
 
 /// Combination of owning package name and name of a type within it
 class PodTypeRef extends PodType {
-
-  bool operator==(PodTypeRef other) =>
-    identical(this, other) ||
-    _packageName == other._packageName &&
-    _resolvedType == other._resolvedType;
+  bool operator ==(PodTypeRef other) =>
+      identical(this, other) ||
+      _packageName == other._packageName &&
+          _resolvedType == other._resolvedType;
 
   int get hashCode => hash2(_packageName, _resolvedType);
 
@@ -463,32 +438,27 @@ class PodTypeRef extends PodType {
 
   PackageName _packageName;
   PodType _resolvedType;
-
 }
-
 
 /// A field, which is a named and type entry, in a [PodObject]
 class PodField extends Object with PropertySet {
+  bool operator ==(PodField other) =>
+      identical(this, other) ||
+      _id == other._id &&
+          doc == other.doc &&
+          isIndex == other.isIndex &&
+          _podType == other._podType &&
+          defaultValue == other.defaultValue &&
+          _propertySet == other._propertySet;
 
-  bool operator==(PodField other) =>
-    identical(this, other) ||
-    _id == other._id &&
-    doc == other.doc &&
-    isIndex == other.isIndex &&
-    _podType == other._podType &&
-    defaultValue == other.defaultValue &&
-    _propertySet == other._propertySet;
-
-  int get hashCode => hashObjects([
-    _id,
-    doc,
-    isIndex,
-    defaultValue,
-    _propertySet]);
+  int get hashCode =>
+      hashObjects([_id, doc, isIndex, defaultValue, _propertySet]);
 
   Id get id => _id;
+
   /// Documentation for the field
   String doc;
+
   /// If true the field is defined as index
   bool isIndex = false;
   dynamic defaultValue;
@@ -527,19 +497,18 @@ class PodField extends Object with PropertySet {
   // end <class PodField>
 
   Id _id;
+
   /// Type associated with the field.
   ///
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
   dynamic _podType;
+
   /// Any properties associated with this type
   String _propertySet = 'new PropertySet()';
-
 }
 
-
 class PodObject extends PodUserDefinedType {
-
   List<PodField> fields = [];
 
   // custom <class PodObject>
@@ -582,7 +551,6 @@ class PodObject extends PodUserDefinedType {
 
 }
 
-
 /// Package names are effectively a list of Id isntances.
 ///
 /// They can be constructed from and represented by the common dotted form:
@@ -591,10 +559,8 @@ class PodObject extends PodUserDefinedType {
 ///
 ///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 class PackageName {
-
-  bool operator==(PackageName other) =>
-    identical(this, other) ||
-    const ListEquality().equals(_path, other._path);
+  bool operator ==(PackageName other) =>
+      identical(this, other) || const ListEquality().equals(_path, other._path);
 
   int get hashCode => const ListEquality<Id>().hash(_path).hashCode;
 
@@ -619,19 +585,22 @@ class PackageName {
   // end <class PackageName>
 
   List<Id> _path = [];
-
 }
-
 
 /// Package structure to support organization of pod definitions
 class PodPackage extends Entity with PropertySet {
-
   /// Name of package
   PackageName get name => _name;
+
   /// Packages required by (ie containing referenced types) this package
   List<PodPackage> get imports => _imports;
+
   /// The named and therefore referencable types within the package
   List<PodType> get namedTypes => _namedTypes;
+
+  /// Any properties associated with this type
+  List<PropertyDefinitionSet> get propertyDefinitionSets =>
+      _propertyDefinitionSets;
 
   // custom <class PodPackage>
 
@@ -674,11 +643,24 @@ class PodPackage extends Entity with PropertySet {
   get podEnums => namedTypes.where((t) => t is PodEnum);
 
   validateProperties() {
+    List errors = [];
     _validatePackageProperties();
-    _allTypes.where((t) => t is PodObject) {
-
-    }
+    _namedTypes.where((t) => t is PodUserDefinedType).forEach((var udt) {
+      udt.propertyNames.forEach((var propName) {
+        print('Looking for $propName in $_propertyDefinitionSets');
+        final def = _propertyDefinitionSets.firstWhere((var pds) {
+          final found = pds.udtPropertyDefinitions
+              .any((var pd) => pd.id.camel == propName);
+          print('Looked in all pds for $propName and got $found');
+          return found;
+        }, orElse: () => null);
+        print('Found def $def for $propName');
+      });
+    });
+    print('Found errors: $errors');
   }
+
+  _validatePackageProperties() {}
 
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
@@ -751,6 +733,7 @@ class PodPackage extends Entity with PropertySet {
           'PodPackage named types must be PodObjects or named PodEnums');
     }
     final unique = new Set();
+    print('All types: ${allTypes.map((t) => "$t -> ${t.typeName}")}');
     final duplicate =
         allTypes.firstWhere((t) => !unique.add(t.typeName), orElse: () => null);
     if (duplicate != null) {
@@ -766,130 +749,78 @@ class PodPackage extends Entity with PropertySet {
   PackageName _name;
   List<PodPackage> _imports = [];
   List<PodType> _namedTypes = [];
+
   /// All types within the package including *anonymous* types
   Set _allTypes;
-  /// Any properties associated with this type
   List<PropertyDefinitionSet> _propertyDefinitionSets = [];
-
 }
-
 
 class CharType extends FixedSizeType {
-
   CharType._() : super(new Id('char')) {}
-
 }
-
 
 class DoubleType extends FixedSizeType {
-
   DoubleType._() : super(new Id('double')) {}
-
 }
-
 
 class ObjectIdType extends FixedSizeType {
-
   ObjectIdType._() : super(new Id('object_id')) {}
-
 }
-
 
 class BooleanType extends FixedSizeType {
-
   BooleanType._() : super(new Id('boolean')) {}
-
 }
-
 
 class DateType extends FixedSizeType {
-
   DateType._() : super(new Id('date')) {}
-
 }
-
 
 class NullType extends FixedSizeType {
-
   NullType._() : super(new Id('null')) {}
-
 }
-
 
 class RegexType extends FixedSizeType {
-
   RegexType._() : super(new Id('regex')) {}
-
 }
-
 
 class Int8Type extends FixedSizeType {
-
   Int8Type._() : super(new Id('int8')) {}
-
 }
-
 
 class Int16Type extends FixedSizeType {
-
   Int16Type._() : super(new Id('int16')) {}
-
 }
-
 
 class Int32Type extends FixedSizeType {
-
   Int32Type._() : super(new Id('int32')) {}
-
 }
-
 
 class Int64Type extends FixedSizeType {
-
   Int64Type._() : super(new Id('int64')) {}
-
 }
-
 
 class Uint8Type extends FixedSizeType {
-
   Uint8Type._() : super(new Id('uint8')) {}
-
 }
-
 
 class Uint16Type extends FixedSizeType {
-
   Uint16Type._() : super(new Id('uint16')) {}
-
 }
-
 
 class Uint32Type extends FixedSizeType {
-
   Uint32Type._() : super(new Id('uint32')) {}
-
 }
-
 
 class Uint64Type extends FixedSizeType {
-
   Uint64Type._() : super(new Id('uint64')) {}
-
 }
-
 
 class DateTimeType extends FixedSizeType {
-
   DateTimeType._() : super(new Id('date_time')) {}
-
 }
 
-
 class TimestampType extends FixedSizeType {
-
   TimestampType._() : super(new Id('timestamp')) {}
-
 }
 
 // custom <library ebisu_pod>
@@ -971,22 +902,20 @@ final BinaryData = new BinaryDataType._(null);
 
 // end <library ebisu_pod>
 
-  final Char = new CharType._();
-  final Double = new DoubleType._();
-  final ObjectId = new ObjectIdType._();
-  final Boolean = new BooleanType._();
-  final Date = new DateType._();
-  final Null = new NullType._();
-  final Regex = new RegexType._();
-  final Int8 = new Int8Type._();
-  final Int16 = new Int16Type._();
-  final Int32 = new Int32Type._();
-  final Int64 = new Int64Type._();
-  final Uint8 = new Uint8Type._();
-  final Uint16 = new Uint16Type._();
-  final Uint32 = new Uint32Type._();
-  final Uint64 = new Uint64Type._();
-  final DateTime = new DateTimeType._();
-  final Timestamp = new TimestampType._();
-
-
+final Char = new CharType._();
+final Double = new DoubleType._();
+final ObjectId = new ObjectIdType._();
+final Boolean = new BooleanType._();
+final Date = new DateType._();
+final Null = new NullType._();
+final Regex = new RegexType._();
+final Int8 = new Int8Type._();
+final Int16 = new Int16Type._();
+final Int32 = new Int32Type._();
+final Int64 = new Int64Type._();
+final Uint8 = new Uint8Type._();
+final Uint16 = new Uint16Type._();
+final Uint32 = new Uint32Type._();
+final Uint64 = new Uint64Type._();
+final DateTime = new DateTimeType._();
+final Timestamp = new TimestampType._();

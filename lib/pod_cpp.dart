@@ -30,8 +30,8 @@ class PodCppMapper {
       _header = new Header(path.last)..namespace = ns;
 
       _header
-        ..classes = podObjects.map(_makeClass)
-        ..enums = podEnums.map(_makeEnum);
+        ..classes = podObjects.map(_makeClass).toList()
+        ..enums = podEnums.map(_makeEnum).toList();
 
       for (var type in _package.allTypes) {
         if (type is DateType) {
@@ -50,7 +50,7 @@ class PodCppMapper {
       ..isStruct = true
       ..isStreamable = true
       ..usesStreamers = po.hasArray;
-    result.members = po.fields.map((f) => _makeMember(po, f));
+    result.members = po.fields.map((f) => _makeMember(po, f)).toList();
     return result;
   }
 

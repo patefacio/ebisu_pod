@@ -246,7 +246,6 @@ by allocating space for strings inline.
           class_('pod_array_type')
             ..doc = 'A [PodType] that is an array of some [referencedType].'
             ..extend = 'VariableSizeType'
-            ..hasOpEquals = true
             ..members = [
               member('referred_type')
                 ..type = 'PodType'
@@ -341,7 +340,7 @@ They can be constructed from and represented by the common dotted form:
                 ..access = IA,
               member('property_definition_sets')
                 ..doc = 'Any properties associated with this type'
-                ..access = IA
+                ..access = RO
                 ..type = 'List<PropertyDefinitionSet>'
               ..classInit = [],
             ],

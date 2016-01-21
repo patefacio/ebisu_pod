@@ -84,8 +84,11 @@ main([List<String> args]) {
         ..serializable = true
         ..badProp = false
     ])
+      ..propertyDefinitionSets.add(pds)
       ..serializable = true
       ..badProp = false;
+
+    pkg.validateProperties();
   });
 
 // end <main>
