@@ -990,5 +990,3 @@ final BinaryData = new BinaryDataType._(null);
   final Uint64 = new Uint64Type._();
   final DateTime = new DateTimeType._();
   final Timestamp = new TimestampType._();
-
-
