@@ -142,14 +142,22 @@ code generators.
                 ..type = 'Map<String /* Property Name */, Property>'
                 ..access = IA
                 ..classInit = {},
-              member('supported_properties')
-                ..type = 'List<PropertyDefinitionSet>'
-                ..classInit = [],
             ],
-          class_('package_property_definintion_set')
+          class_('property_definintion_set')
             ..doc =
                 'A collection of properties that may be associated with elements in a [PodPackage]'
+            ..defaultMemberAccess = RO
             ..members = [
+              member('id')
+              ..doc = '''
+Indentifier for the set of properties.
+
+For example, there might be a *capnpPropertyDefinitionSet* designed to
+shape the PODS into something that can code generate *capnp* IDL. In
+that case the fields might have a *numeric* property to correspond to
+the conventinos required by *capnp*.
+'''
+              ..type = 'Id',
               member('field_property_definitions')
                 ..doc = 'Set of [PropertyDefinition]s'
                 ..type = 'Set<PropertyDefinition>'
@@ -331,11 +339,11 @@ They can be constructed from and represented by the common dotted form:
                     'All types within the package including *anonymous* types'
                 ..type = 'Set'
                 ..access = IA,
-              member('property_set')
+              member('property_definition_sets')
                 ..doc = 'Any properties associated with this type'
                 ..access = IA
-                ..type = 'PropertySet'
-                ..classInit = 'new PropertySet()',
+                ..type = 'List<PropertyDefinitionSet>'
+              ..classInit = [],
             ],
         ]
         ..classes.addAll(podFundamentals.map((var t) => class_('${t}_type')

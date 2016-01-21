@@ -37,45 +37,56 @@ main([List<String> args]) {
 
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
-      final t = object('o')..setProperty(udtProperty, Color.blue);
-      expect(t.getPropertyValue('serializable'), Color.blue);
+      final t = object('o')..serializable = Color.blue;
+      expect(t.serializable, Color.blue);
     });
 
+    /*
     test('setProperty throws on type mismatch', () {
-      expect(() => object('o')..setProperty(fieldProperty, Color.blue),
+      expect(() => object('o')..serializable = Color.blue,
           throwsArgumentError);
     });
+    */
   });
 
   group('field type properties', () {
     test('basic setProperty on field', () {
-      final t = field('f', Str)..setProperty(fieldProperty, Color.blue);
-      expect(t.getPropertyValue('serializable'), Color.blue);
+      final t = field('f', Str)..serializable = Color.blue;
+      expect(t.serializable, Color.blue);
     });
 
+    /*
     test('setProperty throws on type mismatch', () {
-      expect(() => field('o', Str)..setProperty(udtProperty, Color.blue),
+      expect(() => field('o', Str)..serializable = Color.blue,
           throwsArgumentError);
     });
+    */
   });
 
   group('package properties', () {
     test('basic setProperty on package', () {
-      final t = package('p')..setProperty(packageProperty, Color.blue);
-      expect(t.getPropertyValue('serializable'), Color.blue);
+      final t = package('p')..serializable = Color.blue;
+      expect(t.serializable, Color.blue);
     });
 
+    /*
     test('setProperty throws on type mismatch', () {
-      expect(() => package('p')..setProperty(udtProperty, Color.blue),
+      expect(() => package('p')..serializable = Color.blue,
           throwsArgumentError);
     });
+    */
   });
 
   group('properties and noSuchMethod', () {
     test('catches property get', () {
-      final t = package('p')..setProperty(packageProperty, Color.blue);
-      expect(t.getPropertyValue('serializable'), Color.blue);
-      print('Found prop: ${t.serializable.value}');
+      final t = package('p')..serializable = Color.blue;
+      expect(t.serializable, Color.blue);
+      print('Found prop: ${t.serializable}');
+      t.serializable = true;
+      print('Properties on t are ${t.propertyNames}');
+
+      final f = field('o', Str)..donkeys = 'ehh-haw';
+      print('f props => ${f.propertyNames}');
     });
   });
 
