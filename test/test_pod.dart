@@ -174,11 +174,12 @@ main([List<String> args]) {
 
   test('fields can be arrays of named types', () {
     final pkg = new PodPackage('foo', namedTypes: [
+      object('other'),
       object('o', [
         field('f', Boolean),
         field('g', array(Boolean)),
         field('h', array(Int32)),
-        field('h', array('o')),
+        field('h', array('other')),
         field(
             'i',
             object('ii', [
@@ -186,18 +187,21 @@ main([List<String> args]) {
             ])),
       ]),
       object('x', [field('x', Boolean)]),
-      object('z', [field('o', 'o')]),
+      object('r', [field('r', array(object('arrobj')))]),
     ]);
 
     // It found all the types - even those defined inline
     expect(darkMatter(pkg.toString()).contains(darkMatter('''
 PodPackage(foo)
+  PodObject(other)
   BooleanType(boolean)
   Int32Type(int32)
   PodObject(iii)
   PodObject(ii)
   PodObject(o)
   PodObject(x)
+  PodObject(arrobj)
+  PodObject(r)
 ''')), true);
 
     expect(pkg.getType('iii').fields.first.podType, Int32);

@@ -688,8 +688,8 @@ class PodPackage extends Entity with PropertySet {
       } else if (podType is PodArrayType) {
         if (podType._referredType is PodTypeRef) {
           podType.referredType = _resolveType(podType._referredType);
-          visitType(podType.referredType);
         }
+        visitType(podType.referredType);
       } else {
         if (!visitedTypes.contains(podType)) {
           if (podType is PodObject) {
