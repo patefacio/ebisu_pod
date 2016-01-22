@@ -164,15 +164,12 @@ class PropertySet {
   noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
       String field = MirrorSystem.getName(invocation.memberName);
-      print('go keys ${_properties.keys.toList()}');
       final prop = _properties[field];
       if (prop != null) return prop;
     } else if (invocation.isSetter &&
         invocation.positionalArguments.length == 1) {
       String field =
           MirrorSystem.getName(invocation.memberName).replaceAll('=', '');
-      print(
-          'Trying to set with $invocation -> ${invocation.namedArguments} pos ${invocation.positionalArguments}');
       _properties[field] = invocation.positionalArguments.first;
       return;
     }
@@ -404,10 +401,11 @@ class PodArrayType extends VariableSizeType {
 
 /// Combination of owning package name and name of a type within it
 class PodTypeRef extends PodType {
-  bool operator ==(PodTypeRef other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      _packageName == other._packageName &&
-          _resolvedType == other._resolvedType;
+      (runtimeType == other.runtimeType &&
+          _packageName == other._packageName &&
+          _resolvedType == other._resolvedType);
 
   int get hashCode => hash2(_packageName, _resolvedType);
 
@@ -647,17 +645,13 @@ class PodPackage extends Entity with PropertySet {
     _validatePackageProperties();
     _namedTypes.where((t) => t is PodUserDefinedType).forEach((var udt) {
       udt.propertyNames.forEach((var propName) {
-        print('Looking for $propName in $_propertyDefinitionSets');
         final def = _propertyDefinitionSets.firstWhere((var pds) {
           final found = pds.udtPropertyDefinitions
               .any((var pd) => pd.id.camel == propName);
-          print('Looked in all pds for $propName and got $found');
           return found;
         }, orElse: () => null);
-        print('Found def $def for $propName');
       });
     });
-    print('Found errors: $errors');
   }
 
   _validatePackageProperties() {}
@@ -733,7 +727,6 @@ class PodPackage extends Entity with PropertySet {
           'PodPackage named types must be PodObjects or named PodEnums');
     }
     final unique = new Set();
-    print('All types: ${allTypes.map((t) => "$t -> ${t.typeName}")}');
     final duplicate =
         allTypes.firstWhere((t) => !unique.add(t.typeName), orElse: () => null);
     if (duplicate != null) {

@@ -56,7 +56,7 @@ code generators.
     ..includesHop = true
     ..license = 'boost'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.3'
+    ..pubSpec.version = '0.0.4'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
@@ -149,7 +149,7 @@ code generators.
             ..defaultMemberAccess = RO
             ..members = [
               member('id')
-              ..doc = '''
+                ..doc = '''
 Indentifier for the set of properties.
 
 For example, there might be a *capnpPropertyDefinitionSet* designed to
@@ -157,14 +157,15 @@ shape the PODS into something that can code generate *capnp* IDL. In
 that case the fields might have a *numeric* property to correspond to
 the conventinos required by *capnp*.
 '''
-              ..type = 'Id',
+                ..type = 'Id',
               member('field_property_definitions')
                 ..doc = 'Set of [PropertyDefinition]s for fields'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',
               member('udt_property_definitions')
-                ..doc = 'Set of [PropertyDefinition]s for udts [objects and enums]'
+                ..doc =
+                    'Set of [PropertyDefinition]s for udts [objects and enums]'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
                 ..classInit = 'new Set()',
@@ -255,7 +256,7 @@ by allocating space for strings inline.
             ..doc =
                 'Combination of owning package name and name of a type within it'
             ..extend = 'PodType'
-            ..hasOpEquals = true
+            ..hasUntypedOpEquals = true
             ..defaultMemberAccess = RO
             ..members = [
               member('package_name')..type = 'PackageName',
@@ -342,7 +343,7 @@ They can be constructed from and represented by the common dotted form:
                 ..doc = 'Any properties associated with this type'
                 ..access = RO
                 ..type = 'List<PropertyDefinitionSet>'
-              ..classInit = [],
+                ..classInit = [],
             ],
         ]
         ..classes.addAll(podFundamentals.map((var t) => class_('${t}_type')
