@@ -371,8 +371,6 @@ class BinaryDataType extends VariableSizeType {
 
 /// A [PodType] that is an array of some [referencedType].
 class PodArrayType extends VariableSizeType {
-  PodType get referredType => _referredType;
-
   // custom <class PodArrayType>
 
   bool operator ==(other) =>
@@ -382,13 +380,20 @@ class PodArrayType extends VariableSizeType {
   int get hashCode => _referredType.hashCode;
 
   PodArrayType(referredType, {doc, maxLength})
-      : super(_makeTypeId(referredType.id, maxLength), maxLength) {
+      : super(
+            _makeTypeId(
+                referredType is String ? makeId(referredType) : referredType.id,
+                maxLength),
+            maxLength) {
     this._referredType = referredType;
   }
 
+  PodType get referredType =>
+      _referredType is PodTypeRef ? _referredType.podType : _referredType;
+
   static _makeTypeId(Id referredTypeId, maxLength) => makeId(maxLength == null
-      ? 'pod_type_array_of_${referredTypeId.snake}'
-      : 'pod_type_array_of_${maxLength}_${referredTypeId.snake}');
+      ? 'array_of_${referredTypeId.snake}'
+      : 'array_of_${maxLength}_${referredTypeId.snake}');
 
   toString() => 'PodArrayType($typeName)';
 
@@ -396,7 +401,11 @@ class PodArrayType extends VariableSizeType {
 
   // end <class PodArrayType>
 
-  PodType _referredType;
+  /// Type associated with the field.
+  ///
+  /// May be a PodType, PodTypeRef, or a String.
+  /// If it is a String it is converted to a PodTypeRef
+  dynamic _referredType;
 }
 
 /// Combination of owning package name and name of a type within it
@@ -845,7 +854,7 @@ PodField field(id, [podType]) =>
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArrayType array(dynamic referredType, {String doc, int maxLength}) =>
+PodArrayType array(dynamic referredType, {doc, int maxLength}) =>
     new PodArrayType(referredType, doc: doc, maxLength: maxLength);
 
 StrType fixedStr(int maxLength) => new StrType(maxLength);

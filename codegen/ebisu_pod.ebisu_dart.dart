@@ -249,8 +249,14 @@ by allocating space for strings inline.
             ..extend = 'VariableSizeType'
             ..members = [
               member('referred_type')
-                ..type = 'PodType'
-                ..access = RO,
+                ..doc = '''
+Type associated with the field.
+
+May be a PodType, PodTypeRef, or a String.
+If it is a String it is converted to a PodTypeRef
+'''
+                ..type = 'dynamic'
+                ..access = IA,
             ],
           class_('pod_type_ref')
             ..doc =

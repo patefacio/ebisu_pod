@@ -24,8 +24,8 @@ class PodCppMapper {
   get header {
     if (_header == null) {
       final path = package.name.path;
-      final podObjects = _package.namedTypes.where((t) => t is PodObject);
-      final podEnums = _package.namedTypes.where((t) => t is PodEnum);
+      final podObjects = _package.allTypes.where((t) => t is PodObject);
+      final podEnums = _package.allTypes.where((t) => t is PodEnum);
       final ns = new Namespace(path.sublist(0, path.length - 1));
       _header = new Header(path.last)..namespace = ns;
 

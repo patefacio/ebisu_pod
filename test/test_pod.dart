@@ -172,5 +172,27 @@ main([List<String> args]) {
     expect(o.fields.last.podType.referredType, o);
   });
 
+  test('fields can be arrays of named types', () {
+    final pkg = new PodPackage('foo', namedTypes: [
+      object('o', [
+        field('f', Boolean),
+        field('g', array(Boolean)),
+        field('h', array(Int32)),
+        field('h', array('o')),
+        field(
+            'i',
+            object('ii', [
+              field('iix', object('iii', [field('iiix', Int32)]))
+            ])),
+      ]),
+      object('x', [field('x', Boolean)]),
+    ]);
+
+    print(pkg);
+    //print(pkg.getType('o'));
+    //print(pkg.getType('x'));
+    //print(pkg.getType('ii'));
+  });
+
 // end <main>
 }
