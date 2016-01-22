@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 // custom <additional imports>
 
+import 'package:ebisu/ebisu.dart';
 import 'package:ebisu_pod/example/balance_sheet.dart';
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:ebisu_pod/pod_cpp.dart';
@@ -58,7 +59,25 @@ main([List<String> args]) {
 
     final pkg = new PodPackage('sample', namedTypes: [po]);
     final mapper = new PodCppMapper(pkg);
-    print(mapper.header.contents);
+    expect(darkMatter(mapper.header.contents).contains(darkMatter('''
+  char char {};
+  double double {};
+  Object_id object_id {};
+  bool boolean {};
+  boost::gregorian::date date {};
+  Null null {};
+  boost::regex regex {};
+  std::int8_t int8 {};
+  std::int16_t int16 {};
+  std::int32_t int32 {};
+  std::int64_t int64 {};
+  std::uint8_t uint8 {};
+  std::uint16_t uint16 {};
+  std::uint32_t uint32 {};
+  std::uint64_t uint64 {};
+  Date_time date_time {};
+  Timestamp timestamp {};
+''')), true);
   });
 
 // end <main>

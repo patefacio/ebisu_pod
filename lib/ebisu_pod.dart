@@ -385,19 +385,29 @@ class PodArrayType extends VariableSizeType {
                 referredType is String ? makeId(referredType) : referredType.id,
                 maxLength),
             maxLength) {
-    this._referredType = referredType;
+    this.referredType = referredType;
   }
 
   PodType get referredType =>
       _referredType is PodTypeRef ? _referredType.podType : _referredType;
 
-  static _makeTypeId(Id referredTypeId, maxLength) => makeId(maxLength == null
-      ? 'array_of_${referredTypeId.snake}'
-      : 'array_of_${maxLength}_${referredTypeId.snake}');
+  set referredType(dynamic referredType) => _referredType = (referredType
+          is PodType ||
+          referredType is PodTypeRef)
+      ? referredType
+      : referredType is String
+          ? new PodTypeRef.fromQualifiedName(referredType)
+          : throw new ArgumentError(
+              'PodArray<referredType> can only be assigned PodType or PodTypeRef '
+              '- not ${referredType.runtimeType}');
 
   toString() => 'PodArrayType($typeName)';
 
   bool get isFixedSize => maxLength != null;
+
+  static _makeTypeId(Id referredTypeId, maxLength) => makeId(maxLength == null
+      ? 'array_of_${referredTypeId.snake}'
+      : 'array_of_${maxLength}_${referredTypeId.snake}');
 
   // end <class PodArrayType>
 
@@ -479,7 +489,7 @@ class PodField extends Object with PropertySet {
   }
 
   set podType(dynamic podType) =>
-      _podType = (podType is PodType || PodType is PodTypeRef)
+      _podType = (podType is PodType || podType is PodTypeRef)
           ? podType
           : podType is String
               ? new PodTypeRef.fromQualifiedName(podType)
@@ -669,10 +679,17 @@ class PodPackage extends Entity with PropertySet {
     Set visitedTypes = new Set();
 
     visitType(podType) {
+      _logger.info('Visiting ${podType.typeName}');
+
       assert(podType != null);
       if (podType is PodTypeRef) {
         podType._resolvedType = _resolveType(podType);
         visitType(podType._resolvedType);
+      } else if (podType is PodArrayType) {
+        if (podType._referredType is PodTypeRef) {
+          podType.referredType = _resolveType(podType._referredType);
+          visitType(podType.referredType);
+        }
       } else {
         if (!visitedTypes.contains(podType)) {
           if (podType is PodObject) {
@@ -681,7 +698,6 @@ class PodPackage extends Entity with PropertySet {
             }
           }
 
-          _logger.info('Visiting ${podType.typeName}');
           if (func != null) func(podType);
           visitedTypes.add(podType);
         }

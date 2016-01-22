@@ -50,6 +50,9 @@ class PodCppMapper {
       ..isStruct = true
       ..isStreamable = true
       ..usesStreamers = po.hasArray;
+    if (po.hasArray) {
+      result.includes.add('ebisu/utils/streamers/vector.hpp');
+    }
     result.members = po.fields.map((f) => _makeMember(po, f)).toList();
     return result;
   }
@@ -98,11 +101,12 @@ class PodCppMapper {
   };
 
   _cppType(PodType podType) {
-    final podTypeName = podType.typeName;
+    final podTypeName = podType is PodArrayType
+        ? podType.referredType.id.snake
+        : podType.typeName;
     var cppType = _cppTypeMap[podTypeName];
-    print('PT $podType => $cppType');
     if (cppType == null) {
-      cppType = defaultNamer.nameClass(podType.id);
+      cppType = defaultNamer.nameClass(makeId(podTypeName));
     }
     return cppType;
   }

@@ -186,12 +186,21 @@ main([List<String> args]) {
             ])),
       ]),
       object('x', [field('x', Boolean)]),
+      object('z', [field('o', 'o')]),
     ]);
 
-    print(pkg);
-    //print(pkg.getType('o'));
-    //print(pkg.getType('x'));
-    //print(pkg.getType('ii'));
+    // It found all the types - even those defined inline
+    expect(darkMatter(pkg.toString()).contains(darkMatter('''
+PodPackage(foo)
+  BooleanType(boolean)
+  Int32Type(int32)
+  PodObject(iii)
+  PodObject(ii)
+  PodObject(o)
+  PodObject(x)
+''')), true);
+
+    expect(pkg.getType('iii').fields.first.podType, Int32);
   });
 
 // end <main>

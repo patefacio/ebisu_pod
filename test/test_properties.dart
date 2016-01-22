@@ -48,12 +48,10 @@ main([List<String> args]) {
     test('catches property get', () {
       final t = package('p')..serializable = Color.blue;
       expect(t.serializable, Color.blue);
-      print('Found prop: ${t.serializable}');
       t.serializable = true;
-      print('Properties on t are ${t.propertyNames}');
-
+      expect(t.propertyNames, ['serializable']);
       final f = field('o', Str)..donkeys = 'ehh-haw';
-      print('f props => ${f.propertyNames}');
+      expect(f.donkeys, 'ehh-haw');
     });
   });
 
