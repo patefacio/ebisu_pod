@@ -5,14 +5,13 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
-
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen(
-      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -56,7 +55,7 @@ code generators.
     ..includesHop = true
     ..license = 'boost'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.6'
+    ..pubSpec.version = '0.0.7'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
