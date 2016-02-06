@@ -172,8 +172,6 @@ class PropertySet {
           MirrorSystem.getName(invocation.memberName).replaceAll('=', '');
       return (_properties[field] = invocation.positionalArguments.first);
     }
-
-    return super.noSuchMethod(invocation);
   }
 
   // end <class PropertySet>
