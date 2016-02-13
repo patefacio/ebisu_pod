@@ -26,7 +26,7 @@ class PodCppMapper {
       final path = package.name.path;
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
-      final ns = new Namespace(path.sublist(0, path.length - 1));
+      final ns = new Namespace(path);
       _header = new Header(path.last)..namespace = ns;
 
       _header
