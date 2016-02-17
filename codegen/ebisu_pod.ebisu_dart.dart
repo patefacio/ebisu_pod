@@ -374,6 +374,7 @@ They can be constructed from and represented by the common dotted form:
           'package:ebisu_pod/ebisu_pod.dart',
           'package:ebisu_cpp/ebisu_cpp.dart',
           'package:id/id.dart',
+          'package:quiver/iterables.dart',
         ]
         ..classes = [
           class_('pod_cpp_mapper')

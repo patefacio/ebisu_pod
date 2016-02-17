@@ -38,8 +38,8 @@ main([List<String> args]) {
 
   test('field types', () {
     final po = object('all_types', [
-      field('char', Char),
-      field('double', Double),
+      field('a_char', Char),
+      field('a_double', Double),
       field('object_id', ObjectId),
       field('boolean', Boolean),
       field('date', Date),
@@ -54,14 +54,24 @@ main([List<String> args]) {
       field('uint32', Uint32),
       field('uint64', Uint64),
       field('date_time', DateTime),
-      field('timestamp', Timestamp)
+      field('timestamp', Timestamp),
+      field('fixed_size_str', fixedStr(10)),
     ]);
 
     final pkg = new PodPackage('sample', namedTypes: [po]);
     final mapper = new PodCppMapper(pkg);
-    expect(darkMatter(mapper.header.contents).contains(darkMatter('''
-  char char {};
-  double double {};
+    final darkContent = darkMatter(mapper.header.contents);
+    expect(
+        darkContent.contains(
+            darkMatter('#include "ebisu/utils/fixed_size_char_array.hpp"')),
+        true);
+    expect(
+        darkContent.contains(darkMatter(
+            'using Str_10_t = ebisu::utils::Fixed_size_char_array<10>;')),
+        true);
+    expect(darkContent.contains(darkMatter('''
+  char a_char {};
+  double a_double {};
   Object_id object_id {};
   bool boolean {};
   boost::gregorian::date date {};
@@ -77,6 +87,8 @@ main([List<String> args]) {
   std::uint64_t uint64 {};
   Date_time date_time {};
   Timestamp timestamp {};
+  Str_10_t fixed_size_str {};
+
 ''')), true);
   });
 

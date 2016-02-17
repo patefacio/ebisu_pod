@@ -334,7 +334,7 @@ class StrType extends VariableSizeType {
 
   toString() => _maxLength == null ? 'Str(VarLen)' : 'StrType($maxLength)';
 
-  get typeName => maxLength == null ? 'str' : 'str($maxLength)';
+  get typeName => maxLength == null ? 'str' : 'str_$maxLength';
 
   // end <class StrType>
 

@@ -5,6 +5,7 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu_cpp/ebisu_cpp.dart';
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:id/id.dart';
+import 'package:quiver/iterables.dart';
 
 // custom <additional imports>
 // end <additional imports>
@@ -26,8 +27,19 @@ class PodCppMapper {
       final path = package.name.path;
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
+      final fixedStrTypes = concat(podObjects.map((po) => po.fields
+          .map((field) => field.podType)
+          .where((pt) => pt is StrType && pt.isFixedSize))).toList();
+
       final ns = new Namespace(path);
       _header = new Header(path.last)..namespace = ns;
+
+      if (fixedStrTypes.isNotEmpty) {
+        header
+          ..includes.add('ebisu/utils/fixed_size_char_array.hpp')
+          ..usings.addAll(fixedStrTypes.map((fst) => using(fst.typeName,
+            'ebisu::utils::Fixed_size_char_array<${fst.maxLength}>')));
+      }
 
       _header
         ..classes = podObjects.map(_makeClass).toList()
@@ -100,13 +112,20 @@ class PodCppMapper {
     'boolean': 'bool',
   };
 
+  final _strNameRe = new RegExp(r'^str_(\d+)$');
+
   _cppType(PodType podType) {
     final podTypeName = podType is PodArrayType
         ? podType.referredType.id.snake
         : podType.typeName;
     var cppType = _cppTypeMap[podTypeName];
     if (cppType == null) {
-      cppType = defaultNamer.nameClass(makeId(podTypeName));
+      final strMatch = _strNameRe.firstMatch(podTypeName);
+      if (strMatch != null) {
+        cppType = '${makeId(podTypeName).capSnake}_t';
+      } else {
+        cppType = defaultNamer.nameClass(makeId(podTypeName));
+      }
     }
     return cppType;
   }
