@@ -27,9 +27,9 @@ class PodCppMapper {
       final path = package.name.path;
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
-      final fixedStrTypes = concat(podObjects.map((po) => po.fields
+      final fixedStrTypes = new Set.from(concat(podObjects.map((po) => po.fields
           .map((field) => field.podType)
-          .where((pt) => pt is StrType && pt.isFixedSize))).toList();
+          .where((pt) => pt is StrType && pt.isFixedSize))));
 
       final ns = new Namespace(path);
       _header = new Header(path.last)..namespace = ns;
@@ -38,7 +38,7 @@ class PodCppMapper {
         header
           ..includes.add('ebisu/utils/fixed_size_char_array.hpp')
           ..usings.addAll(fixedStrTypes.map((fst) => using(fst.typeName,
-            'ebisu::utils::Fixed_size_char_array<${fst.maxLength}>')));
+              'ebisu::utils::Fixed_size_char_array<${fst.maxLength}>')));
       }
 
       _header
