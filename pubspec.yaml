@@ -1,5 +1,5 @@
 name: ebisu_pod
-version: 0.0.8
+version: 0.0.9
 author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/ebisu_pod
 description: >
@@ -15,8 +15,8 @@ dependencies:
 
 # custom <ebisu_pod dependencies>
 
-  ebisu: "^0.6.14"
-  ebisu_cpp: "^0.3.8"
+  ebisu: "^0.6.18"
+  ebisu_cpp: "^0.3.19"
 
 # end <ebisu_pod dependencies>
 
@@ -29,6 +29,9 @@ dev_dependencies:
 # custom <ebisu_pod dev dependencies>
 
   test: "^0.12.0"
+  
+  drudge:
+    git: git://github.com/patefacio/drudge
 
 environment:
   sdk: ">=1.8.0 <2.0.0"

@@ -59,6 +59,7 @@ class PodCppMapper {
 
   _makeClass(PodObject po) {
     final result = new Class(po.id)
+      ..doc = po.doc
       ..isStruct = true
       ..isStreamable = true
       ..usesStreamers = po.hasArray;
