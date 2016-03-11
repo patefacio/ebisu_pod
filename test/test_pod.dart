@@ -27,6 +27,7 @@ main([List<String> args]) {
 
   test('fields carry type info', () {
     final e = enum_('color', ['red', 'white', 'blue']);
+
     expect(field('field', e).podType is PodEnum, true);
     expect(field('field', Char).podType, Char);
     expect(field('field', Double).podType, Double);
@@ -116,6 +117,37 @@ main([List<String> args]) {
       final outerOuter = object('z')..fields = [field('y', outer)];
       expect(outerOuter.isFixedSize, false);
     });
+  });
+
+  test('has/isFixedSizeArray and has/isVariableArray', () {
+    expect(array('x', maxLength:12).isArray, true);
+    expect(array('x', maxLength:12).isFixedSizeArray, true);
+    expect(array('x', maxLength:12).isVariableArray, false);
+
+    expect(array('x').isArray, true);
+    expect(array('x').isFixedSizeArray, false);
+    expect(array('x').isVariableArray, true);
+
+    final hasBoth = object('obj', [
+      field('a1', array(Uint64)),
+      field('a2', array(Uint64, maxLength:10)),
+    ]);
+    final hasFixed = object('obj', [
+      field('a1', array(Uint64)),
+    ]);
+    final hasVariable = object('obj', [
+      field('a1', array(Uint64, maxLength:10)),
+    ]);
+
+    expect(hasBoth.hasFixedSizeArray, true);
+    expect(hasBoth.hasVariableArray, true);
+
+    expect(hasFixed.hasFixedSizeArray, true);
+    expect(hasFixed.hasVariableArray, false);
+
+    expect(hasVariable.hasFixedSizeArray, false);
+    expect(hasVariable.hasVariableArray, true);
+
   });
 
   test('object field types may be anonymous defined or ref', () {

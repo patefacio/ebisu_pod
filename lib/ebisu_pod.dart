@@ -228,6 +228,8 @@ abstract class PodType {
   int get hashCode => _id.hashCode;
 
   get isArray => this is PodArrayType;
+  get isFixedSizeArray => isArray && isFixedSize;
+  get isVariableArray => isArray && !isFixedSize;
   get isObject => this is PodObject;
   bool get isFixedSize;
 
@@ -398,7 +400,7 @@ class PodArrayType extends VariableSizeType {
               'PodArray<referredType> can only be assigned PodType or PodTypeRef '
               '- not ${referredType.runtimeType}');
 
-  toString() => 'PodArrayType($typeName)';
+  toString() => 'PodArrayType($typeName:$maxLength)';
 
   bool get isFixedSize => maxLength != null;
 
@@ -433,6 +435,8 @@ class PodTypeRef extends PodType {
   get isFixedSize => _resolvedType.isFixedSize;
   get doc => _resolvedType.doc;
   get isArray => _resolvedType.isArray;
+  get isFixedSizeArray => _resolvedType.isFixedSizeArray;
+  get isVariableArray => _resolvedType.isVariableArray;
   get isObject => _resolvedType.isObject;
   get podType => _resolvedType == null ? qualifiedTypeName : _resolvedType;
 
@@ -557,8 +561,9 @@ class PodObject extends PodUserDefinedType {
             ])))
       ]);
 
-  bool get hasArray => fields.any((pf) => pf.podType is PodArrayType);
-
+  bool get hasArray => fields.any((pf) => pf.podType.isArray);
+  bool get hasVariableArray => fields.any((pf) => pf.podType.isFixedSize);
+  bool get hasFixedSizeArray => fields.any((pf) => pf.podType.isVariableArray);
   bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
 
   // end <class PodObject>

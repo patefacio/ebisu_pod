@@ -49,13 +49,18 @@ class PodCppMapper {
         if (type is DateType) {
           _header.includes.add('boost/date_time/gregorian/gregorian.hpp');
         }
-        if (type.isArray) {
-          _header.includes.add('ebisu/utils/streamers/vector.hpp');
+        if (type.isVariableArray) {
+          _addVectorIncludes(_header.includes);
+        } else if(type.isFixedSizeArray) {
+          _addArrayIncludes(_header.includes);
         }
       }
     }
     return _header;
   }
+
+  _addVectorIncludes(l) => l.addAll(['ebisu/utils/streamers/vector.hpp', 'vector']);
+  _addArrayIncludes(l) => l.addAll(['ebisu/utils/streamers/array.hpp', 'array']);
 
   _makeClass(PodObject po) {
     final result = new Class(po.id)
@@ -63,8 +68,11 @@ class PodCppMapper {
       ..isStruct = true
       ..isStreamable = true
       ..usesStreamers = po.hasArray;
-    if (po.hasArray) {
-      result.includes.add('ebisu/utils/streamers/vector.hpp');
+    if (po.hasVariableArray) {
+      _addVectorIncludes(result.includes);
+    }
+    if(po.hasFixedSizeArray) {
+      _addArrayIncludes(result.includes);
     }
     result.members = po.fields.map((f) => _makeMember(po, f)).toList();
     return result;
@@ -91,7 +99,9 @@ class PodCppMapper {
     return new Member(field.id)
       ..cppAccess = public
       ..isByRef = true
-      ..type = 'std::vector<$cppType>';
+      ..type = field.podType?.maxLength == null
+          ? 'std::vector<$cppType>'
+          : 'std::array<$cppType, ${field.podType.maxLength}>';
   }
 
   final _cppTypeMap = {

@@ -56,14 +56,21 @@ main([List<String> args]) {
       field('date_time', DateTime),
       field('timestamp', Timestamp),
       field('fixed_size_str', fixedStr(10)),
+      field('fixed_size_double', array(Double, maxLength: 12)),
+      field('var_size_double', array(Double)),
     ]);
 
     final pkg = new PodPackage('sample', namedTypes: [po]);
     final mapper = new PodCppMapper(pkg);
     final darkContent = darkMatter(mapper.header.contents);
     expect(
-        darkContent.contains(
-            darkMatter('#include "ebisu/utils/fixed_size_char_array.hpp"')),
+        [
+          'ebisu/utils/streamers/array.hpp',
+          'ebisu/utils/streamers/vector.hpp',
+          'array',
+          'vector'
+        ].every((i) => darkContent.contains(
+            darkMatter('#include "ebisu/utils/fixed_size_char_array.hpp"'))),
         true);
     expect(
         darkContent.contains(darkMatter(
@@ -88,7 +95,8 @@ main([List<String> args]) {
   Date_time date_time {};
   Timestamp timestamp {};
   Str_10_t fixed_size_str {};
-
+  std::array<double, 12> fixed_size_double {};
+  std::vector<double> var_size_double {};
 ''')), true);
   });
 
