@@ -51,7 +51,7 @@ class PodCppMapper {
         }
         if (type.isVariableArray) {
           _addVectorIncludes(_header.includes);
-        } else if(type.isFixedSizeArray) {
+        } else if (type.isFixedSizeArray) {
           _addArrayIncludes(_header.includes);
         }
       }
@@ -59,8 +59,10 @@ class PodCppMapper {
     return _header;
   }
 
-  _addVectorIncludes(l) => l.addAll(['ebisu/utils/streamers/vector.hpp', 'vector']);
-  _addArrayIncludes(l) => l.addAll(['ebisu/utils/streamers/array.hpp', 'array']);
+  _addVectorIncludes(l) =>
+      l.addAll(['ebisu/utils/streamers/vector.hpp', 'vector']);
+  _addArrayIncludes(l) =>
+      l.addAll(['ebisu/utils/streamers/array.hpp', 'array']);
 
   _makeClass(PodObject po) {
     final result = new Class(po.id)
@@ -71,7 +73,7 @@ class PodCppMapper {
     if (po.hasVariableArray) {
       _addVectorIncludes(result.includes);
     }
-    if(po.hasFixedSizeArray) {
+    if (po.hasFixedSizeArray) {
       _addArrayIncludes(result.includes);
     }
     result.members = po.fields.map((f) => _makeMember(po, f)).toList();

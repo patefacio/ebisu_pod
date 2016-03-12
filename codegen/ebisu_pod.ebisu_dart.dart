@@ -5,13 +5,14 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen(
+      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -99,7 +100,7 @@ code generators.
               member('id')
                 ..doc = 'Id associated with property'
                 ..access = RO
-                ..type = 'Id', // Booya
+                ..type = 'Id',
               member('property_type')
                 ..doc =
                     'What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]'
@@ -214,6 +215,20 @@ the conventinos required by *capnp*.
                 ..doc = 'If non-0 indicates length capped to [max_length]'
                 ..type = 'int'
                 ..access = RO,
+            ],
+          class_('pod_constant')
+            ..doc = 'Represents a constant'
+            ..defaultCtorStyle = requiredParms
+            ..members = [
+              member('id')
+                ..type = 'Id'
+                ..access = RO,
+              member('pod_type')
+                ..doc = 'Type of the constant'
+                ..type = 'PodType',
+              member('value')
+                ..doc = 'Value for the constant'
+                ..type = 'dynamic',
             ],
           class_('str_type')
             ..doc = '''
@@ -334,6 +349,10 @@ They can be constructed from and represented by the common dotted form:
                     'Packages required by (ie containing referenced types) this package'
                 ..type = 'List<PodPackage>'
                 ..classInit = [],
+              member('pod_constants')
+                ..doc = 'Named constants within the package'
+                ..type = 'List<PodConstant>'
+                ..classInit = [],
               member('named_types')
                 ..doc =
                     'The named and therefore referencable types within the package'
@@ -358,7 +377,12 @@ They can be constructed from and represented by the common dotted form:
               cb
                 ..tag = null // No need for custom block
                 ..snippets.add(
-                    "${cls.id.capCamel}._() : super(new Id('${makeId(t).snake}')) {}");
+                    '''
+${cls.id.capCamel}._() : super(new Id('${makeId(t).snake}')) {}
+
+toString() => id.capCamel;
+
+''');
             });
           })))
         ..withCustomBlock(
@@ -408,4 +432,3 @@ ${indentBlock(brCompact(nonGeneratedFiles))}
 
 // custom <ebisuPodEbisuDart global>
 // end <ebisuPodEbisuDart global>
-

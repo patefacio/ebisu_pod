@@ -316,6 +316,27 @@ abstract class VariableSizeType extends PodType {
   int _maxLength;
 }
 
+/// Represents a constant
+class PodConstant {
+  PodConstant(this._id, this.podType, this.value);
+
+  Id get id => _id;
+
+  /// Type of the constant
+  PodType podType;
+
+  /// Value for the constant
+  dynamic value;
+
+  // custom <class PodConstant>
+
+  toString() => 'PodConstant(${id.snake}, $podType, $value)';
+
+  // end <class PodConstant>
+
+  Id _id;
+}
+
 /// Used to define string types, which may have a fixed type.
 ///
 /// The primary purpose for modeling data as fixed size strings over the
@@ -614,6 +635,9 @@ class PodPackage extends Entity with PropertySet {
   /// Packages required by (ie containing referenced types) this package
   List<PodPackage> get imports => _imports;
 
+  /// Named constants within the package
+  List<PodConstant> get podConstants => _podConstants;
+
   /// The named and therefore referencable types within the package
   List<PodType> get namedTypes => _namedTypes;
 
@@ -623,10 +647,14 @@ class PodPackage extends Entity with PropertySet {
 
   // custom <class PodPackage>
 
-  PodPackage(name, {Iterable imports, Iterable<PodType> namedTypes}) {
+  PodPackage(name,
+      {Iterable imports,
+      Iterable<PodConstant> podConstants,
+      Iterable<PodType> namedTypes}) {
     this.name = name;
-    this.imports = (imports != null) ? imports : [];
-    this._namedTypes = (namedTypes != null) ? namedTypes : [];
+    this._imports = imports ?? [];
+    this._podConstants = podConstants ?? [];
+    this._namedTypes = namedTypes ?? [];
     _allTypes = visitTypes(null);
     _checkNamedTypes();
   }
@@ -743,6 +771,11 @@ class PodPackage extends Entity with PropertySet {
 
   get details => brCompact([
         'PodPackage($name)',
+        '--------- imports ---------',
+        indentBlock(br(imports.map((t) => t.toString()))),
+        '--------- podConstants ---------',
+        indentBlock(br(podConstants.map((t) => t.toString()))),
+        '--------- allTypes ---------',
         indentBlock(br(allTypes.map((t) => t.toString()),
             '\n----------------------------------\n'))
       ]);
@@ -768,6 +801,7 @@ class PodPackage extends Entity with PropertySet {
 
   PackageName _name;
   List<PodPackage> _imports = [];
+  List<PodConstant> _podConstants = [];
   List<PodType> _namedTypes = [];
 
   /// All types within the package including *anonymous* types
@@ -777,70 +811,104 @@ class PodPackage extends Entity with PropertySet {
 
 class CharType extends FixedSizeType {
   CharType._() : super(new Id('char')) {}
+
+  toString() => id.capCamel;
 }
 
 class DoubleType extends FixedSizeType {
   DoubleType._() : super(new Id('double')) {}
+
+  toString() => id.capCamel;
 }
 
 class ObjectIdType extends FixedSizeType {
   ObjectIdType._() : super(new Id('object_id')) {}
+
+  toString() => id.capCamel;
 }
 
 class BooleanType extends FixedSizeType {
   BooleanType._() : super(new Id('boolean')) {}
+
+  toString() => id.capCamel;
 }
 
 class DateType extends FixedSizeType {
   DateType._() : super(new Id('date')) {}
+
+  toString() => id.capCamel;
 }
 
 class NullType extends FixedSizeType {
   NullType._() : super(new Id('null')) {}
+
+  toString() => id.capCamel;
 }
 
 class RegexType extends FixedSizeType {
   RegexType._() : super(new Id('regex')) {}
+
+  toString() => id.capCamel;
 }
 
 class Int8Type extends FixedSizeType {
   Int8Type._() : super(new Id('int8')) {}
+
+  toString() => id.capCamel;
 }
 
 class Int16Type extends FixedSizeType {
   Int16Type._() : super(new Id('int16')) {}
+
+  toString() => id.capCamel;
 }
 
 class Int32Type extends FixedSizeType {
   Int32Type._() : super(new Id('int32')) {}
+
+  toString() => id.capCamel;
 }
 
 class Int64Type extends FixedSizeType {
   Int64Type._() : super(new Id('int64')) {}
+
+  toString() => id.capCamel;
 }
 
 class Uint8Type extends FixedSizeType {
   Uint8Type._() : super(new Id('uint8')) {}
+
+  toString() => id.capCamel;
 }
 
 class Uint16Type extends FixedSizeType {
   Uint16Type._() : super(new Id('uint16')) {}
+
+  toString() => id.capCamel;
 }
 
 class Uint32Type extends FixedSizeType {
   Uint32Type._() : super(new Id('uint32')) {}
+
+  toString() => id.capCamel;
 }
 
 class Uint64Type extends FixedSizeType {
   Uint64Type._() : super(new Id('uint64')) {}
+
+  toString() => id.capCamel;
 }
 
 class DateTimeType extends FixedSizeType {
   DateTimeType._() : super(new Id('date_time')) {}
+
+  toString() => id.capCamel;
 }
 
 class TimestampType extends FixedSizeType {
   TimestampType._() : super(new Id('timestamp')) {}
+
+  toString() => id.capCamel;
 }
 
 // custom <library ebisu_pod>
@@ -866,6 +934,9 @@ final DateTimeArray = array(DateTime, doc: 'Array<DateTime>');
 final TimestampArray = array(Timestamp, doc: 'Array<Timestamp>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
+
+PodConstant constant(id, podType, value) =>
+    new PodConstant(makeId(id), podType, value);
 
 PodField field(id, [podType]) =>
     new PodField(makeId(id), podType == null ? Str : podType);

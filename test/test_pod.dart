@@ -120,9 +120,9 @@ main([List<String> args]) {
   });
 
   test('has/isFixedSizeArray and has/isVariableArray', () {
-    expect(array('x', maxLength:12).isArray, true);
-    expect(array('x', maxLength:12).isFixedSizeArray, true);
-    expect(array('x', maxLength:12).isVariableArray, false);
+    expect(array('x', maxLength: 12).isArray, true);
+    expect(array('x', maxLength: 12).isFixedSizeArray, true);
+    expect(array('x', maxLength: 12).isVariableArray, false);
 
     expect(array('x').isArray, true);
     expect(array('x').isFixedSizeArray, false);
@@ -130,14 +130,11 @@ main([List<String> args]) {
 
     final hasBoth = object('obj', [
       field('a1', array(Uint64)),
-      field('a2', array(Uint64, maxLength:10)),
+      field('a2', array(Uint64, maxLength: 10)),
     ]);
-    final hasFixed = object('obj', [
-      field('a1', array(Uint64)),
-    ]);
-    final hasVariable = object('obj', [
-      field('a1', array(Uint64, maxLength:10)),
-    ]);
+    final hasFixed = object('obj', [field('a1', array(Uint64)),]);
+    final hasVariable =
+        object('obj', [field('a1', array(Uint64, maxLength: 10)),]);
 
     expect(hasBoth.hasFixedSizeArray, true);
     expect(hasBoth.hasVariableArray, true);
@@ -147,7 +144,6 @@ main([List<String> args]) {
 
     expect(hasVariable.hasFixedSizeArray, false);
     expect(hasVariable.hasVariableArray, true);
-
   });
 
   test('object field types may be anonymous defined or ref', () {
