@@ -5,14 +5,13 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
-
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen(
-      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -91,6 +90,15 @@ code generators.
             ..hasLibraryScopedValues = true
         ]
         ..classes = [
+          class_('property_error')
+          ..doc = 'Indicates an attempt to access an invalid property'
+          ..defaultCtorStyle = requiredParms
+          ..isImmutable = true
+          ..members = [
+            member('property_type')..type = 'PropertyType',
+            member('item_accessed'),
+            member('property'),
+          ],
           class_('property_definition')
             ..doc =
                 'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'

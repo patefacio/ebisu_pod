@@ -74,6 +74,22 @@ const PropertyType FIELD_PROPERTY = PropertyType.FIELD_PROPERTY;
 ///
 const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
 
+/// Indicates an attempt to access an invalid property
+class PropertyError {
+  const PropertyError(this.propertyType, this.itemAccessed, this.property);
+
+  final PropertyType propertyType;
+  final String itemAccessed;
+  final String property;
+
+  // custom <class PropertyError>
+
+  toString() => 'PropertyError($propertyType, $itemAccessed, $property)';
+
+  // end <class PropertyError>
+
+}
+
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
 class PropertyDefinition {
   bool operator ==(PropertyDefinition other) =>
@@ -172,6 +188,7 @@ class PropertySet {
           MirrorSystem.getName(invocation.memberName).replaceAll('=', '');
       return (_properties[field] = invocation.positionalArguments.first);
     }
+    throw 'Invalid property access ${invocation.memberName} on ${runtimeType}';
   }
 
   // end <class PropertySet>
@@ -619,7 +636,6 @@ class PackageName {
   }
 
   bool get isQualified => path.isNotEmpty;
-
   toString() => path.join('.');
 
   // end <class PackageName>
@@ -689,21 +705,24 @@ class PodPackage extends Entity with PropertySet {
   get podObjects => namedTypes.where((t) => t is PodObject);
   get podEnums => namedTypes.where((t) => t is PodEnum);
 
-  validateProperties() {
+  Iterable<String> get propertyErrors {
     List errors = [];
-    _validatePackageProperties();
+    errors.addAll(_packagePropertyErrors);
     _namedTypes.where((t) => t is PodUserDefinedType).forEach((var udt) {
       udt.propertyNames.forEach((var propName) {
         final def = _propertyDefinitionSets.firstWhere((var pds) {
           final found = pds.udtPropertyDefinitions
               .any((var pd) => pd.id.camel == propName);
           return found;
-        }, orElse: () => null);
+        },
+            orElse: () =>
+            errors.add(new PropertyError(UDT_PROPERTY, udt.id.snake, propName)));
       });
     });
+    return errors;
   }
 
-  _validatePackageProperties() {}
+  Iterable<String> get _packagePropertyErrors => [];
 
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();

@@ -86,7 +86,7 @@ main([List<String> args]) {
       ..serializable = true
       ..badProp = false;
 
-    pkg.validateProperties();
+    print(pkg.propertyErrors);
   });
 
 // end <main>
