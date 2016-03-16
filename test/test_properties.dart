@@ -55,7 +55,7 @@ main([List<String> args]) {
     });
   });
 
-  group('property validations', () {
+  test('property validations', () {
     final fieldProperty = defineFieldProperty(
         'serializable', 'indicates type is serializable',
         isValueValidPredicate: (Color value) => true);
@@ -86,7 +86,19 @@ main([List<String> args]) {
       ..serializable = true
       ..badProp = false;
 
-    print(pkg.propertyErrors);
+    final errors = pkg.propertyErrors;
+    expect(
+        errors.contains(
+            new PropertyError(PACKAGE_PROPERTY, 'my_data', 'badProp')),
+        true);
+    expect(
+        errors.contains(
+            new PropertyError(FIELD_PROPERTY, 'f1', 'badProp')),
+        true);
+    expect(
+        errors.contains(
+            new PropertyError(UDT_PROPERTY, 'o', 'badProp')),
+        true);
   });
 
 // end <main>

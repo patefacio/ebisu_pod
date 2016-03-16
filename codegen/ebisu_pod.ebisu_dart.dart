@@ -94,6 +94,7 @@ code generators.
           ..doc = 'Indicates an attempt to access an invalid property'
           ..defaultCtorStyle = requiredParms
           ..isImmutable = true
+          ..hasOpEquals = true
           ..members = [
             member('property_type')..type = 'PropertyType',
             member('item_accessed'),
@@ -145,6 +146,7 @@ code generators.
           class_('property_set')
             ..doc =
                 'A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]'
+            ..isAbstract = true
             ..members = [
               member('properties')
                 ..type = 'Map<String /* Property Name */, Property>'
@@ -349,7 +351,7 @@ They can be constructed from and represented by the common dotted form:
             ..mixins = ['PropertySet']
             ..defaultMemberAccess = RO
             ..members = [
-              member('name')
+              member('package_name')
                 ..doc = 'Name of package'
                 ..type = 'PackageName',
               member('imports')

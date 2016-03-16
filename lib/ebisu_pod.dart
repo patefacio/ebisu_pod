@@ -78,6 +78,14 @@ const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
 class PropertyError {
   const PropertyError(this.propertyType, this.itemAccessed, this.property);
 
+  bool operator ==(PropertyError other) =>
+      identical(this, other) ||
+      propertyType == other.propertyType &&
+          itemAccessed == other.itemAccessed &&
+          property == other.property;
+
+  int get hashCode => hash3(propertyType, itemAccessed, property);
+
   final PropertyType propertyType;
   final String itemAccessed;
   final String property;
@@ -172,7 +180,7 @@ class Property {
 }
 
 /// A set of properties associated with a [PodTy[e], [PodField] or [PodPackage]
-class PropertySet {
+abstract class PropertySet {
   // custom <class PropertySet>
 
   Iterable get propertyNames => _properties.keys;
@@ -189,6 +197,25 @@ class PropertySet {
       return (_properties[field] = invocation.positionalArguments.first);
     }
     throw 'Invalid property access ${invocation.memberName} on ${runtimeType}';
+  }
+
+  Iterable<String> getPropertyErrors(
+      List<PropertyDefinitionSet> propertyDefinitionSets);
+
+  Iterable<String> _getPropertyErrors(PropertyType propertyType,
+      List<PropertyDefinitionSet> propertyDefinitionSets) {
+    List errors = [];
+    propertyNames.forEach((var propName) {
+      final def = propertyDefinitionSets.firstWhere((var pds) {
+        final found = pds
+            .getPropertyDefinitions(propertyType)
+            .any((var pd) => pd.id.camel == propName);
+        return found;
+      },
+          orElse: () =>
+              errors.add(new PropertyError(propertyType, name, propName)));
+    });
+    return errors;
   }
 
   // end <class PropertySet>
@@ -218,7 +245,16 @@ class PropertyDefinitionSet {
       _packagePropertyDefinitions;
 
   // custom <class PropertyDefinitionSet>
+
   PropertyDefinitionSet(id) : _id = makeId(id);
+
+  Set<PropertyDefinition> getPropertyDefinitions(propertyType) =>
+      propertyType == FIELD_PROPERTY
+          ? _fieldPropertyDefinitions
+          : propertyType == UDT_PROPERTY
+              ? _udtPropertyDefinitions
+              : _packagePropertyDefinitions;
+
   // end <class PropertyDefinitionSet>
 
   Id _id;
@@ -262,6 +298,10 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
 
   PodUserDefinedType(id) : super(id);
+
+  Iterable<String> getPropertyErrors(
+          List<PropertyDefinitionSet> propertyDefinitionSets) =>
+      _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
 
   // end <class PodUserDefinedType>
 
@@ -527,6 +567,10 @@ class PodField extends Object with PropertySet {
     this.podType = podType;
   }
 
+  Iterable<String> getPropertyErrors(
+          List<PropertyDefinitionSet> propertyDefinitionSets) =>
+      _getPropertyErrors(FIELD_PROPERTY, propertyDefinitionSets);
+
   set podType(dynamic podType) =>
       _podType = (podType is PodType || podType is PodTypeRef)
           ? podType
@@ -573,6 +617,18 @@ class PodObject extends PodUserDefinedType {
     if (fields == null) {
       fields = [];
     }
+  }
+
+  /// Returns name of [PodObject] in *snake_case*
+  String get name => _id.snake;
+
+  Iterable<String> _getPropertyErrors(
+      UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
+    List errors =
+        super._getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
+    fields.forEach((field) =>
+        errors.addAll(field.getPropertyErrors(propertyDefinitionSets)));
+    return errors;
   }
 
   bool operator ==(PodObject other) =>
@@ -636,7 +692,7 @@ class PackageName {
   }
 
   bool get isQualified => path.isNotEmpty;
-  toString() => path.join('.');
+  toString() => path.map((id) => id.snake).join('.');
 
   // end <class PackageName>
 
@@ -646,7 +702,7 @@ class PackageName {
 /// Package structure to support organization of pod definitions
 class PodPackage extends Entity with PropertySet {
   /// Name of package
-  PackageName get name => _name;
+  PackageName get packageName => _packageName;
 
   /// Packages required by (ie containing referenced types) this package
   List<PodPackage> get imports => _imports;
@@ -663,11 +719,11 @@ class PodPackage extends Entity with PropertySet {
 
   // custom <class PodPackage>
 
-  PodPackage(name,
+  PodPackage(packageName,
       {Iterable imports,
       Iterable<PodConstant> podConstants,
       Iterable<PodType> namedTypes}) {
-    this.name = name;
+    this.packageName = packageName;
     this._imports = imports ?? [];
     this._podConstants = podConstants ?? [];
     this._namedTypes = namedTypes ?? [];
@@ -675,12 +731,30 @@ class PodPackage extends Entity with PropertySet {
     _checkNamedTypes();
   }
 
+  get name => _packageName.toString();
+
+  Iterable<String> get propertyErrors =>
+      getPropertyErrors(_propertyDefinitionSets);
+
+  Iterable<String> getPropertyErrors(
+          List<PropertyDefinitionSet> propertyDefinitionSets) =>
+      _getPropertyErrors(PACKAGE_PROPERTY, propertyDefinitionSets);
+
+  Iterable<String> _getPropertyErrors(
+      propertyType, List<PropertyDefinitionSet> propertyDefinitionSets) {
+    List errors =
+        super._getPropertyErrors(propertyType, propertyDefinitionSets);
+    allTypes.where((t) => t is PodUserDefinedType).forEach(
+        (t) => errors.addAll(t.getPropertyErrors(propertyDefinitionSets)));
+    return errors;
+  }
+
   set imports(Iterable imports) {
     this._imports = imports;
   }
 
-  set name(name) {
-    this._name = new PackageName(name);
+  set packageName(packageName) {
+    this._packageName = new PackageName(packageName);
   }
 
   PodType getType(String typeName) =>
@@ -704,25 +778,6 @@ class PodPackage extends Entity with PropertySet {
 
   get podObjects => namedTypes.where((t) => t is PodObject);
   get podEnums => namedTypes.where((t) => t is PodEnum);
-
-  Iterable<String> get propertyErrors {
-    List errors = [];
-    errors.addAll(_packagePropertyErrors);
-    _namedTypes.where((t) => t is PodUserDefinedType).forEach((var udt) {
-      udt.propertyNames.forEach((var propName) {
-        final def = _propertyDefinitionSets.firstWhere((var pds) {
-          final found = pds.udtPropertyDefinitions
-              .any((var pd) => pd.id.camel == propName);
-          return found;
-        },
-            orElse: () =>
-            errors.add(new PropertyError(UDT_PROPERTY, udt.id.snake, propName)));
-      });
-    });
-    return errors;
-  }
-
-  Iterable<String> get _packagePropertyErrors => [];
 
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
@@ -818,7 +873,7 @@ class PodPackage extends Entity with PropertySet {
 
   // end <class PodPackage>
 
-  PackageName _name;
+  PackageName _packageName;
   List<PodPackage> _imports = [];
   List<PodConstant> _podConstants = [];
   List<PodType> _namedTypes = [];
