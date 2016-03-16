@@ -24,7 +24,7 @@ class PodCppMapper {
 
   get header {
     if (_header == null) {
-      final path = package.name.path;
+      final path = package.packageName.path;
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
       final fixedStrTypes = new Set.from(concat(podObjects.map((po) => po.fields

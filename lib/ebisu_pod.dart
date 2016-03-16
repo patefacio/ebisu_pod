@@ -819,7 +819,7 @@ class PodPackage extends Entity with PropertySet {
     if (podTypeRef.packageName.isQualified) {
       _logger.info('Look for $podTypeRef in imported packages');
       final package = imports.firstWhere(
-          (package) => package.name == podTypeRef.packageName,
+          (package) => package.packageName == podTypeRef.packageName,
           orElse: () => null);
       found = package._findNamedType(podTypeRef.typeName);
     } else {
