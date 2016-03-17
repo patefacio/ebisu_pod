@@ -91,14 +91,10 @@ main([List<String> args]) {
         errors.contains(
             new PropertyError(PACKAGE_PROPERTY, 'my_data', 'badProp')),
         true);
-    expect(
-        errors.contains(
-            new PropertyError(FIELD_PROPERTY, 'f1', 'badProp')),
+    expect(errors.contains(new PropertyError(FIELD_PROPERTY, 'f1', 'badProp')),
         true);
     expect(
-        errors.contains(
-            new PropertyError(UDT_PROPERTY, 'o', 'badProp')),
-        true);
+        errors.contains(new PropertyError(UDT_PROPERTY, 'o', 'badProp')), true);
   });
 
 // end <main>

@@ -5,13 +5,14 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen(
+      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -63,6 +64,7 @@ code generators.
       library('test_pod'),
       library('test_package'),
       library('test_example'),
+      library('test_max_length'),
       library('test_pod_cpp_mapper'),
       library('test_properties'),
     ]
@@ -91,15 +93,15 @@ code generators.
         ]
         ..classes = [
           class_('property_error')
-          ..doc = 'Indicates an attempt to access an invalid property'
-          ..defaultCtorStyle = requiredParms
-          ..isImmutable = true
-          ..hasOpEquals = true
-          ..members = [
-            member('property_type')..type = 'PropertyType',
-            member('item_accessed'),
-            member('property'),
-          ],
+            ..doc = 'Indicates an attempt to access an invalid property'
+            ..defaultCtorStyle = requiredParms
+            ..isImmutable = true
+            ..hasOpEquals = true
+            ..members = [
+              member('property_type')..type = 'PropertyType',
+              member('item_accessed'),
+              member('property'),
+            ],
           class_('property_definition')
             ..doc =
                 'Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]'
@@ -114,16 +116,13 @@ code generators.
                 ..doc =
                     'What this [PropertyDefinition] is associated with: [PodType], [PodField] or [PodPackage]'
                 ..type = 'PropertyType',
-
               member('doc')
                 ..doc =
                     'Documentation for the [PropertyDefinition]/[Property].',
-
               member('default_value')
                 ..doc =
                     'The default value for a [Property] associated with *this* [PropertyDefinition]'
                 ..type = 'dynamic',
-
               member('is_value_valid_predicate')
                 ..doc =
                     'Predicate to determine of [Property] identified by [PropertyDefinition] is valid'
@@ -215,6 +214,12 @@ the conventinos required by *capnp*.
             ..isAbstract = true
             ..customCodeBlock.snippets.add('bool get isFixedSize => true;'),
           class_('variable_size_type')
+            ..doc = '''
+Provides support for variable sized type like strings and arrays.
+
+A [maxLength] may be associated with the type to indicate it is fixed
+length. Assignment to [maxLength] must be of type _int_ or [PodConstant].
+'''
             ..extend = 'PodType'
             ..isAbstract = true
             ..customCodeBlock
@@ -223,7 +228,7 @@ the conventinos required by *capnp*.
             ..members = [
               member('max_length')
                 ..doc = 'If non-0 indicates length capped to [max_length]'
-                ..type = 'int'
+                ..type = 'dynamic'
                 ..access = RO,
             ],
           class_('pod_constant')
@@ -269,7 +274,12 @@ by allocating space for strings inline.
                 ..classInit = 'new Map<int, BinaryDataType>()',
             ],
           class_('pod_array_type')
-            ..doc = 'A [PodType] that is an array of some [referencedType].'
+            ..doc = '''
+A [PodType] that is an array of some [referencedType].
+
+A [maxLength] may be associated with the type to indicate it is fixed
+length. Assignment to [maxLength] must be of type _int_ or [PodConstant].
+'''
             ..extend = 'VariableSizeType'
             ..members = [
               member('referred_type')
@@ -386,8 +396,7 @@ They can be constructed from and represented by the common dotted form:
             cls.withCustomBlock((cb) {
               cb
                 ..tag = null // No need for custom block
-                ..snippets.add(
-                    '''
+                ..snippets.add('''
 ${cls.id.capCamel}._() : super(new Id('${makeId(t).snake}')) {}
 
 toString() => id.capCamel;

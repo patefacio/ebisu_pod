@@ -185,18 +185,20 @@ abstract class PropertySet {
 
   Iterable get propertyNames => _properties.keys;
 
+  mapProperties(f(propName, property)) =>
+      propertyNames.map((pn) => f(pn, _properties[pn]));
+
   noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
       String field = MirrorSystem.getName(invocation.memberName);
       final prop = _properties[field];
-      if (prop != null) return prop;
+      return prop;
     } else if (invocation.isSetter &&
         invocation.positionalArguments.length == 1) {
       String field =
           MirrorSystem.getName(invocation.memberName).replaceAll('=', '');
       return (_properties[field] = invocation.positionalArguments.first);
     }
-    throw 'Invalid property access ${invocation.memberName} on ${runtimeType}';
   }
 
   Iterable<String> getPropertyErrors(
@@ -254,6 +256,15 @@ class PropertyDefinitionSet {
           : propertyType == UDT_PROPERTY
               ? _udtPropertyDefinitions
               : _packagePropertyDefinitions;
+
+  toString() => brCompact([
+        '---------- udt property definitions ----------',
+        indentBlock(brCompact(udtPropertyDefinitions)),
+        '---------- field property definitions ----------',
+        indentBlock(brCompact(fieldPropertyDefinitions)),
+        '---------- package property definitions ----------',
+        indentBlock(brCompact(packagePropertyDefinitions)),
+      ]);
 
   // end <class PropertyDefinitionSet>
 
@@ -350,13 +361,19 @@ abstract class FixedSizeType extends PodType {
   bool get isFixedSize => true;
 }
 
+/// Provides support for variable sized type like strings and arrays.
+///
+/// A [maxLength] may be associated with the type to indicate it is fixed
+/// length. Assignment to [maxLength] must be of type _int_ or [PodConstant].
 abstract class VariableSizeType extends PodType {
   /// If non-0 indicates length capped to [max_length]
-  int get maxLength => _maxLength;
+  dynamic get maxLength => _maxLength;
 
   // custom <class VariableSizeType>
 
-  VariableSizeType(id, this._maxLength) : super(id);
+  VariableSizeType(id, maxLength) : super(id) {
+    this.maxLength = maxLength;
+  }
 
   bool operator ==(VariableSizeType other) =>
       identical(this, other) ||
@@ -366,11 +383,17 @@ abstract class VariableSizeType extends PodType {
 
   int get hashCode => hash2(_maxLength, super.hashCode);
 
+  set maxLength(maxLength) => _maxLength = (maxLength == null ||
+          maxLength is int ||
+          maxLength is PodConstant)
+      ? maxLength
+      : throw 'maxLength for VariableSizeTypes must be int or PodConstant - not $maxLength';
+
   // end <class VariableSizeType>
 
   bool get isFixedSize => maxLength != null;
 
-  int _maxLength;
+  dynamic _maxLength;
 }
 
 /// Represents a constant
@@ -388,6 +411,8 @@ class PodConstant {
   // custom <class PodConstant>
 
   toString() => 'PodConstant(${id.snake}, $podType, $value)';
+
+  get encodedId => makeId('${id.snake}_${podType.id.snake}_$value');
 
   // end <class PodConstant>
 
@@ -409,8 +434,7 @@ class StrType extends VariableSizeType {
     this.doc = doc;
   }
 
-  static _makeTypeId(maxLength) =>
-      makeId(maxLength == null ? 'str' : 'str_of_${maxLength}');
+  static _makeTypeId(maxLength) => _makePrefixedTypeId('str', maxLength);
 
   toString() => _maxLength == null ? 'Str(VarLen)' : 'StrType($maxLength)';
 
@@ -434,8 +458,7 @@ class BinaryDataType extends VariableSizeType {
     this.doc = doc;
   }
 
-  static _makeTypeId(maxLength) =>
-      makeId(maxLength == null ? 'binary_data' : 'binary_data_of_${maxLength}');
+  static _makeTypeId(maxLength) => _makePrefixedTypeId('binary_data', maxLength);
 
   toString() => 'BinaryDataType($maxLength)';
   get typeName => maxLength == null ? 'binary_data' : 'binary_data($maxLength)';
@@ -447,6 +470,9 @@ class BinaryDataType extends VariableSizeType {
 }
 
 /// A [PodType] that is an array of some [referencedType].
+///
+/// A [maxLength] may be associated with the type to indicate it is fixed
+/// length. Assignment to [maxLength] must be of type _int_ or [PodConstant].
 class PodArrayType extends VariableSizeType {
   // custom <class PodArrayType>
 
@@ -482,9 +508,8 @@ class PodArrayType extends VariableSizeType {
 
   bool get isFixedSize => maxLength != null;
 
-  static _makeTypeId(Id referredTypeId, maxLength) => makeId(maxLength == null
-      ? 'array_of_${referredTypeId.snake}'
-      : 'array_of_${maxLength}_${referredTypeId.snake}');
+  static _makeTypeId(Id referredTypeId, maxLength) => _makePrefixedTypeId(
+      'array_of_${referredTypeId.snake}', maxLength);
 
   // end <class PodArrayType>
 
@@ -648,7 +673,10 @@ class PodObject extends PodUserDefinedType {
 
   toString() => brCompact([
         'PodObject($typeName)',
-        indentBlock(blockComment(doc)),
+        doc ?? indentBlock(blockComment(doc)),
+        '----- properties -----',
+        indentBlock(brCompact(mapProperties((pn, prop) => '$pn -> $prop'))),
+        '----- fields -----',
         indentBlock(brCompact(fields.map((pf) => [
               '${pf.id}:${pf.podType}',
               pf.doc == null ? null : blockComment(pf.doc)
@@ -656,8 +684,8 @@ class PodObject extends PodUserDefinedType {
       ]);
 
   bool get hasArray => fields.any((pf) => pf.podType.isArray);
-  bool get hasVariableArray => fields.any((pf) => pf.podType.isFixedSize);
-  bool get hasFixedSizeArray => fields.any((pf) => pf.podType.isVariableArray);
+  bool get hasVariableArray => fields.any((pf) => pf.podType.isVariableArray);
+  bool get hasFixedSizeArray => fields.any((pf) => pf.podType.isFixedSizeArray);
   bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
 
   // end <class PodObject>
@@ -720,10 +748,12 @@ class PodPackage extends Entity with PropertySet {
   // custom <class PodPackage>
 
   PodPackage(packageName,
-      {Iterable imports,
+      {List<PropertyDefinitionSet> propertyDefinitionSets,
+      Iterable imports,
       Iterable<PodConstant> podConstants,
       Iterable<PodType> namedTypes}) {
     this.packageName = packageName;
+    this._propertyDefinitionSets = propertyDefinitionSets ?? [];
     this._imports = imports ?? [];
     this._podConstants = podConstants ?? [];
     this._namedTypes = namedTypes ?? [];
@@ -839,6 +869,11 @@ class PodPackage extends Entity with PropertySet {
 
   toString() => brCompact([
         'PodPackage($name)',
+        '----- properties -----',
+        indentBlock(brCompact(mapProperties((pn, prop) => '$pn -> $prop'))),
+        '----- pod constants -----',
+        indentBlock(br(podConstants.map((t) => t.toString()))),
+        '----- all types -----',
         indentBlock(
             brCompact(allTypes.map((t) => '${t.runtimeType}(${t.typeName})')))
       ]);
@@ -1017,13 +1052,19 @@ PodField field(id, [podType]) =>
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
-PodArrayType array(dynamic referredType, {doc, int maxLength}) =>
+/// Creates a PodArrayType from [referencedType] with optional [doc] and
+/// [maxLength].
+PodArrayType array(dynamic referredType, {doc, dynamic maxLength}) =>
     new PodArrayType(referredType, doc: doc, maxLength: maxLength);
 
 StrType fixedStr(int maxLength) => new StrType(maxLength);
 
-PodPackage package(packageName, {imports, namedTypes}) =>
-    new PodPackage(packageName, imports: imports, namedTypes: namedTypes);
+PodPackage package(packageName,
+        {propertyDefinitionSets, imports, namedTypes}) =>
+    new PodPackage(packageName,
+        propertyDefinitionSets: propertyDefinitionSets,
+        imports: imports,
+        namedTypes: namedTypes);
 
 _makeValidIdPart(part) => makeId(part);
 _makeValidPath(path) => path.map(_makeValidIdPart).toList();
@@ -1064,6 +1105,12 @@ PropertyDefinition definePackageProperty(id, String doc,
 
 final Str = new StrType._(null);
 final BinaryData = new BinaryDataType._(null);
+
+_makePrefixedTypeId(prefix, maxLength) => makeId(maxLength == null
+      ? prefix
+      : maxLength is int
+          ? '${prefix}_of_${maxLength}'
+          : '${prefix}_of_${maxLength.encodedId.snake}');
 
 // end <library ebisu_pod>
 

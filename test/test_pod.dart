@@ -132,8 +132,8 @@ main([List<String> args]) {
       field('a1', array(Uint64)),
       field('a2', array(Uint64, maxLength: 10)),
     ]);
-    final hasFixed = object('obj', [field('a1', array(Uint64)),]);
-    final hasVariable =
+    final hasVariable = object('obj', [field('a1', array(Uint64)),]);
+    final hasFixed =
         object('obj', [field('a1', array(Uint64, maxLength: 10)),]);
 
     expect(hasBoth.hasFixedSizeArray, true);
@@ -221,6 +221,9 @@ main([List<String> args]) {
     // It found all the types - even those defined inline
     expect(darkMatter(pkg.toString()).contains(darkMatter('''
 PodPackage(foo)
+----- properties -----
+----- pod constants -----
+----- all types -----
   PodObject(other)
   BooleanType(boolean)
   Int32Type(int32)
