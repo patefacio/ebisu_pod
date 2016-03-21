@@ -44,7 +44,6 @@ main([List<String> args]) {
     test('on string with double', () {
       final arr = array(Int32);
       final p = pkg(arr);
-
     });
   });
 

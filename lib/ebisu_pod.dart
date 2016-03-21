@@ -458,7 +458,8 @@ class BinaryDataType extends VariableSizeType {
     this.doc = doc;
   }
 
-  static _makeTypeId(maxLength) => _makePrefixedTypeId('binary_data', maxLength);
+  static _makeTypeId(maxLength) =>
+      _makePrefixedTypeId('binary_data', maxLength);
 
   toString() => 'BinaryDataType($maxLength)';
   get typeName => maxLength == null ? 'binary_data' : 'binary_data($maxLength)';
@@ -467,6 +468,35 @@ class BinaryDataType extends VariableSizeType {
 
   /// Cache of all fixed size BinaryData types
   static Map<int, BinaryDataType> _typeCache = new Map<int, BinaryDataType>();
+}
+
+/// Model related bits
+class BitSetType extends PodType {
+  /// Number of bits in the set
+  int numBits;
+
+  /// Any bit padding after identified [num_bits] bits
+  int rhsPadBits = 0;
+
+  /// Any bit padding in front of identified [num_bits] bits
+  int lhsPadBits = 0;
+
+  // custom <class BitSetType>
+
+  BitSetType(id, this.numBits, {rhsPadBits, lhsPadBits})
+      : super(id),
+        this.rhsPadBits = rhsPadBits ?? 0,
+        this.lhsPadBits = lhsPadBits ?? 0 {}
+
+  bool get isFixedSize => true;
+
+  toString() => brCompact([
+        'BitSet($id:$rhsPadBits:$numBits:$lhsPadBits)',
+        doc == null ? null : indentBlock(blockComment(doc))
+      ]);
+
+  // end <class BitSetType>
+
 }
 
 /// A [PodType] that is an array of some [referencedType].
@@ -508,8 +538,8 @@ class PodArrayType extends VariableSizeType {
 
   bool get isFixedSize => maxLength != null;
 
-  static _makeTypeId(Id referredTypeId, maxLength) => _makePrefixedTypeId(
-      'array_of_${referredTypeId.snake}', maxLength);
+  static _makeTypeId(Id referredTypeId, maxLength) =>
+      _makePrefixedTypeId('array_of_${referredTypeId.snake}', maxLength);
 
   // end <class PodArrayType>
 
@@ -1052,6 +1082,9 @@ PodField field(id, [podType]) =>
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
+BitSetType bitSet(id, numBits, {rhsPadBits, lhsPadBits}) =>
+    new BitSetType(id, numBits, rhsPadBits: rhsPadBits, lhsPadBits: lhsPadBits);
+
 /// Creates a PodArrayType from [referencedType] with optional [doc] and
 /// [maxLength].
 PodArrayType array(dynamic referredType, {doc, dynamic maxLength}) =>
@@ -1107,10 +1140,10 @@ final Str = new StrType._(null);
 final BinaryData = new BinaryDataType._(null);
 
 _makePrefixedTypeId(prefix, maxLength) => makeId(maxLength == null
-      ? prefix
-      : maxLength is int
-          ? '${prefix}_of_${maxLength}'
-          : '${prefix}_of_${maxLength.encodedId.snake}');
+    ? prefix
+    : maxLength is int
+        ? '${prefix}_of_${maxLength}'
+        : '${prefix}_of_${maxLength.encodedId.snake}');
 
 // end <library ebisu_pod>
 

@@ -65,6 +65,7 @@ code generators.
       library('test_package'),
       library('test_example'),
       library('test_max_length'),
+      library('test_bitset'),
       library('test_pod_cpp_mapper'),
       library('test_properties'),
     ]
@@ -272,6 +273,20 @@ by allocating space for strings inline.
                 ..isStatic = true
                 ..type = 'Map<int, BinaryDataType>'
                 ..classInit = 'new Map<int, BinaryDataType>()',
+            ],
+          class_('bit_set_type')
+            ..doc = 'Model related bits'
+            ..extend = 'PodType'
+            ..members = [
+              member('num_bits')
+                ..doc = 'Number of bits in the set'
+                ..type = 'int',
+              member('rhs_pad_bits')
+                ..doc = 'Any bit padding after identified [num_bits] bits'
+                ..classInit = 0,
+              member('lhs_pad_bits')
+                ..doc = 'Any bit padding in front of identified [num_bits] bits'
+                ..classInit = 0,
             ],
           class_('pod_array_type')
             ..doc = '''
