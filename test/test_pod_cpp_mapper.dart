@@ -58,11 +58,13 @@ main([List<String> args]) {
       field('fixed_size_str', fixedStr(10)),
       field('fixed_size_double', array(Double, maxLength: 12)),
       field('var_size_double', array(Double)),
+      bitSetField('bs', 4, rhsPadBits: 2),
     ]);
 
     final pkg = new PodPackage('sample', namedTypes: [po]);
     final mapper = new PodCppMapper(pkg);
     final darkContent = darkMatter(mapper.header.contents);
+
     expect(
         [
           'ebisu/utils/streamers/array.hpp',

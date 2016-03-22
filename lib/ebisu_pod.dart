@@ -1085,6 +1085,18 @@ PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 BitSetType bitSet(id, numBits, {rhsPadBits, lhsPadBits}) =>
     new BitSetType(id, numBits, rhsPadBits: rhsPadBits, lhsPadBits: lhsPadBits);
 
+/// Convenience function for creating a field with same id as bitSet
+///
+/// BitSets are modeled as types which must be named. Fields also require a name
+/// which is almost always the name of the bitset. This function allows:
+///
+///     bitSetField('io_flags', 4)
+///
+///
+PodField bitSetField(id, numBits, {rhsPadBits, lhsPadBits}) => new PodField(
+    makeId(id),
+    bitSet(id, numBits, rhsPadBits: rhsPadBits, lhsPadBits: lhsPadBits));
+
 /// Creates a PodArrayType from [referencedType] with optional [doc] and
 /// [maxLength].
 PodArrayType array(dynamic referredType, {doc, dynamic maxLength}) =>
