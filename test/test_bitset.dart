@@ -22,7 +22,6 @@ main([List<String> args]) {
 // custom <main>
 
   group('bitset', () {
-
     test('basics', () {
       var bs = bitSet('io_flags', 3);
       expect(bs.id, makeId('io_flags'));
@@ -30,25 +29,24 @@ main([List<String> args]) {
     });
 
     test('padding', () {
-      var bs = bitSet('io_flags', 3, rhsPadBits:2);
+      var bs = bitSet('io_flags', 3, rhsPadBits: 2);
       expect(bs.id, makeId('io_flags'));
       expect(bs.numBits, 3);
       expect(bs.rhsPadBits, 2);
       expect(bs.lhsPadBits, 0);
 
-      bs = bitSet('io_flags', 3, lhsPadBits:2);
+      bs = bitSet('io_flags', 3, lhsPadBits: 2);
       expect(bs.id, makeId('io_flags'));
       expect(bs.numBits, 3);
       expect(bs.rhsPadBits, 0);
       expect(bs.lhsPadBits, 2);
 
-      bs = bitSet('io_flags', 3, rhsPadBits:2, lhsPadBits:3)..doc = 'foo';
+      bs = bitSet('io_flags', 3, rhsPadBits: 2, lhsPadBits: 3)..doc = 'foo';
       expect(bs.id, makeId('io_flags'));
       expect(bs.numBits, 3);
       expect(bs.rhsPadBits, 2);
       expect(bs.lhsPadBits, 3);
     });
-
   });
 
 // end <main>

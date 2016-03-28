@@ -93,9 +93,17 @@ class PodCppMapper {
 
   _makeScalarMember(PodObject po, PodField field) {
     var cppType = _cppType(field.podType);
-    return new Member(field.id)
+    final cppMember = new Member(field.id)
       ..cppAccess = public
       ..type = cppType;
+
+    if (field.podType is StrType) {
+      cppMember.isByRef = true;
+    }
+    if (field.defaultValue != null) {
+      cppMember.init = field.defaultValue;
+    }
+    return cppMember;
   }
 
   _makeArrayMember(PodObject po, PodField field) {
@@ -156,4 +164,5 @@ class PodCppMapper {
 }
 
 // custom <library pod_cpp>
+main() => print('done');
 // end <library pod_cpp>
