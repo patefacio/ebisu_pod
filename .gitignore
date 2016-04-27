@@ -13,5 +13,6 @@ build/
 *.js.deps
 *.js.map
 # custom <additional>
+pubspec.lock
 # end <additional>
 
