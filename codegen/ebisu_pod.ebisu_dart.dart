@@ -292,6 +292,32 @@ If it is a String it is converted to a PodTypeRef
                 ..type = 'dynamic'
                 ..access = IA,
             ],
+          class_('pod_map_type')
+            ..doc = '''
+A [PodType] that is a map of some [keyReferencedType] to some [valueReferenceType].
+'''
+            ..extend = 'PodType'
+            ..members = [
+              member('key_referred_type')
+                ..doc = '''
+Type associated with the key field.
+
+May be a PodType, PodTypeRef, or a String.
+If it is a String it is converted to a PodTypeRef
+'''
+                ..type = 'dynamic'
+                ..access = IA,
+              member('value_referred_type')
+                ..doc = '''
+Type associated with the value field.
+
+May be a PodType, PodTypeRef, or a String.
+If it is a String it is converted to a PodTypeRef
+'''
+                ..type = 'dynamic'
+                ..access = IA,
+            ],
+
           class_('pod_type_ref')
             ..doc =
                 'Combination of owning package name and name of a type within it'

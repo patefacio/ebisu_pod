@@ -458,7 +458,8 @@ class BinaryDataType extends VariableSizeType {
     this.doc = doc;
   }
 
-  static _makeTypeId(maxLength) => _makePrefixedTypeId('binary_data', maxLength);
+  static _makeTypeId(maxLength) =>
+      _makePrefixedTypeId('binary_data', maxLength);
 
   toString() => 'BinaryDataType($maxLength)';
   get typeName => maxLength == null ? 'binary_data' : 'binary_data($maxLength)';
@@ -508,8 +509,8 @@ class PodArrayType extends VariableSizeType {
 
   bool get isFixedSize => maxLength != null;
 
-  static _makeTypeId(Id referredTypeId, maxLength) => _makePrefixedTypeId(
-      'array_of_${referredTypeId.snake}', maxLength);
+  static _makeTypeId(Id referredTypeId, maxLength) =>
+      _makePrefixedTypeId('array_of_${referredTypeId.snake}', maxLength);
 
   // end <class PodArrayType>
 
@@ -518,6 +519,24 @@ class PodArrayType extends VariableSizeType {
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
   dynamic _referredType;
+}
+
+/// A [PodType] that is a map of some [keyReferencedType] to some [valueReferenceType].
+class PodMapType extends PodType {
+  // custom <class PodMapType>
+  // end <class PodMapType>
+
+  /// Type associated with the key field.
+  ///
+  /// May be a PodType, PodTypeRef, or a String.
+  /// If it is a String it is converted to a PodTypeRef
+  dynamic _keyReferredType;
+
+  /// Type associated with the value field.
+  ///
+  /// May be a PodType, PodTypeRef, or a String.
+  /// If it is a String it is converted to a PodTypeRef
+  dynamic _valueReferredType;
 }
 
 /// Combination of owning package name and name of a type within it
@@ -1107,10 +1126,10 @@ final Str = new StrType._(null);
 final BinaryData = new BinaryDataType._(null);
 
 _makePrefixedTypeId(prefix, maxLength) => makeId(maxLength == null
-      ? prefix
-      : maxLength is int
-          ? '${prefix}_of_${maxLength}'
-          : '${prefix}_of_${maxLength.encodedId.snake}');
+    ? prefix
+    : maxLength is int
+        ? '${prefix}_of_${maxLength}'
+        : '${prefix}_of_${maxLength.encodedId.snake}');
 
 // end <library ebisu_pod>
 
