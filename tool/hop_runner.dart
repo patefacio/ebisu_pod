@@ -20,6 +20,7 @@ void main(List<String> args) {
         "test/test_package.dart",
         "test/test_example.dart",
         "test/test_max_length.dart",
+        "test/test_bitset.dart",
         "test/test_pod_cpp_mapper.dart",
         "test/test_properties.dart"
       ]));

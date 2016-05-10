@@ -87,17 +87,28 @@ class PodCppMapper {
 
   _makeMember(PodObject po, PodField field) => field.podType.isArray
       ? _makeArrayMember(po, field)
-      : _makeScalarMember(po, field);
+      : field.podType is BitSetType
+          ? new BitSet(field.id, field.podType.numBits)
+          : _makeScalarMember(po, field);
 
   _makeScalarMember(PodObject po, PodField field) {
     var cppType = _cppType(field.podType);
-    return new Member(field.id)
+    final cppMember = new Member(field.id)
       ..cppAccess = public
       ..type = cppType;
+
+    if (field.podType is StrType) {
+      cppMember.isByRef = true;
+    }
+    if (field.defaultValue != null) {
+      cppMember.init = field.defaultValue;
+    }
+    return cppMember;
   }
 
   _makeArrayMember(PodObject po, PodField field) {
     var cppType = _cppType(field.podType);
+
     return new Member(field.id)
       ..cppAccess = public
       ..isByRef = true
@@ -153,4 +164,5 @@ class PodCppMapper {
 }
 
 // custom <library pod_cpp>
+main() => print('done');
 // end <library pod_cpp>

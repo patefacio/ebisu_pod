@@ -5,14 +5,13 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
-
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen(
-      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -65,6 +64,7 @@ code generators.
       library('test_package'),
       library('test_example'),
       library('test_max_length'),
+      library('test_bitset'),
       library('test_pod_cpp_mapper'),
       library('test_properties'),
     ]
@@ -273,6 +273,20 @@ by allocating space for strings inline.
                 ..type = 'Map<int, BinaryDataType>'
                 ..classInit = 'new Map<int, BinaryDataType>()',
             ],
+          class_('bit_set_type')
+            ..doc = 'Model related bits'
+            ..extend = 'PodType'
+            ..members = [
+              member('num_bits')
+                ..doc = 'Number of bits in the set'
+                ..type = 'int',
+              member('rhs_pad_bits')
+                ..doc = 'Any bit padding after identified [num_bits] bits'
+                ..classInit = 0,
+              member('lhs_pad_bits')
+                ..doc = 'Any bit padding in front of identified [num_bits] bits'
+                ..classInit = 0,
+            ],
           class_('pod_array_type')
             ..doc = '''
 A [PodType] that is an array of some [referencedType].
@@ -477,3 +491,4 @@ ${indentBlock(brCompact(nonGeneratedFiles))}
 
 // custom <ebisuPodEbisuDart global>
 // end <ebisuPodEbisuDart global>
+

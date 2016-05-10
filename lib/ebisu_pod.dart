@@ -470,6 +470,35 @@ class BinaryDataType extends VariableSizeType {
   static Map<int, BinaryDataType> _typeCache = new Map<int, BinaryDataType>();
 }
 
+/// Model related bits
+class BitSetType extends PodType {
+  /// Number of bits in the set
+  int numBits;
+
+  /// Any bit padding after identified [num_bits] bits
+  int rhsPadBits = 0;
+
+  /// Any bit padding in front of identified [num_bits] bits
+  int lhsPadBits = 0;
+
+  // custom <class BitSetType>
+
+  BitSetType(id, this.numBits, {rhsPadBits, lhsPadBits})
+      : super(id),
+        this.rhsPadBits = rhsPadBits ?? 0,
+        this.lhsPadBits = lhsPadBits ?? 0 {}
+
+  bool get isFixedSize => true;
+
+  toString() => brCompact([
+        'BitSet($id:$rhsPadBits:$numBits:$lhsPadBits)',
+        doc == null ? null : indentBlock(blockComment(doc))
+      ]);
+
+  // end <class BitSetType>
+
+}
+
 /// A [PodType] that is an array of some [referencedType].
 ///
 /// A [maxLength] may be associated with the type to indicate it is fixed
@@ -1085,6 +1114,21 @@ PodField field(id, [podType]) =>
     new PodField(makeId(id), podType == null ? Str : podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
+
+BitSetType bitSet(id, numBits, {rhsPadBits, lhsPadBits}) =>
+    new BitSetType(id, numBits, rhsPadBits: rhsPadBits, lhsPadBits: lhsPadBits);
+
+/// Convenience function for creating a field with same id as bitSet
+///
+/// BitSets are modeled as types which must be named. Fields also require a name
+/// which is almost always the name of the bitset. This function allows:
+///
+///     bitSetField('io_flags', 4)
+///
+///
+PodField bitSetField(id, numBits, {rhsPadBits, lhsPadBits}) => new PodField(
+    makeId(id),
+    bitSet(id, numBits, rhsPadBits: rhsPadBits, lhsPadBits: lhsPadBits));
 
 /// Creates a PodArrayType from [referencedType] with optional [doc] and
 /// [maxLength].
