@@ -546,7 +546,7 @@ class PodMapType extends PodType {
 
   PodMapType(keyReferredType, valueReferredType, {doc})
       : super(
-            'map_of_${_referredTypeId(keyReferredType)}_to_${_referredTypeId(valueReferredType)}') {
+            'map_of_${_referredTypeId(keyReferredType).snake}_to_${_referredTypeId(valueReferredType).snake}') {
     this.keyReferredType = _normalizeReferredType(keyReferredType);
     this.valueReferredType = _normalizeReferredType(valueReferredType);
     this.doc = doc;

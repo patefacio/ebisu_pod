@@ -106,12 +106,12 @@ main([List<String> args]) {
     expect(stringToDouble.keyReferredType is StrType, true);
     expect(stringToDouble.valueReferredType is DoubleType, true);
 
-    final k = object('k')..fields = [field('x', Int32),];
-    final v = object('v')..fields = [field('x', Timestamp),];
+    final k = object('key_type')..fields = [field('x', Int32),];
+    final v = object('value_type')..fields = [field('x', Timestamp),];
     final m = map(k,v);
     expect(m.keyReferredType is PodObject, true);
-    expect(m.keyReferredType.id.snake, 'k');
-    expect(m.valueReferredType.id.snake, 'v');
+    expect(m.keyReferredType.id.snake, 'key_type');
+    expect(m.valueReferredType.id.snake, 'value_type');
   });
 
   test('isFixedSize tracks size recursively', () {
