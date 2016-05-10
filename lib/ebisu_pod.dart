@@ -555,11 +555,11 @@ class PodMapType extends PodType {
   set keyReferredType(dynamic referredType) =>
       _keyReferredType = _normalizeReferredType(referredType);
 
-  PodType get keyReferredType => _keyReferredType is PodTypeRef
+  get keyReferredType => _keyReferredType is PodTypeRef
       ? _keyReferredType.podType
       : _keyReferredType;
 
-  PodType get valueReferredType => _valueReferredType is PodTypeRef
+  get valueReferredType => _valueReferredType is PodTypeRef
       ? _valueReferredType.podType
       : _valueReferredType;
 
@@ -887,6 +887,15 @@ class PodPackage extends Entity with PropertySet {
           podType.referredType = _resolveType(podType._referredType);
         }
         visitType(podType.referredType);
+      } else if (podType is PodMapType) {
+        if (podType._keyReferredType is PodTypeRef) {
+          podType.keyReferredType = _resolveType(podType._keyReferredType);
+        }
+        visitType(podType.keyReferredType);
+        if (podType._valueReferredType is PodTypeRef) {
+          podType.valueReferredType = _resolveType(podType._valueReferredType);
+        }
+        visitType(podType.valueReferredType);
       } else {
         if (!visitedTypes.contains(podType)) {
           if (podType is PodObject) {
@@ -1196,7 +1205,7 @@ _makePrefixedTypeId(prefix, maxLength) => makeId(maxLength == null
         ? '${prefix}_of_${maxLength}'
         : '${prefix}_of_${maxLength.encodedId.snake}');
 
-_referredTypeId(t) => t is String ? makeId(t) : t.id;
+_referredTypeId(t) => t is String ? makeId(t.replaceAll('.', '_')) : t.id;
 
 _normalizeReferredType(referredType) => (referredType is PodType ||
         referredType is PodTypeRef)

@@ -108,7 +108,7 @@ main([List<String> args]) {
 
     final k = object('key_type')..fields = [field('x', Int32),];
     final v = object('value_type')..fields = [field('x', Timestamp),];
-    final m = map(k,v);
+    final m = map(k, v);
     expect(m.keyReferredType is PodObject, true);
     expect(m.keyReferredType.id.snake, 'key_type');
     expect(m.valueReferredType.id.snake, 'value_type');
