@@ -485,25 +485,15 @@ class PodArrayType extends VariableSizeType {
 
   PodArrayType(referredType, {doc, maxLength})
       : super(
-            _makeTypeId(
-                referredType is String ? makeId(referredType) : referredType.id,
-                maxLength),
-            maxLength) {
+            _makeTypeId(_referredTypeId(referredType), maxLength), maxLength) {
     this.referredType = referredType;
   }
 
   PodType get referredType =>
       _referredType is PodTypeRef ? _referredType.podType : _referredType;
 
-  set referredType(dynamic referredType) => _referredType = (referredType
-          is PodType ||
-          referredType is PodTypeRef)
-      ? referredType
-      : referredType is String
-          ? new PodTypeRef.fromQualifiedName(referredType)
-          : throw new ArgumentError(
-              'PodArray<referredType> can only be assigned PodType or PodTypeRef '
-              '- not ${referredType.runtimeType}');
+  set referredType(dynamic referredType) =>
+      _referredType = _normalizeReferredType(referredType);
 
   toString() => 'PodArrayType($typeName:$maxLength)';
 
@@ -524,6 +514,31 @@ class PodArrayType extends VariableSizeType {
 /// A [PodType] that is a map of some [keyReferencedType] to some [valueReferenceType].
 class PodMapType extends PodType {
   // custom <class PodMapType>
+
+  PodMapType(keyReferredType, valueReferredType, {doc})
+      : super(
+            'map_of_${_referredTypeId(keyReferredType)}_to_${_referredTypeId(valueReferredType)}') {
+    this.keyReferredType = _normalizeReferredType(keyReferredType);
+    this.valueReferredType = _normalizeReferredType(valueReferredType);
+    this.doc = doc;
+  }
+
+  set keyReferredType(dynamic referredType) =>
+      _keyReferredType = _normalizeReferredType(referredType);
+
+  PodType get keyReferredType => _keyReferredType is PodTypeRef
+      ? _keyReferredType.podType
+      : _keyReferredType;
+
+  PodType get valueReferredType => _valueReferredType is PodTypeRef
+      ? _valueReferredType.podType
+      : _valueReferredType;
+
+  set valueReferredType(dynamic referredType) =>
+      _valueReferredType = _normalizeReferredType(referredType);
+
+  toString() => 'PodMapType($keyReferredType:$valueReferredType)';
+
   // end <class PodMapType>
 
   /// Type associated with the key field.
@@ -1076,6 +1091,12 @@ PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 PodArrayType array(dynamic referredType, {doc, dynamic maxLength}) =>
     new PodArrayType(referredType, doc: doc, maxLength: maxLength);
 
+PodMapType map(dynamic keyReferredType, dynamic valueReferredType, {doc}) =>
+    new PodMapType(keyReferredType, valueReferredType, doc: doc);
+
+PodMapType strMap(dynamic valueReferredType, {doc}) =>
+    new PodMapType(Str, valueReferredType, doc: doc);
+
 StrType fixedStr(int maxLength) => new StrType(maxLength);
 
 PodPackage package(packageName,
@@ -1130,6 +1151,17 @@ _makePrefixedTypeId(prefix, maxLength) => makeId(maxLength == null
     : maxLength is int
         ? '${prefix}_of_${maxLength}'
         : '${prefix}_of_${maxLength.encodedId.snake}');
+
+_referredTypeId(t) => t is String ? makeId(t) : t.id;
+
+_normalizeReferredType(referredType) => (referredType is PodType ||
+        referredType is PodTypeRef)
+    ? referredType
+    : referredType is String
+        ? new PodTypeRef.fromQualifiedName(referredType)
+        : throw new ArgumentError(
+            'PodArray<referredType> can only be assigned PodType, PodTypeRef, String - qualified pod name'
+            '- not ${referredType.runtimeType}');
 
 // end <library ebisu_pod>
 

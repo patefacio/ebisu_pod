@@ -94,6 +94,26 @@ main([List<String> args]) {
         true);
   });
 
+  test('map associates key and value types', () {
+    final doubleToDouble = map(Double, Double, doc: 'Double to double');
+    expect(doubleToDouble is PodType, true);
+    expect(doubleToDouble is PodMapType, true);
+    expect(doubleToDouble.keyReferredType is DoubleType, true);
+    expect(doubleToDouble.valueReferredType is DoubleType, true);
+
+    final stringToDouble = strMap(Double, doc: 'Double to double');
+    expect(stringToDouble is PodMapType, true);
+    expect(stringToDouble.keyReferredType is StrType, true);
+    expect(stringToDouble.valueReferredType is DoubleType, true);
+
+    final k = object('k')..fields = [field('x', Int32),];
+    final v = object('v')..fields = [field('x', Timestamp),];
+    final m = map(k,v);
+    expect(m.keyReferredType is PodObject, true);
+    expect(m.keyReferredType.id.snake, 'k');
+    expect(m.valueReferredType.id.snake, 'v');
+  });
+
   test('isFixedSize tracks size recursively', () {
     [Double, ObjectId, Boolean, Date, Null, Regex, Int32, Int64, Timestamp]
         .forEach((var t) {
