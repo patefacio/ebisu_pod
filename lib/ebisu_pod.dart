@@ -342,8 +342,10 @@ class PodEnum extends PodUserDefinedType {
   bool get isFixedSize => true;
 
   toString() => chomp(brCompact([
-        'PodEnum($id:[${values.join(", ")}])',
-        doc == null ? null : blockComment(doc)
+        'PodEnum($id)',
+        indentBlock(
+            brCompact(['----- doc -----', (doc ?? ''), '----- values -----'])),
+        indentBlock(brCompact(values))
       ]));
 
   // end <class PodEnum>
@@ -736,14 +738,17 @@ class PodObject extends PodUserDefinedType {
 
   toString() => brCompact([
         'PodObject($typeName)',
-        doc ?? indentBlock(blockComment(doc)),
-        '----- properties -----',
-        indentBlock(brCompact(mapProperties((pn, prop) => '$pn -> $prop'))),
-        '----- fields -----',
-        indentBlock(brCompact(fields.map((pf) => [
-              '${pf.id}:${pf.podType}',
-              pf.doc == null ? null : blockComment(pf.doc)
-            ])))
+        indentBlock(brCompact([
+          '----- doc -----',
+          doc ?? '',
+          '----- properties -----',
+          indentBlock(brCompact(mapProperties((pn, prop) => '$pn -> $prop'))),
+          '----- fields -----',
+          indentBlock(brCompact(fields.map((pf) => [
+                '${pf.id}:${pf.podType}',
+                pf.doc == null ? null : blockComment(pf.doc)
+              ])))
+        ]))
       ]);
 
   bool get hasArray => fields.any((pf) => pf.podType.isArray);
@@ -819,7 +824,14 @@ class PodPackage extends Entity with PropertySet {
     this._propertyDefinitionSets = propertyDefinitionSets ?? [];
     this._imports = imports ?? [];
     this._podConstants = podConstants ?? [];
-    this._namedTypes = namedTypes ?? [];
+
+    {
+      // Get all named types recursively
+      final nt = new Set.from(namedTypes ?? []);
+      this._imports.forEach((import) => nt.addAll(import.namedTypes));
+      this._namedTypes = new List.from(nt) ?? [];
+    }
+
     _allTypes = visitTypes(null);
     _checkNamedTypes();
   }
@@ -972,7 +984,7 @@ class PodPackage extends Entity with PropertySet {
         allTypes.firstWhere((t) => !unique.add(t.typeName), orElse: () => null);
     if (duplicate != null) {
       throw new ArgumentError(
-          'PodPackage named types must unique - duplicate: $duplicate');
+          'PodPackage named types must be unique - duplicate: $duplicate');
     }
   }
 
@@ -1121,6 +1133,8 @@ PodConstant constant(id, podType, value) =>
 
 PodField field(id, [podType]) =>
     new PodField(makeId(id), podType == null ? Str : podType);
+
+PodField anonymousField(podType) => new PodField(makeId(podType), podType);
 
 PodObject object(id, [fields]) => new PodObject(makeId(id), fields);
 
