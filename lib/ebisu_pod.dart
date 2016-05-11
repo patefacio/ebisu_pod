@@ -806,9 +806,6 @@ class PodPackage extends Entity with PropertySet {
   /// Named constants within the package
   List<PodConstant> get podConstants => _podConstants;
 
-  /// The named and therefore referencable types within the package
-  List<PodType> get namedTypes => _namedTypes;
-
   /// Any properties associated with this type
   List<PropertyDefinitionSet> get propertyDefinitionSets =>
       _propertyDefinitionSets;
@@ -826,10 +823,15 @@ class PodPackage extends Entity with PropertySet {
     this._podConstants = podConstants ?? [];
 
     {
+      namedTypes ??= [];
+
       // Get all named types recursively
-      final nt = new Set.from(namedTypes ?? []);
-      this._imports.forEach((import) => nt.addAll(import.namedTypes));
-      this._namedTypes = new List.from(nt) ?? [];
+      namedTypes.forEach((var t) {
+        final qn = qualifiedName(t.id.snake);
+        assert(!_namedTypesMap.containsKey(qn));
+        _namedTypesMap[qn] = t;
+      });
+      this._imports.forEach((import) => _namedTypesMap.addAll(import._namedTypesMap));
     }
 
     _allTypes = visitTypes(null);
@@ -837,6 +839,10 @@ class PodPackage extends Entity with PropertySet {
   }
 
   get name => _packageName.toString();
+
+  qualifiedName(s) => '$name.$s';
+
+  get namedTypes => _namedTypesMap.values;
 
   Iterable<String> get propertyErrors =>
       getPropertyErrors(_propertyDefinitionSets);
@@ -922,7 +928,7 @@ class PodPackage extends Entity with PropertySet {
       }
     }
 
-    for (var podType in _namedTypes) {
+    for (var podType in namedTypes) {
       visitType(podType);
     }
     return visitedTypes;
@@ -995,7 +1001,9 @@ class PodPackage extends Entity with PropertySet {
   PackageName _packageName;
   List<PodPackage> _imports = [];
   List<PodConstant> _podConstants = [];
-  List<PodType> _namedTypes = [];
+
+  /// The named and therefore referencable types within the package
+  Map<String, PodType> _namedTypesMap = {};
 
   /// All types within the package including *anonymous* types
   Set _allTypes;

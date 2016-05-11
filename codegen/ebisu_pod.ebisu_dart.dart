@@ -413,11 +413,12 @@ They can be constructed from and represented by the common dotted form:
                 ..doc = 'Named constants within the package'
                 ..type = 'List<PodConstant>'
                 ..classInit = [],
-              member('named_types')
+              member('named_types_map')
                 ..doc =
                     'The named and therefore referencable types within the package'
-                ..type = 'List<PodType>'
-                ..classInit = [],
+                ..type = 'Map<String,PodType>'
+                ..access = IA
+                ..classInit = {},
               member('all_types')
                 ..doc =
                     'All types within the package including *anonymous* types'
