@@ -75,6 +75,7 @@ code generators.
           'mirrors',
           'package:ebisu/ebisu.dart',
           'package:id/id.dart',
+          'package:quiver/iterables.dart',
         ]
         ..enums = [
           enum_('property_type')

@@ -6,6 +6,7 @@ import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
 import 'package:logging/logging.dart';
 import 'package:quiver/core.dart';
+import 'package:quiver/iterables.dart';
 
 // custom <additional imports>
 // end <additional imports>
@@ -814,12 +815,15 @@ class PodPackage extends Entity with PropertySet {
 
   PodPackage(packageName,
       {List<PropertyDefinitionSet> propertyDefinitionSets,
-      Iterable imports,
+      Iterable<PodPackage> imports,
       Iterable<PodConstant> podConstants,
       Iterable<PodType> namedTypes}) {
     this.packageName = packageName;
     this._propertyDefinitionSets = propertyDefinitionSets ?? [];
-    this._imports = imports ?? [];
+    imports ??= [];
+    _imports
+      ..addAll(imports)
+      ..addAll(concat(imports.map((PodPackage pkg) => pkg.imports)));
     this._podConstants = podConstants ?? [];
 
     {
@@ -828,10 +832,14 @@ class PodPackage extends Entity with PropertySet {
       // Get all named types recursively
       namedTypes.forEach((var t) {
         final qn = qualifiedName(t.id.snake);
-        assert(!_namedTypesMap.containsKey(qn));
+        if (_namedTypesMap.containsKey(qn)) {
+          throw "Duplicate type in pod package: $qn";
+        }
         _namedTypesMap[qn] = t;
       });
-      this._imports.forEach((import) => _namedTypesMap.addAll(import._namedTypesMap));
+      this
+          ._imports
+          .forEach((PodPackage import) => _namedTypesMap.addAll(import._namedTypesMap));
     }
 
     _allTypes = visitTypes(null);
@@ -941,7 +949,11 @@ class PodPackage extends Entity with PropertySet {
       final package = imports.firstWhere(
           (package) => package.packageName == podTypeRef.packageName,
           orElse: () => null);
-      found = package._findNamedType(podTypeRef.typeName);
+      try {
+        found = package._findNamedType(podTypeRef.typeName);
+      } catch(e) {
+        throw "PodPackage($name) no ${podTypeRef.typeName} in ${namedTypes.map((t) => t.typeName)}";
+      }
     } else {
       _logger.info('Looking for ${podTypeRef.typeName} in *this* package');
       found = _findNamedType(podTypeRef.typeName);
@@ -954,8 +966,13 @@ class PodPackage extends Entity with PropertySet {
     return found;
   }
 
-  _findNamedType(typeName) =>
-      namedTypes.singleWhere((t) => t.typeName == typeName);
+  _findNamedType(typeName) {
+    try {
+      return namedTypes.singleWhere((t) => t.typeName == typeName);
+    } catch (e) {
+      throw 'Could not find single matching type $typeName - excp: $e';
+    }
+  }
 
   toString() => brCompact([
         'PodPackage($name)',
