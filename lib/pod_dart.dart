@@ -28,8 +28,9 @@ class PodDartMapper {
     final path = package.packageName.path;
     final podObjects = _package.allTypes.where((t) => t is PodObject);
     final podEnums = _package.allTypes.where((t) => t is PodEnum);
-    print(path);
-    return library(path.last)..classes.addAll(podObjects.map(_makeClass));
+    return library(path.last)
+      ..classes.addAll(podObjects.map(_makeClass))
+      ..enums.addAll(podEnums.map(_makeEnum));
   }
 
   Class _makeClass(PodObject po) {
@@ -43,6 +44,12 @@ class PodDartMapper {
     return member(field.id)
       ..type = _getType(field.podType)
       ..doc = field.doc;
+  }
+
+  Enum _makeEnum(PodEnum e) {
+    return new Enum(e.id)
+      ..doc = e.doc
+      ..values = e.values;
   }
 
   _getType(PodType t) {

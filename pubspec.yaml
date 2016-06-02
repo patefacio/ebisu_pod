@@ -11,6 +11,9 @@ description: >
   The goal is a simple modeling API that can then be used as inputs to
   code generators.
 
+environment:
+  sdk: '>=1.8.2 <2.0.0'
+
 dependencies:
 
 # custom <ebisu_pod dependencies>
