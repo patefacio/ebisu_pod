@@ -837,9 +837,8 @@ class PodPackage extends Entity with PropertySet {
         }
         _namedTypesMap[qn] = t;
       });
-      this
-          ._imports
-          .forEach((PodPackage import) => _namedTypesMap.addAll(import._namedTypesMap));
+      this._imports.forEach(
+          (PodPackage import) => _namedTypesMap.addAll(import._namedTypesMap));
     }
 
     _allTypes = visitTypes(null);
@@ -951,7 +950,7 @@ class PodPackage extends Entity with PropertySet {
           orElse: () => null);
       try {
         found = package._findNamedType(podTypeRef.typeName);
-      } catch(e) {
+      } catch (e) {
         throw "PodPackage($name) no ${podTypeRef.typeName} in ${namedTypes.map((t) => t.typeName)}";
       }
     } else {

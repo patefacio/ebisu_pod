@@ -5,13 +5,14 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+
 // custom <additional imports>
 // end <additional imports>
 final _logger = new Logger('ebisuPodEbisuDart');
 
 main(List<String> args) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.onRecord.listen(
+      (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
   useDartFormatter = true;
   String here = absolute(Platform.script.toFilePath());
@@ -66,6 +67,7 @@ code generators.
       library('test_max_length'),
       library('test_bitset'),
       library('test_pod_cpp_mapper'),
+      library('test_pod_dart_mapper'),
       library('test_properties'),
     ]
     ..libraries = [
@@ -332,7 +334,6 @@ If it is a String it is converted to a PodTypeRef
                 ..type = 'dynamic'
                 ..access = IA,
             ],
-
           class_('pod_type_ref')
             ..doc =
                 'Combination of owning package name and name of a type within it'
@@ -452,6 +453,25 @@ toString() => id.capCamel;
                   final clsName = clsId.capCamel;
                   return "final $clsName = new ${clsName}Type._();";
                 })))),
+      library('pod_dart')
+        ..doc = 'Consistent mapping of pod to dart classes'
+        ..imports = [
+          'package:ebisu/ebisu.dart',
+          'package:ebisu/ebisu_dart_meta.dart',
+          'package:ebisu_pod/ebisu_pod.dart',
+        ]
+        ..classes = [
+          class_('pod_dart_mapper')
+            ..doc =
+                'Given pod package maps definitions to dart classes/libraries'
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('package')
+                ..doc = 'Package to generate dart code for'
+                ..type = 'PodPackage'
+                ..ctors = ['']
+            ],
+        ],
       library('pod_cpp')
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'
         ..imports = [

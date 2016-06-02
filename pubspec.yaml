@@ -15,7 +15,7 @@ dependencies:
 
 # custom <ebisu_pod dependencies>
 
-  ebisu: "^0.6.18"
+  ebisu: "^0.6.18"    
   ebisu_cpp: "^0.3.20"
 
 # end <ebisu_pod dependencies>
@@ -41,7 +41,9 @@ environment:
 dependency_overrides:
 # custom <ebisu_pod dependency overrides>
 
-#  ebisu:
+  ebisu:
+    git: git://github.com/patefacio/ebisu
+
 #    path: ../ebisu
 
 #  ebisu_cpp:
