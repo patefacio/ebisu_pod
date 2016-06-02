@@ -50,8 +50,17 @@ holding.''',
         ..doc = 'Type of the portfolio account',
       field('descr')..doc = 'Description of the account',
       field('stout', Boolean)..doc = 'Is it a beefy account',
+      field('num_symbols', Int32)..doc = 'Number of symbols in account',
     ]
 ]);
+
+final dossier = new PodPackage('dossier', imports: [
+  balanceSheet,
+], namedTypes: [
+  object('dossier', [
+    field('portfolio_account', array('bs.balance_sheet.portfolio_account')),
+  ])]);
+
 
 // end <library balance_sheet>
 
@@ -62,7 +71,9 @@ main([List<String> args]) {
       (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.INFO;
 
-  print(balanceSheet.details);
+  //  print(balanceSheet.details);
+
+  print(dossier.details);
 
 // end <main>
 }

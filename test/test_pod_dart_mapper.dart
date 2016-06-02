@@ -22,8 +22,7 @@ main([List<String> args]) {
   Logger.root.level = Level.OFF;
 // custom <main>
 
-  final bs = balanceSheet;
-  final mapper = new PodDartMapper(balanceSheet);
+  final mapper = new PodDartMapper(dossier);
 
   print(mapper.createLibraries().map((lib) => lib.tar));
 
