@@ -18,8 +18,13 @@ class PodDartMapper {
   // custom <class PodDartMapper>
 
   List<Library> createLibraries() {
-    final result =
-        package.imports.fold([], (prev, pkg) => prev..add(_createLibrary(pkg)));
+    final result = [];
+    final uniquePackages = new Set();
+    package.imports.forEach((PodPackage pkg) {
+      if(uniquePackages.add(pkg)) {
+        result.add(_createLibrary(pkg));
+      }
+    });
     result.add(_createLibrary(package));
     return result;
   }
@@ -40,7 +45,6 @@ class PodDartMapper {
   }
 
   Member _makeClassMember(PodField field) {
-    print('Making field ${field.podType}');
     return member(field.id)
       ..type = _getType(field.podType)
       ..doc = field.doc;
