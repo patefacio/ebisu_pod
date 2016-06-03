@@ -32,8 +32,8 @@ class PodDartMapper {
   Library _createLibrary(PodPackage package) {
     final path = package.packageName.path;
     return library(path.last)
-      ..classes.addAll(_package.localPodObjects.map(_makeClass))
-      ..enums.addAll(_package.localPodEnums.map(_makeEnum))
+      ..classes.addAll(package.localPodObjects.map(_makeClass))
+      ..enums.addAll(package.localPodEnums.map(_makeEnum))
       ..importAndExportAll(package.imports
           .map((pkg) => '${pkg.packageName.path.last.snake}.dart'));
   }
