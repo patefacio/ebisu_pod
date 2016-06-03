@@ -21,7 +21,7 @@ class PodDartMapper {
     final result = [];
     final uniquePackages = new Set();
     package.imports.forEach((PodPackage pkg) {
-      if(uniquePackages.add(pkg)) {
+      if (uniquePackages.add(pkg)) {
         result.add(_createLibrary(pkg));
       }
     });
@@ -35,7 +35,9 @@ class PodDartMapper {
     final podEnums = _package.allTypes.where((t) => t is PodEnum);
     return library(path.last)
       ..classes.addAll(podObjects.map(_makeClass))
-      ..enums.addAll(podEnums.map(_makeEnum));
+      ..enums.addAll(podEnums.map(_makeEnum))
+      ..importAndExportAll(package.imports
+          .map((pkg) => '${pkg.packageName.path.last.snake}.dart'));
   }
 
   Class _makeClass(PodObject po) {
