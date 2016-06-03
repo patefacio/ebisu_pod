@@ -836,6 +836,7 @@ class PodPackage extends Entity with PropertySet {
           throw "Duplicate type in pod package: $qn";
         }
         _namedTypesMap[qn] = t;
+        _localNamedTypesMap[qn] = t;
       });
       this._imports.forEach(
           (PodPackage import) => _namedTypesMap.addAll(import._namedTypesMap));
@@ -850,6 +851,7 @@ class PodPackage extends Entity with PropertySet {
   qualifiedName(s) => '$name.$s';
 
   get namedTypes => _namedTypesMap.values;
+  get localNamedTypes => _localNamedTypesMap.values;
 
   Iterable<String> get propertyErrors =>
       getPropertyErrors(_propertyDefinitionSets);
@@ -896,6 +898,9 @@ class PodPackage extends Entity with PropertySet {
 
   get podObjects => namedTypes.where((t) => t is PodObject);
   get podEnums => namedTypes.where((t) => t is PodEnum);
+
+  get localPodObjects => localNamedTypes.where((t) => t is PodObject);
+  get localPodEnums => localNamedTypes.where((t) => t is PodEnum);
 
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
@@ -1019,6 +1024,9 @@ class PodPackage extends Entity with PropertySet {
   List<PodConstant> _podConstants = [];
 
   /// The named and therefore referencable types within the package
+  Map<String, PodType> _localNamedTypesMap = {};
+
+  /// The named and therefore referencable types within the package including imported types
   Map<String, PodType> _namedTypesMap = {};
 
   /// All types within the package including *anonymous* types

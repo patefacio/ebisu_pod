@@ -31,11 +31,9 @@ class PodDartMapper {
 
   Library _createLibrary(PodPackage package) {
     final path = package.packageName.path;
-    final podObjects = _package.allTypes.where((t) => t is PodObject);
-    final podEnums = _package.allTypes.where((t) => t is PodEnum);
     return library(path.last)
-      ..classes.addAll(podObjects.map(_makeClass))
-      ..enums.addAll(podEnums.map(_makeEnum))
+      ..classes.addAll(_package.localPodObjects.map(_makeClass))
+      ..enums.addAll(_package.localPodEnums.map(_makeEnum))
       ..importAndExportAll(package.imports
           .map((pkg) => '${pkg.packageName.path.last.snake}.dart'));
   }
@@ -59,8 +57,9 @@ class PodDartMapper {
   }
 
   _getType(PodType t) {
-    if (t is PodArrayType)
-      return 'List';
+    if (t is PodArrayType) return 'List<${_getType(t.referredType)}>';
+    if (t is PodMapType)
+      return 'Map<${_getType(t.keyReferredType)}, ${_getType(t.valueReferredType)}>';
     else if (t is PodObject || t is PodEnum)
       return t.id.capCamel;
     else if (t is DateType)

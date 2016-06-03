@@ -24,7 +24,6 @@ main([List<String> args]) {
 
   final mapper = new PodDartMapper(dossier);
 
-  print(mapper.createLibraries().map((lib) => lib.tar));
 
 // end <main>
 }
