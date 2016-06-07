@@ -635,11 +635,9 @@ class PodField extends Object with PropertySet {
           doc == other.doc &&
           isIndex == other.isIndex &&
           _podType == other._podType &&
-          defaultValue == other.defaultValue &&
-          _propertySet == other._propertySet;
+          defaultValue == other.defaultValue;
 
-  int get hashCode =>
-      hashObjects([_id, doc, isIndex, defaultValue, _propertySet]);
+  int get hashCode => hash4(_id, doc, isIndex, defaultValue);
 
   Id get id => _id;
 
@@ -694,9 +692,6 @@ class PodField extends Object with PropertySet {
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
   dynamic _podType;
-
-  /// Any properties associated with this type
-  String _propertySet = 'new PropertySet()';
 }
 
 class PodObject extends PodUserDefinedType {

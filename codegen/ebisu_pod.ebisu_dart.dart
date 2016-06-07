@@ -367,10 +367,6 @@ If it is a String it is converted to a PodTypeRef
                 ..isInHashCode = false
                 ..access = IA,
               member('default_value')..type = 'dynamic',
-              member('property_set')
-                ..doc = 'Any properties associated with this type'
-                ..access = IA
-                ..classInit = 'new PropertySet()',
             ],
           class_('pod_object')
             ..extend = 'PodUserDefinedType'

@@ -24,6 +24,5 @@ main([List<String> args]) {
 
   final mapper = new PodDartMapper(dossier);
 
-
 // end <main>
 }
