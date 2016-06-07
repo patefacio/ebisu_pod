@@ -569,6 +569,8 @@ class PodMapType extends PodType {
   set valueReferredType(dynamic referredType) =>
       _valueReferredType = _normalizeReferredType(referredType);
 
+  bool get isFixedSize => false;
+
   toString() => 'PodMapType($keyReferredType:$valueReferredType)';
 
   // end <class PodMapType>
