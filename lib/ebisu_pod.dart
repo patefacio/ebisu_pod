@@ -186,6 +186,8 @@ abstract class PropertySet {
 
   Iterable get propertyNames => _properties.keys;
 
+  String get name;
+
   mapProperties(f(propName, property)) =>
       propertyNames.map((pn) => f(pn, _properties[pn]));
 
@@ -209,14 +211,16 @@ abstract class PropertySet {
       List<PropertyDefinitionSet> propertyDefinitionSets) {
     List errors = [];
     propertyNames.forEach((var propName) {
-      final def = propertyDefinitionSets.firstWhere((var pds) {
+      final matching = propertyDefinitionSets.firstWhere((var pds) {
         final found = pds
             .getPropertyDefinitions(propertyType)
             .any((var pd) => pd.id.camel == propName);
         return found;
-      },
-          orElse: () =>
-              errors.add(new PropertyError(propertyType, runtimeType, propName)));
+      }, orElse: () => null);
+
+      if (matching == null) {
+        errors.add(new PropertyError(propertyType, this.name, propName));
+      }
     });
     return errors;
   }
@@ -314,6 +318,8 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
   Iterable<String> getPropertyErrors(
           List<PropertyDefinitionSet> propertyDefinitionSets) =>
       _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
+
+  get name => _id.snake;
 
   // end <class PodUserDefinedType>
 
@@ -680,7 +686,7 @@ class PodField extends Object with PropertySet {
   bool get isFixedSize => podType.isFixedSize;
 
   /// Returns name of [PodField] in *snake_case*
-  String get name => _id.snake;
+  get name => _id.snake;
 
   /// Returns type of [PodField]
   String get typeName => podType.typeName;
@@ -706,9 +712,6 @@ class PodObject extends PodUserDefinedType {
       fields = [];
     }
   }
-
-  /// Returns name of [PodObject] in *snake_case*
-  String get name => _id.snake;
 
   Iterable<String> _getPropertyErrors(
       UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
