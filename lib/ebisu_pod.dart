@@ -216,7 +216,7 @@ abstract class PropertySet {
         return found;
       },
           orElse: () =>
-              errors.add(new PropertyError(propertyType, name, propName)));
+              errors.add(new PropertyError(propertyType, runtimeType, propName)));
     });
     return errors;
   }
