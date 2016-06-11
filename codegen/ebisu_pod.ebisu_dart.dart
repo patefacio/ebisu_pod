@@ -153,7 +153,7 @@ code generators.
               member('properties')
                 ..type = 'Map<String /* Property Name */, Property>'
                 ..access = IA
-                ..classInit = {},
+                ..init = {},
             ],
           class_('property_definition_set')
             ..doc =
@@ -174,18 +174,18 @@ the conventinos required by *capnp*.
                 ..doc = 'Set of [PropertyDefinition]s for fields'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
-                ..classInit = 'new Set()',
+                ..init = 'new Set()',
               member('udt_property_definitions')
                 ..doc =
                     'Set of [PropertyDefinition]s for udts [objects and enums]'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
-                ..classInit = 'new Set()',
+                ..init = 'new Set()',
               member('package_property_definitions')
                 ..doc = 'Set of [PropertyDefinition]s for packages'
                 ..type = 'Set<PropertyDefinition>'
                 ..access = RO
-                ..classInit = 'new Set()',
+                ..init = 'new Set()',
             ],
           class_('pod_type')
             ..doc = 'Base class for all [PodType]s'
@@ -208,7 +208,7 @@ the conventinos required by *capnp*.
             ..members = [
               member('values')
                 ..type = 'List<String>'
-                ..classInit = [],
+                ..init = [],
             ],
           class_('fixed_size_type')
             ..doc =
@@ -263,7 +263,7 @@ by allocating space for strings inline.
                 ..access = IA
                 ..isStatic = true
                 ..type = 'Map<int, StrType>'
-                ..classInit = 'new Map<int, StrType>()',
+                ..init = 'new Map<int, StrType>()',
             ],
           class_('binary_data_type')
             ..doc = 'Stores binary data as array of bytes'
@@ -274,7 +274,7 @@ by allocating space for strings inline.
                 ..access = IA
                 ..isStatic = true
                 ..type = 'Map<int, BinaryDataType>'
-                ..classInit = 'new Map<int, BinaryDataType>()',
+                ..init = 'new Map<int, BinaryDataType>()',
             ],
           class_('bit_set_type')
             ..doc = 'Model related bits'
@@ -285,10 +285,10 @@ by allocating space for strings inline.
                 ..type = 'int',
               member('rhs_pad_bits')
                 ..doc = 'Any bit padding after identified [num_bits] bits'
-                ..classInit = 0,
+                ..init = 0,
               member('lhs_pad_bits')
                 ..doc = 'Any bit padding in front of identified [num_bits] bits'
-                ..classInit = 0,
+                ..init = 0,
             ],
           class_('pod_array_type')
             ..doc = '''
@@ -355,7 +355,7 @@ If it is a String it is converted to a PodTypeRef
               member('doc')..doc = 'Documentation for the field',
               member('is_index')
                 ..doc = 'If true the field is defined as index'
-                ..classInit = false,
+                ..init = false,
               member('pod_type')
                 ..doc = '''
 Type associated with the field.
@@ -373,7 +373,7 @@ If it is a String it is converted to a PodTypeRef
             ..members = [
               member('fields')
                 ..type = 'List<PodField>'
-                ..classInit = [],
+                ..init = [],
             ],
           class_('package_name')
             ..doc = '''
@@ -389,7 +389,7 @@ They can be constructed from and represented by the common dotted form:
             ..members = [
               member('path')
                 ..type = 'List<Id>'
-                ..classInit = []
+                ..init = []
                 ..access = RO,
             ],
           class_('pod_package')
@@ -406,23 +406,23 @@ They can be constructed from and represented by the common dotted form:
                 ..doc =
                     'Packages required by (ie containing referenced types) this package'
                 ..type = 'List<PodPackage>'
-                ..classInit = [],
+                ..init = [],
               member('pod_constants')
                 ..doc = 'Named constants within the package'
                 ..type = 'List<PodConstant>'
-                ..classInit = [],
+                ..init = [],
               member('local_named_types_map')
                 ..doc =
                     'The named and therefore referencable types within the package'
                 ..type = 'Map<String,PodType>'
                 ..access = IA
-                ..classInit = {},
+                ..init = {},
               member('named_types_map')
                 ..doc =
                     'The named and therefore referencable types within the package including imported types'
                 ..type = 'Map<String,PodType>'
                 ..access = IA
-                ..classInit = {},
+                ..init = {},
               member('all_types')
                 ..doc =
                     'All types within the package including *anonymous* types'
@@ -432,7 +432,7 @@ They can be constructed from and represented by the common dotted form:
                 ..doc = 'Any properties associated with this type'
                 ..access = RO
                 ..type = 'List<PropertyDefinitionSet>'
-                ..classInit = [],
+                ..init = [],
             ],
         ]
         ..classes.addAll(podFundamentals.map((var t) => class_('${t}_type')
@@ -503,7 +503,7 @@ toString() => id.capCamel;
         ]
     ];
 
-  ebisu.generate();
+  ebisu.generate(generateDrudge:false);
 
   _logger.warning('''
 **** NON GENERATED FILES ****

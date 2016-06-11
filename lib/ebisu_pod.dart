@@ -225,6 +225,13 @@ abstract class PropertySet {
     return errors;
   }
 
+  get propertyDetails => brCompact([
+        name,
+        '--- properties ---',
+        indentBlock(
+            brCompact(_properties.keys.map((p) => '$p -> ${_properties[p]}'))),
+      ]);
+
   // end <class PropertySet>
 
   Map<String /* Property Name */, Property> _properties = {};
@@ -678,8 +685,10 @@ class PodField extends Object with PropertySet {
                   '- not ${podType.runtimeType}');
 
   toString() => brCompact([
-        'PodField($id:$podType:default=$defaultValue)',
-        indentBlock(blockComment(doc))
+        'PodField($id:$podType)',
+        indentBlock('default=$defaultValue'),
+        indentBlock(blockComment(doc)),
+        indentBlock(propertyDetails),
       ]);
 
   /// Returns true if the type is fixed size
@@ -745,10 +754,7 @@ class PodObject extends PodUserDefinedType {
           '----- properties -----',
           indentBlock(brCompact(mapProperties((pn, prop) => '$pn -> $prop'))),
           '----- fields -----',
-          indentBlock(brCompact(fields.map((pf) => [
-                '${pf.id}:${pf.podType}',
-                pf.doc == null ? null : blockComment(pf.doc)
-              ])))
+          indentBlock(brCompact(fields))
         ]))
       ]);
 

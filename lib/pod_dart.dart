@@ -85,4 +85,13 @@ class PodDartMapper {
 }
 
 // custom <library pod_dart>
+
+final constructionPropertyDefinitionSet =
+    new PropertyDefinitionSet('construction_props')
+      ..fieldPropertyDefinitions.addAll([
+        defineFieldProperty(
+            'is_required', 'indicates field is required in ctor',
+            defaultValue: true, isValueValidPredicate: (bool) => true)
+      ]);
+
 // end <library pod_dart>
