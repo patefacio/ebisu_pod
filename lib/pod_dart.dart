@@ -4,9 +4,12 @@ library ebisu_pod.pod_dart;
 import 'package:ebisu/ebisu.dart';
 import 'package:ebisu/ebisu_dart_meta.dart';
 import 'package:ebisu_pod/ebisu_pod.dart';
+import 'package:logging/logging.dart';
 
 // custom <additional imports>
 // end <additional imports>
+
+final _logger = new Logger('pod_dart');
 
 /// Given pod package maps definitions to dart classes/libraries
 class PodDartMapper {
@@ -44,8 +47,15 @@ class PodDartMapper {
       ..members.addAll(po.fields.map(_makeClassMember));
   }
 
+  _initMember(PodField field) => field.podType is PodMapType
+      ? {}
+      : field.podType is PodArrayType ? [] : null;
+
   Member _makeClassMember(PodField field) {
+    _logger.info('PodField ${field.id} type is ${field.podType.runtimeType}'
+        ' => ${_initMember(field)}');
     return member(field.id)
+      ..init = _initMember(field)
       ..type = _getType(field.podType)
       ..doc = field.doc;
   }

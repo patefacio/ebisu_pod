@@ -53,7 +53,6 @@ code generators.
   String _topDir = dirname(dirname(here));
   useDartFormatter = true;
   System ebisu = system('ebisu_pod')
-    ..includesHop = true
     ..license = 'boost'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
     ..pubSpec.version = '0.0.9'
@@ -457,6 +456,7 @@ toString() => id.capCamel;
                 })))),
       library('pod_dart')
         ..doc = 'Consistent mapping of pod to dart classes'
+        ..includesLogger = true
         ..imports = [
           'package:ebisu/ebisu.dart',
           'package:ebisu/ebisu_dart_meta.dart',

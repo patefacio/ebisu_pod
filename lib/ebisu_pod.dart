@@ -1,7 +1,7 @@
 library ebisu_pod.ebisu_pod;
 
 import 'dart:mirrors';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'package:ebisu/ebisu.dart';
 import 'package:id/id.dart';
 import 'package:logging/logging.dart';
@@ -33,11 +33,11 @@ class PropertyType implements Comparable<PropertyType> {
   String toString() {
     switch (this) {
       case UDT_PROPERTY:
-        return "UDT_PROPERTY";
+        return "udt_property";
       case FIELD_PROPERTY:
-        return "FIELD_PROPERTY";
+        return "field_property";
       case PACKAGE_PROPERTY:
-        return "PACKAGE_PROPERTY";
+        return "package_property";
     }
     return null;
   }
@@ -45,11 +45,11 @@ class PropertyType implements Comparable<PropertyType> {
   static PropertyType fromString(String s) {
     if (s == null) return null;
     switch (s) {
-      case "UDT_PROPERTY":
+      case "udt_property":
         return UDT_PROPERTY;
-      case "FIELD_PROPERTY":
+      case "field_property":
         return FIELD_PROPERTY;
-      case "PACKAGE_PROPERTY":
+      case "package_property":
         return PACKAGE_PROPERTY;
       default:
         return null;
