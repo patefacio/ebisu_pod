@@ -201,12 +201,20 @@ the conventinos required by *capnp*.
             ..isAbstract = true
             ..mixins = ['PropertySet']
             ..members = [],
+          class_('enum_value')
+            ..doc = 'Combines the enumerant id and optionally a doc string'
+            ..hasOpEquals = true
+            ..members = [
+              member('id')..type = 'Id',
+              member('doc')..doc = 'Description of enumerant',
+            ],
           class_('pod_enum')
             ..doc = 'Represents an enumeration'
             ..extend = 'PodUserDefinedType'
             ..members = [
               member('values')
-                ..type = 'List<String>'
+                ..type = 'List<EnumValue>'
+                ..access = RO
                 ..init = [],
             ],
           class_('fixed_size_type')
@@ -459,7 +467,8 @@ toString() => id.capCamel;
         ..includesLogger = true
         ..imports = [
           'package:ebisu/ebisu.dart',
-          'package:ebisu/ebisu_dart_meta.dart',
+          "'package:ebisu/ebisu_dart_meta.dart' hide EnumValue",
+          "'package:ebisu/ebisu_dart_meta.dart' as ebisu show EnumValue",
           'package:ebisu_pod/ebisu_pod.dart',
         ]
         ..classes = [
@@ -471,7 +480,9 @@ toString() => id.capCamel;
               member('package')
                 ..doc = 'Package to generate dart code for'
                 ..type = 'PodPackage'
-                ..ctors = ['']
+                ..ctors = [''],
+              member('class_to_object_map')..init = {},
+              member('member_to_field_map')..init = {},
             ],
         ],
       library('pod_cpp')
@@ -479,7 +490,8 @@ toString() => id.capCamel;
         ..imports = [
           'package:ebisu/ebisu.dart',
           'package:ebisu_pod/ebisu_pod.dart',
-          'package:ebisu_cpp/ebisu_cpp.dart',
+          "'package:ebisu_cpp/ebisu_cpp.dart' hide EnumValue",
+          "'package:ebisu_cpp/ebisu_cpp.dart' as ebisu_cpp show EnumValue",
           'package:id/id.dart',
           'package:quiver/iterables.dart',
         ]
@@ -503,7 +515,7 @@ toString() => id.capCamel;
         ]
     ];
 
-  ebisu.generate(generateDrudge:false);
+  ebisu.generate(generateDrudge: false);
 
   _logger.warning('''
 **** NON GENERATED FILES ****

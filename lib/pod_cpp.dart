@@ -2,7 +2,8 @@
 library ebisu_pod.pod_cpp;
 
 import 'package:ebisu/ebisu.dart';
-import 'package:ebisu_cpp/ebisu_cpp.dart';
+import 'package:ebisu_cpp/ebisu_cpp.dart' as ebisu_cpp show EnumValue;
+import 'package:ebisu_cpp/ebisu_cpp.dart' hide EnumValue;
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:id/id.dart';
 import 'package:quiver/iterables.dart';
@@ -83,7 +84,8 @@ class PodCppMapper {
   _makeEnum(PodEnum pe) => new Enum(pe.id)
     ..isStreamable = true
     ..isClass = true
-    ..values = pe.values;
+    ..values =
+        pe.values.map((ev) => new ebisu_cpp.EnumValue(ev.id)..doc = ev.doc);
 
   _makeMember(PodObject po, PodField field) => field.podType.isArray
       ? _makeArrayMember(po, field)

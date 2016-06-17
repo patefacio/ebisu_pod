@@ -2,7 +2,8 @@
 library ebisu_pod.pod_dart;
 
 import 'package:ebisu/ebisu.dart';
-import 'package:ebisu/ebisu_dart_meta.dart';
+import 'package:ebisu/ebisu_dart_meta.dart' as ebisu show EnumValue;
+import 'package:ebisu/ebisu_dart_meta.dart' hide EnumValue;
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:logging/logging.dart';
 
@@ -17,6 +18,8 @@ class PodDartMapper {
 
   /// Package to generate dart code for
   PodPackage get package => _package;
+  Map get classToObjectMap => _classToObjectMap;
+  Map get memberToFieldMap => _memberToFieldMap;
 
   // custom <class PodDartMapper>
 
@@ -42,28 +45,39 @@ class PodDartMapper {
   }
 
   Class _makeClass(PodObject po) {
-    return class_(po.id)
+    final result = class_(po.id)
       ..doc = po.doc
+      ..withCtor('', (Ctor ctor) => ctor.isConst = false)
       ..members.addAll(po.fields.map(_makeClassMember));
+    classToObjectMap[result] = po;
+    return result;
   }
 
   _initMember(PodField field) => field.podType is PodMapType
       ? {}
-      : field.podType is PodArrayType ? [] : null;
+      : field.podType is PodArrayType
+          ? []
+          : field.podType is PodObject
+              ? 'new ${field.podType.id.capCamel}()'
+              : null;
 
   Member _makeClassMember(PodField field) {
     _logger.info('PodField ${field.id} type is ${field.podType.runtimeType}'
         ' => ${_initMember(field)}');
-    return member(field.id)
-      ..init = _initMember(field)
+    final result = member(field.id)
+      ..ctorInit = _initMember(field)
+      ..isFinal = false
       ..type = _getType(field.podType)
       ..doc = field.doc;
+    memberToFieldMap[result] = field;
+    return result;
   }
 
   Enum _makeEnum(PodEnum e) {
     return new Enum(e.id)
       ..doc = e.doc
-      ..values = e.values;
+      ..values =
+          e.values.map((ev) => new ebisu.EnumValue(ev.id, ev.doc)).toList();
   }
 
   _getType(PodType t) {
@@ -92,16 +106,10 @@ class PodDartMapper {
   // end <class PodDartMapper>
 
   PodPackage _package;
+  Map _classToObjectMap = {};
+  Map _memberToFieldMap = {};
 }
 
 // custom <library pod_dart>
-
-final constructionPropertyDefinitionSet =
-    new PropertyDefinitionSet('construction_props')
-      ..fieldPropertyDefinitions.addAll([
-        defineFieldProperty(
-            'is_required', 'indicates field is required in ctor',
-            defaultValue: true, isValueValidPredicate: (bool) => true)
-      ]);
 
 // end <library pod_dart>

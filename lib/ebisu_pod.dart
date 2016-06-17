@@ -332,9 +332,29 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
 
 }
 
+/// Combines the enumerant id and optionally a doc string
+class EnumValue {
+  bool operator ==(EnumValue other) =>
+      identical(this, other) || id == other.id && doc == other.doc;
+
+  int get hashCode => hash2(id, doc);
+
+  Id id;
+
+  /// Description of enumerant
+  String doc;
+
+  // custom <class EnumValue>
+
+  EnumValue(id, [this.doc]) : id = makeId(id);
+
+  // end <class EnumValue>
+
+}
+
 /// Represents an enumeration
 class PodEnum extends PodUserDefinedType {
-  List<String> values = [];
+  List<EnumValue> get values => _values;
 
   // custom <class PodEnum>
 
@@ -347,11 +367,19 @@ class PodEnum extends PodUserDefinedType {
   int get hashCode =>
       hash2(super.hashCode, const ListEquality<String>().hash(values).hashCode);
 
-  PodEnum(id, [this.values]) : super(id) {
-    if (values == null) {
-      values = [];
-    }
+  PodEnum(id, [Iterable values]) : super(id) {
+    this.values = values;
   }
+
+  set values(Iterable values) {
+    this._values = values?.map(_makeEv)?.toList() ?? [];
+  }
+
+  static EnumValue _makeEv(dynamic v) => v is EnumValue
+      ? v
+      : v is String || v is Id
+          ? new EnumValue(v)
+          : throw 'EnumValue must be String, Id or EnumValue: $v';
 
   bool get isFixedSize => true;
 
@@ -364,6 +392,7 @@ class PodEnum extends PodUserDefinedType {
 
   // end <class PodEnum>
 
+  List<EnumValue> _values = [];
 }
 
 /// Base class for [PodType]s that may have a fixed size specified
@@ -1267,6 +1296,8 @@ _normalizeReferredType(referredType) => (referredType is PodType ||
         : throw new ArgumentError(
             'PodArray<referredType> can only be assigned PodType, PodTypeRef, String - qualified pod name'
             '- not ${referredType.runtimeType}');
+
+EnumValue ev(id, [doc]) => new EnumValue(id, doc);
 
 // end <library ebisu_pod>
 
