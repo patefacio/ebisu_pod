@@ -24,11 +24,34 @@ class PodDartMapper {
 
   // custom <class PodDartMapper>
 
-  List<Library> createLibraries() {
-    final result = [];
-    result.add(_createLibrary(package));
-    result.add(_createCoverageTestLibrary(package));
-    return result;
+  List<Library> createLibraries() => [_createLibrary(package)];
+
+  List<Library> createCoverageTestLibraries() =>
+      [_createCoverageTestLibrary(package)];
+
+  static String _enumTest(PodEnum pe) {
+    final name = pe.id.capCamel;
+    return brCompact([
+      """
+test('$name values', () =>
+  expect($name.values.every((v) => v.compareTo(v) == 0), true));
+
+test('$name values other', () =>
+  expect($name.values.every((v) =>
+    $name.values.every((v2) => identical(v,v2) ||
+      (v2.compareTo(v) != 0 && v.compareTo(v2) != 0))), true));
+
+test('$name to/from json', () =>
+  expect($name.values.every((v) => $name.fromJson(v.toJson()) == v), true));
+
+test('$name to/from string', () =>
+  expect($name.values.every((v) => $name.fromString(v.toString()) == v), true));
+
+test('$name hashCode', () =>
+  expect($name.values.every((v) => v.hashCode == v.value), true));
+
+""",
+    ]);
   }
 
   Library _createCoverageTestLibrary(PodPackage package) {
@@ -38,9 +61,17 @@ class PodDartMapper {
     return library('test_coverage_${path.last.snake}')
       ..imports.add(join(relPath, libName))
       ..withMainCustomBlock((CodeBlock cb) {
-        cb.snippets.add('''
-print("good");
-''');
+        final enums = package.localNamedTypes.where((nt) => nt is PodEnum);
+        final objects = package.localNamedTypes.where((nt) => nt is PodObject);
+        cb.snippets.add(brCompact([
+          enums.isNotEmpty
+              ? '''
+group('enum coverage', () {
+${brCompact(enums.map(_enumTest))}
+});
+'''
+              : null
+        ]));
       })
       ..isTest = true;
   }
