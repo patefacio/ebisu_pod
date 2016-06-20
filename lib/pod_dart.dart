@@ -46,6 +46,9 @@ expect(obj1.hashCode, obj2.hashCode);
 expect(obj2, obj3);
 expect(obj2.hashCode, obj3.hashCode);
 expect($name.fromJson(obj1.toJson()), obj1);
+expect($name.fromJson(JSON.encode(obj1.toJson())), obj1);
+expect($name.fromJson(null), null);
+expect(obj1.toString() is String, true);
 });
 '''
     ]);
@@ -82,6 +85,7 @@ test('$name hashCode', () =>
     final libName = '${package.packageName.path.last.snake}.dart';
     return library('test_coverage_${path.last.snake}')
       ..imports.add(join(relPath, libName))
+      ..imports.add('dart:convert')
       ..withMainCustomBlock((CodeBlock cb) {
         final enums = package.localNamedTypes.where((nt) => nt is PodEnum);
         cb.snippets.add(brCompact([
