@@ -25,12 +25,6 @@ class PodDartMapper {
 
   List<Library> createLibraries() {
     final result = [];
-    final uniquePackages = new Set();
-    package.imports.forEach((PodPackage pkg) {
-      if (uniquePackages.add(pkg)) {
-        result.add(_createLibrary(pkg));
-      }
-    });
     result.add(_createLibrary(package));
     return result;
   }
@@ -41,7 +35,12 @@ class PodDartMapper {
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
       ..importAndExportAll(package.imports
-          .map((pkg) => '${pkg.packageName.path.last.snake}.dart'));
+          .map((PodPackage pkg) {
+            final relPath = pkg.getProperty('relativePath');
+            final importPath = relPath == null ? '' :
+              '$relPath/';
+            return '$importPath${pkg.packageName.path.last.snake}.dart';
+          }));
   }
 
   Class _makeClass(PodObject po) {

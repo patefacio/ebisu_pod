@@ -191,18 +191,9 @@ abstract class PropertySet {
   mapProperties(f(propName, property)) =>
       propertyNames.map((pn) => f(pn, _properties[pn]));
 
-  noSuchMethod(Invocation invocation) {
-    if (invocation.isGetter) {
-      String field = MirrorSystem.getName(invocation.memberName);
-      final prop = _properties[field];
-      return prop;
-    } else if (invocation.isSetter &&
-        invocation.positionalArguments.length == 1) {
-      String field =
-          MirrorSystem.getName(invocation.memberName).replaceAll('=', '');
-      return (_properties[field] = invocation.positionalArguments.first);
-    }
-  }
+  setProperty(String propName, propValue) => _properties[propName] = propValue;
+
+  getProperty(String propName) => _properties[propName];
 
   Iterable<String> getPropertyErrors(
       List<PropertyDefinitionSet> propertyDefinitionSets);

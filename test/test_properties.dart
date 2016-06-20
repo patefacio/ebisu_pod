@@ -25,33 +25,33 @@ main([List<String> args]) {
 
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
-      final t = object('o')..serializable = Color.blue;
-      expect(t.serializable, Color.blue);
+      final t = object('o')..setProperty('serializable', Color.blue);
+      expect(t.getProperty('serializable'), Color.blue);
     });
   });
 
   group('field type properties', () {
     test('basic setProperty on field', () {
-      final t = field('f', Str)..serializable = Color.blue;
-      expect(t.serializable, Color.blue);
+      final t = field('f', Str)..setProperty('serializable', Color.blue);
+      expect(t.getProperty('serializable'), Color.blue);
     });
   });
 
   group('package properties', () {
     test('basic setProperty on package', () {
-      final t = package('p')..serializable = Color.blue;
-      expect(t.serializable, Color.blue);
+      final t = package('p')..setProperty('serializable', Color.blue);
+      expect(t.getProperty('serializable'), Color.blue);
     });
   });
 
   group('properties and noSuchMethod', () {
     test('catches property get', () {
-      final t = package('p')..serializable = Color.blue;
-      expect(t.serializable, Color.blue);
-      t.serializable = true;
+      final t = package('p')..setProperty('serializable', Color.blue);
+      expect(t.getProperty('serializable'), Color.blue);
+      t.setProperty('serializable', true);
       expect(t.propertyNames, ['serializable']);
-      final f = field('o', Str)..donkeys = 'ehh-haw';
-      expect(f.donkeys, 'ehh-haw');
+      final f = field('o', Str)..setProperty('donkeys', 'ehh-haw');
+      expect(f.getProperty('donkeys'), 'ehh-haw');
     });
   });
 
@@ -76,15 +76,13 @@ main([List<String> args]) {
     final pkg = package('my_data', namedTypes: [
       object('o', [
         field('f1', Int32)
-          ..serializable = true
-          ..badProp = false
-      ])
-        ..serializable = true
-        ..badProp = false
+          ..setProperty('serializable', true)
+          ..setProperty('badProp', false)
+      ])..setProperty('serializable', true)..setProperty('badProp', false)
     ])
       ..propertyDefinitionSets.add(pds)
-      ..serializable = true
-      ..badProp = false;
+      ..setProperty('serializable', true)
+      ..setProperty('badProp', false);
 
     final errors = pkg.propertyErrors;
     expect(
