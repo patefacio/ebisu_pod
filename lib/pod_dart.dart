@@ -29,6 +29,28 @@ class PodDartMapper {
   List<Library> createCoverageTestLibraries() =>
       [_createCoverageTestLibrary(package)];
 
+  static String _objectTest(PodObject po) {
+    final name = po.id.capCamel;
+    return brCompact([
+      '''
+test('$name default ctor', () {
+final obj1 = new $name();
+final obj2 = new $name();
+final obj3 = obj1.copy();
+
+expect(identical(obj1, obj2), false);
+expect(identical(obj2, obj3), false);
+expect(identical(obj1, obj3), false);
+expect(obj1, obj2);
+expect(obj1.hashCode, obj2.hashCode);
+expect(obj2, obj3);
+expect(obj2.hashCode, obj3.hashCode);
+expect($name.fromJson(obj1.toJson()), obj1);
+});
+'''
+    ]);
+  }
+
   static String _enumTest(PodEnum pe) {
     final name = pe.id.capCamel;
     return brCompact([
@@ -62,12 +84,22 @@ test('$name hashCode', () =>
       ..imports.add(join(relPath, libName))
       ..withMainCustomBlock((CodeBlock cb) {
         final enums = package.localNamedTypes.where((nt) => nt is PodEnum);
-        final objects = package.localNamedTypes.where((nt) => nt is PodObject);
         cb.snippets.add(brCompact([
           enums.isNotEmpty
               ? '''
 group('enum coverage', () {
 ${brCompact(enums.map(_enumTest))}
+});
+'''
+              : null
+        ]));
+
+        final objects = package.localNamedTypes.where((nt) => nt is PodObject);
+        cb.snippets.add(brCompact([
+          objects.isNotEmpty
+              ? '''
+group('object coverage', () {
+${brCompact(objects.map(_objectTest))}
 });
 '''
               : null
