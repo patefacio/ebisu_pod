@@ -364,8 +364,8 @@ class PodEnum extends PodUserDefinedType {
           _id == other._id &&
           const ListEquality().equals(values, other.values);
 
-  int get hashCode =>
-      hash2(super.hashCode, const ListEquality<String>().hash(values).hashCode);
+  int get hashCode => hash2(
+      super.hashCode, const ListEquality<EnumValue>().hash(values).hashCode);
 
   PodEnum(id, [Iterable values]) : super(id) {
     this.values = values;
@@ -1099,12 +1099,6 @@ class DateType extends FixedSizeType {
   toString() => id.capCamel;
 }
 
-class NullType extends FixedSizeType {
-  NullType._() : super(new Id('null')) {}
-
-  toString() => id.capCamel;
-}
-
 class RegexType extends FixedSizeType {
   RegexType._() : super(new Id('regex')) {}
 
@@ -1306,7 +1300,6 @@ final Double = new DoubleType._();
 final ObjectId = new ObjectIdType._();
 final Boolean = new BooleanType._();
 final Date = new DateType._();
-final Null = new NullType._();
 final Regex = new RegexType._();
 final Int8 = new Int8Type._();
 final Int16 = new Int16Type._();

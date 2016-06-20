@@ -43,7 +43,6 @@ main([List<String> args]) {
       field('object_id', ObjectId),
       field('boolean', Boolean),
       field('date', Date),
-      field('null', Null),
       field('regex', Regex),
       field('int8', Int8),
       field('int16', Int16),
@@ -84,7 +83,6 @@ main([List<String> args]) {
   Object_id object_id {};
   bool boolean {};
   boost::gregorian::date date {};
-  Null null {};
   boost::regex regex {};
   std::int8_t int8 {};
   std::int16_t int16 {};

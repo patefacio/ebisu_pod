@@ -36,7 +36,6 @@ code generators.
     'object_id',
     'boolean',
     'date',
-    'null',
     'regex',
     'int8',
     'int16',

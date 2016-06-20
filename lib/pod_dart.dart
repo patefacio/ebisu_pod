@@ -76,8 +76,9 @@ class PodDartMapper {
   Enum _makeEnum(PodEnum e) {
     return new Enum(e.id)
       ..doc = e.doc
-      ..values =
-          e.values.map((ev) => new ebisu.EnumValue(ev.id, ev.doc)).toList();
+      ..values = e.values
+          .map((ev) => new ebisu.EnumValue(ev.id, null)..doc = ev.doc)
+          .toList();
   }
 
   _getType(PodType t) {
