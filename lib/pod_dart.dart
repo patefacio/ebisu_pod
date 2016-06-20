@@ -6,6 +6,7 @@ import 'package:ebisu/ebisu_dart_meta.dart' as ebisu show EnumValue;
 import 'package:ebisu/ebisu_dart_meta.dart' hide EnumValue;
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 
 // custom <additional imports>
 // end <additional imports>
@@ -26,7 +27,22 @@ class PodDartMapper {
   List<Library> createLibraries() {
     final result = [];
     result.add(_createLibrary(package));
+    result.add(_createCoverageTestLibrary(package));
     return result;
+  }
+
+  Library _createCoverageTestLibrary(PodPackage package) {
+    final path = package.packageName.path;
+    final relPath = package.getProperty('relativePath');
+    final libName = '${package.packageName.path.last.snake}.dart';
+    return library('test_coverage_${path.last.snake}')
+      ..imports.add(join(relPath, libName))
+      ..withMainCustomBlock((CodeBlock cb) {
+        cb.snippets.add('''
+print("good");
+''');
+      })
+      ..isTest = true;
   }
 
   Library _createLibrary(PodPackage package) {
@@ -34,13 +50,11 @@ class PodDartMapper {
     return library(path.last)
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
-      ..importAndExportAll(package.imports
-          .map((PodPackage pkg) {
-            final relPath = pkg.getProperty('relativePath');
-            final importPath = relPath == null ? '' :
-              '$relPath/';
-            return '$importPath${pkg.packageName.path.last.snake}.dart';
-          }));
+      ..importAndExportAll(package.imports.map((PodPackage pkg) {
+        final relPath = pkg.getProperty('relativePath');
+        final importPath = relPath == null ? '' : '$relPath/';
+        return '$importPath${pkg.packageName.path.last.snake}.dart';
+      }));
   }
 
   Class _makeClass(PodObject po) {

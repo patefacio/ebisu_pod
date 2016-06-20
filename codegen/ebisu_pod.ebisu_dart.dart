@@ -469,6 +469,7 @@ toString() => id.capCamel;
           "'package:ebisu/ebisu_dart_meta.dart' hide EnumValue",
           "'package:ebisu/ebisu_dart_meta.dart' as ebisu show EnumValue",
           'package:ebisu_pod/ebisu_pod.dart',
+          'package:path/path.dart',
         ]
         ..classes = [
           class_('pod_dart_mapper')
