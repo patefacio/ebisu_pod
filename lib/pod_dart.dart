@@ -11,7 +11,7 @@ import 'package:path/path.dart';
 // custom <additional imports>
 // end <additional imports>
 
-final _logger = new Logger('pod_dart');
+final Logger _logger = new Logger('pod_dart');
 
 /// Given pod package maps definitions to dart classes/libraries
 class PodDartMapper {
@@ -137,9 +137,11 @@ ${brCompact(objects.map(_objectTest))}
       ? {}
       : field.podType is PodArrayType
           ? []
-          : field.podType is PodObject
+          : field.podType is PodObject || field.podType is DateType
               ? 'new ${field.podType.id.capCamel}()'
-              : null;
+              : field.podType is PodEnum
+                  ? '${field.podType.id.capCamel}.${field.podType.values.first.id.shout}'
+                  : null;
 
   Member _makeClassMember(PodField field) {
     _logger.info('PodField ${field.id} type is ${field.podType.runtimeType}'

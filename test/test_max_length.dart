@@ -9,12 +9,12 @@ import 'package:ebisu_pod/ebisu_pod.dart';
 
 // end <additional imports>
 
-final _logger = new Logger('test_max_length');
+final Logger _logger = new Logger('test_max_length');
 
 // custom <library test_max_length>
 // end <library test_max_length>
 
-main([List<String> args]) {
+void main([List<String> args]) {
   Logger.root.onRecord.listen(
       (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;

@@ -39,8 +39,8 @@ environment:
 dependency_overrides:
 # custom <ebisu_pod dependency overrides>
 
-  ebisu: "^0.7.3"
-#    git: git://github.com/patefacio/ebisu
+  ebisu: #"^0.7.3"
+    git: git://github.com/patefacio/ebisu
 
 #    path: ../ebisu
 

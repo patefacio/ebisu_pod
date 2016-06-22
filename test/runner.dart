@@ -8,7 +8,7 @@ import 'test_pod_cpp_mapper.dart' as test_pod_cpp_mapper;
 import 'test_pod_dart_mapper.dart' as test_pod_dart_mapper;
 import 'test_properties.dart' as test_properties;
 
-main() {
+void main() {
   Logger.root.level = Level.OFF;
   Logger.root.onRecord.listen((LogRecord rec) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');

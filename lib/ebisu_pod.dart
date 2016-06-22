@@ -11,12 +11,17 @@ import 'package:quiver/iterables.dart';
 // custom <additional imports>
 // end <additional imports>
 
-final _logger = new Logger('ebisu_pod');
+final Logger _logger = new Logger('ebisu_pod');
 
 class PropertyType implements Comparable<PropertyType> {
-  static const UDT_PROPERTY = const PropertyType._(0);
-  static const FIELD_PROPERTY = const PropertyType._(1);
-  static const PACKAGE_PROPERTY = const PropertyType._(2);
+  /// Property for annotating UDTs ([PodEnum] and [PodObject])
+  static const PropertyType UDT_PROPERTY = const PropertyType._(0);
+
+  /// Property for annotating [PodField]
+  static const PropertyType FIELD_PROPERTY = const PropertyType._(1);
+
+  /// Property for annotating [PodPackage]
+  static const PropertyType PACKAGE_PROPERTY = const PropertyType._(2);
 
   static get values => [UDT_PROPERTY, FIELD_PROPERTY, PACKAGE_PROPERTY];
 
@@ -79,12 +84,14 @@ const PropertyType PACKAGE_PROPERTY = PropertyType.PACKAGE_PROPERTY;
 class PropertyError {
   const PropertyError(this.propertyType, this.itemAccessed, this.property);
 
+  @override
   bool operator ==(PropertyError other) =>
       identical(this, other) ||
       propertyType == other.propertyType &&
           itemAccessed == other.itemAccessed &&
           property == other.property;
 
+  @override
   int get hashCode => hash3(propertyType, itemAccessed, property);
 
   final PropertyType propertyType;
@@ -101,6 +108,7 @@ class PropertyError {
 
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
 class PropertyDefinition {
+  @override
   bool operator ==(PropertyDefinition other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -109,6 +117,7 @@ class PropertyDefinition {
           _defaultValue == other._defaultValue &&
           _isValueValidPredicate == other._isValueValidPredicate;
 
+  @override
   int get hashCode => hashObjects(
       [_id, _propertyType, _doc, _defaultValue, _isValueValidPredicate]);
 
@@ -157,11 +166,13 @@ class PropertyDefinition {
 
 /// A property associated with a [PodType], [PodField] or [PodPackage]
 class Property {
+  @override
   bool operator ==(Property other) =>
       identical(this, other) ||
       _propertyDefinition == other._propertyDefinition &&
           _value == other._value;
 
+  @override
   int get hashCode => hash2(_propertyDefinition, _value);
 
   /// Reference [PropertyDefinition] for this property
@@ -325,9 +336,11 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
 
 /// Combines the enumerant id and optionally a doc string
 class EnumValue {
+  @override
   bool operator ==(EnumValue other) =>
       identical(this, other) || id == other.id && doc == other.doc;
 
+  @override
   int get hashCode => hash2(id, doc);
 
   Id id;
@@ -623,12 +636,14 @@ class PodMapType extends PodType {
 
 /// Combination of owning package name and name of a type within it
 class PodTypeRef extends PodType {
+  @override
   bool operator ==(other) =>
       identical(this, other) ||
       (runtimeType == other.runtimeType &&
           _packageName == other._packageName &&
           _resolvedType == other._resolvedType);
 
+  @override
   int get hashCode => hash2(_packageName, _resolvedType);
 
   PackageName get packageName => _packageName;
@@ -664,6 +679,7 @@ class PodTypeRef extends PodType {
 
 /// A field, which is a named and type entry, in a [PodObject]
 class PodField extends Object with PropertySet {
+  @override
   bool operator ==(PodField other) =>
       identical(this, other) ||
       _id == other._id &&
@@ -672,6 +688,7 @@ class PodField extends Object with PropertySet {
           _podType == other._podType &&
           defaultValue == other.defaultValue;
 
+  @override
   int get hashCode => hash4(_id, doc, isIndex, defaultValue);
 
   Id get id => _id;
@@ -682,6 +699,7 @@ class PodField extends Object with PropertySet {
   /// If true the field is defined as index
   bool isIndex = false;
   dynamic defaultValue;
+  PodObject get owner => _owner;
 
   // custom <class PodField>
 
@@ -729,18 +747,27 @@ class PodField extends Object with PropertySet {
   /// May be a PodType, PodTypeRef, or a String.
   /// If it is a String it is converted to a PodTypeRef
   dynamic _podType;
+  PodObject _owner;
 }
 
 class PodObject extends PodUserDefinedType {
-  List<PodField> fields = [];
+  List<PodField> get fields => _fields;
 
   // custom <class PodObject>
 
-  PodObject(id, [this.fields]) : super(id) {
-    if (fields == null) {
-      fields = [];
-    }
+  PodObject(id, [this._fields]) : super(id) {
+    _fields ??= [];
+    _fields.forEach(_setOwner);
   }
+
+  _setOwner(field) => field._owner = this;
+
+  addField(PodField field) {
+    _setOwner(field);
+    _fields.add(field);
+  }
+
+  addAllFields(Iterable<Field> fields) => fields.forEach((f) => addField(f));
 
   Iterable<String> _getPropertyErrors(
       UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
@@ -785,6 +812,7 @@ class PodObject extends PodUserDefinedType {
 
   // end <class PodObject>
 
+  List<PodField> _fields = [];
 }
 
 /// Package names are effectively a list of Id isntances.
@@ -795,9 +823,11 @@ class PodObject extends PodUserDefinedType {
 ///
 ///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 class PackageName {
+  @override
   bool operator ==(PackageName other) =>
       identical(this, other) || const ListEquality().equals(_path, other._path);
 
+  @override
   int get hashCode => const ListEquality<Id>().hash(_path).hashCode;
 
   List<Id> get path => _path;

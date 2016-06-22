@@ -45,13 +45,13 @@ holding.''',
   object('portfolio_account')
     ..doc =
         'The map of holdings indexed by symbol (or similar name unique to the portfolio).'
-    ..fields = [
+    ..fields.addAll([
       field('account_type', 'account_type')
         ..doc = 'Type of the portfolio account',
       field('descr')..doc = 'Description of the account',
       field('stout', Boolean)..doc = 'Is it a beefy account',
       field('num_symbols', Int32)..doc = 'Number of symbols in account',
-    ]
+    ])
 ]);
 
 final dossier = new PodPackage('dossier', imports: [

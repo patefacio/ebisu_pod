@@ -373,12 +373,18 @@ If it is a String it is converted to a PodTypeRef
                 ..isInHashCode = false
                 ..access = IA,
               member('default_value')..type = 'dynamic',
+              member('owner')
+                ..isInHashCode = false
+                ..isInEquality = false
+                ..type = 'PodObject'
+                ..access = RO,
             ],
           class_('pod_object')
             ..extend = 'PodUserDefinedType'
             ..members = [
               member('fields')
                 ..type = 'List<PodField>'
+                ..access = RO
                 ..init = [],
             ],
           class_('package_name')

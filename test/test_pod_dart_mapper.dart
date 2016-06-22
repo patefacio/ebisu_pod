@@ -11,12 +11,12 @@ import 'package:ebisu_pod/ebisu_pod.dart';
 
 // end <additional imports>
 
-final _logger = new Logger('test_pod_dart_mapper');
+final Logger _logger = new Logger('test_pod_dart_mapper');
 
 // custom <library test_pod_dart_mapper>
 // end <library test_pod_dart_mapper>
 
-main([List<String> args]) {
+void main([List<String> args]) {
   Logger.root.onRecord.listen(
       (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;

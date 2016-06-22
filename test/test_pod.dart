@@ -10,12 +10,12 @@ import 'package:ebisu/ebisu.dart';
 
 // end <additional imports>
 
-final _logger = new Logger('test_pod');
+final Logger _logger = new Logger('test_pod');
 
 // custom <library test_pod>
 // end <library test_pod>
 
-main([List<String> args]) {
+void main([List<String> args]) {
   Logger.root.onRecord.listen(
       (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
   Logger.root.level = Level.OFF;
@@ -105,8 +105,8 @@ main([List<String> args]) {
     expect(stringToDouble.keyReferredType is StrType, true);
     expect(stringToDouble.valueReferredType is DoubleType, true);
 
-    final k = object('key_type')..fields = [field('x', Int32),];
-    final v = object('value_type')..fields = [field('x', Timestamp),];
+    final k = object('key_type')..addAllFields([field('x', Int32),]);
+    final v = object('value_type')..addAllFields([field('x', Timestamp),]);
     final m = map(k, v);
     expect(m.keyReferredType is PodObject, true);
     expect(m.keyReferredType.id.snake, 'key_type');
@@ -118,22 +118,22 @@ main([List<String> args]) {
         .forEach((var t) {
       expect(t.isFixedSize, true);
 
-      final o = object('x')..fields = [field('x', t),];
+      final o = object('x')..addAllFields([field('x', t),]);
       expect(o.isFixedSize, true);
-      final outer = object('y')..fields = [field('x', o)];
-      final outerOuter = object('z')..fields = [field('y', outer)];
+      final outer = object('y')..addAllFields([field('x', o)]);
+      final outerOuter = object('z')..addAllFields([field('y', outer)]);
       expect(outerOuter.isFixedSize, true);
     });
 
     [Str, BinaryData].forEach((var t) {
       expect(t.isFixedSize, false);
-      var o = object('x')..fields = [field('x', t),];
+      var o = object('x')..addAllFields([field('x', t),]);
       expect(o.isFixedSize, false);
-      o = object('x')..fields = [field('x_arr', array(t)),];
+      o = object('x')..addAllFields([field('x_arr', array(t)),]);
       expect(o.isFixedSize, false);
 
-      final outer = object('y')..fields = [field('x', o)];
-      final outerOuter = object('z')..fields = [field('y', outer)];
+      final outer = object('y')..addAllFields([field('x', o)]);
+      final outerOuter = object('z')..addAllFields([field('y', outer)]);
       expect(outerOuter.isFixedSize, false);
     });
   });
@@ -167,7 +167,7 @@ main([List<String> args]) {
 
   test('object field types may be anonymous defined or ref', () {
     final o = object('o')
-      ..fields = [field('x', object('deep')), field('y', 'a.b.c')];
+      ..addAllFields([field('x', object('deep')), field('y', 'a.b.c')]);
     expect(o.fields.first.name, 'x');
     expect(o.fields.first.podType, object('deep'));
     expect(o.fields.last.name, 'y');
@@ -175,12 +175,12 @@ main([List<String> args]) {
   });
 
   final address = object('address')
-    ..fields = [
+    ..addAllFields([
       field('number', Int32),
       field('street', Str),
       field('zipcode', Str),
       field('state', Str),
-    ];
+    ]);
 
   test('basic object has fields', () {
     expect(address.fields.length, 4);
