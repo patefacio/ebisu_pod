@@ -810,6 +810,26 @@ class PodObject extends PodUserDefinedType {
   bool get hasFixedSizeArray => fields.any((pf) => pf.podType.isFixedSizeArray);
   bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
 
+  transitiveFields(List path, Set paths) {
+    for(PodField field in fields) {
+      final fieldPath = new List.from(path)..add(field);
+      if(field.podType is PodObject) {
+        final po = field.podType;
+        po.transitiveFields(fieldPath, paths);
+      } else if(field.podType is PodMapType) {
+        final PodMapType podMapType = field.podType;
+        final valueType = podMapType.valueReferredType;
+        final mapValuePath = new List.from(fieldPath)..add(null);
+        if(valueType is PodObject) {
+          final po = valueType;
+          po.transitiveFields(mapValuePath, paths);
+        }
+      }
+      paths.add(fieldPath);
+    }
+  }
+
+
   // end <class PodObject>
 
   List<PodField> _fields = [];

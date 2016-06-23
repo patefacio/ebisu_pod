@@ -130,7 +130,58 @@ ${brCompact(objects.map(_objectTest))}
       ..withCtor('', (Ctor ctor) => ctor.isConst = false)
       ..members.addAll(po.fields.map(_makeClassMember));
     classToObjectMap[result] = po;
+
+    if (po.getProperty('hasFieldUpdateMethod') ?? false) {
+      addFieldUpdateMethod(po, result);
+    }
+
     return result;
+  }
+
+  addFieldUpdateMethod(PodObject po, Class cls) {
+    final paths = new Set();
+    po.transitiveFields([], paths);
+
+    pathKey(List path) =>
+        doubleQuote(path.map((f) => f?.id?.camel ?? '').join('.'));
+
+    pathResolved(List path) {
+      int i = 0;
+      return doubleQuote(path
+          .map((f) => f?.id?.camel ?? '\${placeHolders[${i++}]}')
+          .join('.'));
+    }
+
+    pathUpdateFunction(List path) {
+      final leafField = path.last;
+      final placeHolderCount = path.where((f) => f == null).length;
+      return '''
+///
+(List<String> placeHolders) {
+  assert(placeHolders.length == $placeHolderCount);
+  return ${pathResolved(path)};
+}
+
+''';
+    }
+
+    pathEntry(List path) {
+      final leafField = path.last;
+      return combine([
+        '///\n',
+        pathKey(path), ':', pathUpdateFunction(path)]);
+    }
+
+    pathMapContents() => br(paths.map(pathEntry), ',\n\n');
+
+    cls.customCodeBlock.snippets.add('''
+static final Map _fieldUpdateMethods = {
+${indentBlock(pathMapContents())}
+};
+void updateField(String fieldSpec, List<String> placeHolders) {
+
+}
+''');
   }
 
   _initMember(PodField field) => field.podType is PodMapType
