@@ -756,6 +756,9 @@ class FieldPath {
   List<Field> path = [];
 
   // custom <class FieldPath>
+
+  int get numPlaceHolders => path.where((f) => f == null).length;
+
   // end <class FieldPath>
 
 }
