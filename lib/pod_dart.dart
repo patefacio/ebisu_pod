@@ -153,8 +153,7 @@ ${brCompact(objects.map(_objectTest))}
   addFieldUpdateMethod(PodObject po, Class cls) {
     final paths = po.fieldPaths;
 
-    pathKey(FieldPath fieldPath) =>
-        doubleQuote(fieldPath.path.map((f) => f?.id?.camel ?? '').join('.'));
+    pathKey(FieldPath fieldPath) => doubleQuote(fieldPath.pathKey);
 
     pathResolved(FieldPath fieldPath) {
       int i = 0;

@@ -766,6 +766,9 @@ class FieldPath {
   /// Returns the [PodType] of the field the path points to
   PodType get fieldPodType => path.last.podType;
 
+  /// The dot-qualified string of field names to the leaf field
+  String get pathKey => path.map((f) => f?.id?.camel ?? '').join('.');
+
   // end <class FieldPath>
 
 }
