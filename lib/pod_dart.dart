@@ -122,17 +122,6 @@ ${brCompact(objects.map(_objectTest))}
         final importPath = relPath == null ? '' : '$relPath/';
         return '$importPath${pkg.packageName.path.last.snake}.dart';
       }));
-
-    if (package.podObjects
-        .any((PodObject po) => po.fieldPaths.any((FieldPath fieldPath) {
-              final podType = fieldPath.fieldPodType;
-              return podType is UuidType ||
-                  (podType is PodMapType &&
-                      podType.valueReferredType is UuidType) ||
-                  (podType is PodArrayType && podType.referredType is UuidType);
-            }))) {
-      result.imports.add('package:uuid/uuid.dart');
-    }
     return result;
   }
 
