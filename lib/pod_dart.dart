@@ -139,37 +139,35 @@ ${brCompact(objects.map(_objectTest))}
   }
 
   addFieldUpdateMethod(PodObject po, Class cls) {
-    final paths = new Set();
-    po.transitiveFields([], paths);
+    final paths = po.fieldPaths;
 
-    pathKey(List path) =>
-        doubleQuote(path.map((f) => f?.id?.camel ?? '').join('.'));
+    pathKey(FieldPath fieldPath) =>
+        doubleQuote(fieldPath.path.map((f) => f?.id?.camel ?? '').join('.'));
 
-    pathResolved(List path) {
+    pathResolved(FieldPath fieldPath) {
       int i = 0;
-      return doubleQuote(path
+      return doubleQuote(fieldPath.path
           .map((f) => f?.id?.camel ?? '\${placeHolders[${i++}]}')
           .join('.'));
     }
 
-    pathUpdateFunction(List path) {
-      final leafField = path.last;
-      final placeHolderCount = path.where((f) => f == null).length;
+    pathUpdateFunction(FieldPath fieldPath) {
+      final leafField = fieldPath.path.last;
+      final placeHolderCount = fieldPath.numPlaceHolders;
       return '''
 ///
 (List<String> placeHolders) {
   assert(placeHolders.length == $placeHolderCount);
-  return ${pathResolved(path)};
+  return ${pathResolved(fieldPath)};
 }
 
 ''';
     }
 
-    pathEntry(List path) {
-      final leafField = path.last;
-      return combine([
-        '///\n',
-        pathKey(path), ':', pathUpdateFunction(path)]);
+    pathEntry(FieldPath fieldPath) {
+      final leafField = fieldPath.path.last;
+      return combine(
+          ['///\n', pathKey(fieldPath), ':', pathUpdateFunction(fieldPath)]);
     }
 
     pathMapContents() => br(paths.map(pathEntry), ',\n\n');

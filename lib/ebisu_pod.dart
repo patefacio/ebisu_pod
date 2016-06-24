@@ -750,6 +750,16 @@ class PodField extends Object with PropertySet {
   PodObject _owner;
 }
 
+class FieldPath {
+  FieldPath(this.path);
+
+  List<Field> path = [];
+
+  // custom <class FieldPath>
+  // end <class FieldPath>
+
+}
+
 class PodObject extends PodUserDefinedType {
   List<PodField> get fields => _fields;
 
@@ -810,29 +820,37 @@ class PodObject extends PodUserDefinedType {
   bool get hasFixedSizeArray => fields.any((pf) => pf.podType.isFixedSizeArray);
   bool get hasDefaultedField => fields.any((pf) => pf.defaultValue != null);
 
-  transitiveFields(List path, Set paths) {
-    for(PodField field in fields) {
+  Set<FieldPath> get fieldPaths {
+    if (_fieldPaths == null) {
+      _fieldPaths = new Set();
+      _transitiveFields([], _fieldPaths);
+    }
+    return _fieldPaths;
+  }
+
+  _transitiveFields(List path, Set<FieldPath> paths) {
+    for (PodField field in fields) {
       final fieldPath = new List.from(path)..add(field);
-      if(field.podType is PodObject) {
+      if (field.podType is PodObject) {
         final po = field.podType;
-        po.transitiveFields(fieldPath, paths);
-      } else if(field.podType is PodMapType) {
+        po._transitiveFields(fieldPath, paths);
+      } else if (field.podType is PodMapType) {
         final PodMapType podMapType = field.podType;
         final valueType = podMapType.valueReferredType;
         final mapValuePath = new List.from(fieldPath)..add(null);
-        if(valueType is PodObject) {
+        if (valueType is PodObject) {
           final po = valueType;
-          po.transitiveFields(mapValuePath, paths);
+          po._transitiveFields(mapValuePath, paths);
         }
       }
-      paths.add(fieldPath);
+      paths.add(new FieldPath(fieldPath));
     }
   }
-
 
   // end <class PodObject>
 
   List<PodField> _fields = [];
+  Set<FieldPath> _fieldPaths;
 }
 
 /// Package names are effectively a list of Id isntances.
@@ -1206,6 +1224,12 @@ class TimestampType extends FixedSizeType {
   toString() => id.capCamel;
 }
 
+class UuidType extends FixedSizeType {
+  UuidType._() : super(new Id('uuid')) {}
+
+  toString() => id.capCamel;
+}
+
 // custom <library ebisu_pod>
 
 final DoubleArray = array(Double, doc: 'Array<double>');
@@ -1227,6 +1251,7 @@ final Uint32Array = array(Uint32, doc: 'Array<Uint32>');
 final Uint64Array = array(Uint64, doc: 'Array<Uint64>');
 final DateTimeArray = array(DateTime, doc: 'Array<DateTime>');
 final TimestampArray = array(Timestamp, doc: 'Array<Timestamp>');
+final UuidArray = array(Timestamp, doc: 'Array<Uuid>');
 
 PodEnum enum_(id, [values]) => new PodEnum(makeId(id), values);
 
@@ -1352,3 +1377,4 @@ final Uint32 = new Uint32Type._();
 final Uint64 = new Uint64Type._();
 final DateTime = new DateTimeType._();
 final Timestamp = new TimestampType._();
+final Uuid = new UuidType._();

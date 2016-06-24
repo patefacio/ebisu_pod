@@ -49,6 +49,7 @@ void main([List<String> args]) {
     expect(field('field', Uint64).podType, Uint64);
 
     expect(field('field', Timestamp).podType, Timestamp);
+    expect(field('field', Uuid).podType, Uuid);
 
     expect(field('field', DoubleArray).podType, DoubleArray);
     expect(field('field', StringArray).podType, StringArray);
@@ -60,6 +61,7 @@ void main([List<String> args]) {
     expect(field('field', Int32Array).podType, Int32Array);
     expect(field('field', Int64Array).podType, Int64Array);
     expect(field('field', TimestampArray).podType, TimestampArray);
+    expect(field('field', UuidArray).podType, UuidArray);
 
     expect(field('field', fixedStr(32)).podType, fixedStr(32));
   });
@@ -114,7 +116,7 @@ void main([List<String> args]) {
   });
 
   test('isFixedSize tracks size recursively', () {
-    [Double, ObjectId, Boolean, Date, Regex, Int32, Int64, Timestamp]
+    [Double, ObjectId, Boolean, Date, Regex, Int32, Int64, Timestamp, Uuid]
         .forEach((var t) {
       expect(t.isFixedSize, true);
 

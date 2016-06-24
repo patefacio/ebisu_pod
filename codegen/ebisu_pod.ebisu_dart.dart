@@ -46,7 +46,8 @@ code generators.
     'uint32',
     'uint64',
     'date_time',
-    'timestamp'
+    'timestamp',
+    'uuid',
   ];
 
   String _topDir = dirname(dirname(here));
@@ -379,6 +380,13 @@ If it is a String it is converted to a PodTypeRef
                 ..type = 'PodObject'
                 ..access = RO,
             ],
+          class_('field_path')
+            ..defaultCtorStyle = requiredParms
+            ..members = [
+              member('path')
+                ..type = 'List<Field>'
+                ..init = []
+            ],
           class_('pod_object')
             ..extend = 'PodUserDefinedType'
             ..members = [
@@ -386,6 +394,9 @@ If it is a String it is converted to a PodTypeRef
                 ..type = 'List<PodField>'
                 ..access = RO
                 ..init = [],
+              member('field_paths')
+                ..type = 'Set<FieldPath>'
+                ..access = IA,
             ],
           class_('package_name')
             ..doc = '''
