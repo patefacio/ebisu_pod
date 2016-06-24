@@ -381,9 +381,13 @@ If it is a String it is converted to a PodTypeRef
                 ..access = RO,
             ],
           class_('field_path')
+            ..doc = '''
+Represents the list of fields from some top level [PodObject] to a given field.
+'''
             ..defaultCtorStyle = requiredParms
             ..members = [
               member('path')
+                ..doc = 'Fields from top level [PodObject] to a leaf field'
                 ..type = 'List<Field>'
                 ..init = []
             ],

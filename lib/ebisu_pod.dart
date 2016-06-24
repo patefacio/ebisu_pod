@@ -750,14 +750,21 @@ class PodField extends Object with PropertySet {
   PodObject _owner;
 }
 
+/// Represents the list of fields from some top level [PodObject] to a given field.
 class FieldPath {
   FieldPath(this.path);
 
+  /// Fields from top level [PodObject] to a leaf field
   List<Field> path = [];
 
   // custom <class FieldPath>
 
+  /// Returns the number of placeholders (strings representing keys in maps) to
+  /// fully qualify the path to field
   int get numPlaceHolders => path.where((f) => f == null).length;
+
+  /// Returns the [PodType] of the field the path points to
+  PodType get fieldPodType => path.last.podType;
 
   // end <class FieldPath>
 
