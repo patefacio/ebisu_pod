@@ -186,7 +186,9 @@ void updateField(String fieldSpec, List<String> placeHolders) {
       ? {}
       : field.podType is PodArrayType
           ? []
-          : field.podType is PodObject || field.podType is DateType
+          : field.podType is PodObject ||
+                  field.podType is DateType ||
+                  field.podType is UuidType
               ? 'new ${field.podType.id.capCamel}()'
               : field.podType is PodEnum
                   ? '${field.podType.id.capCamel}.${field.podType.values.first.id.shout}'
@@ -198,8 +200,12 @@ void updateField(String fieldSpec, List<String> placeHolders) {
     final result = member(field.id)
       ..ctorInit = _initMember(field)
       ..isFinal = false
+      ..isInComparable = field.getProperty('isInComparable') ?? true
+      ..isInEquality = field.getProperty('isInEquality') ?? true
+      ..isInHashCode = field.getProperty('isInHashCode') ?? true
       ..type = _getType(field.podType)
       ..doc = field.doc;
+
     memberToFieldMap[result] = field;
     return result;
   }
