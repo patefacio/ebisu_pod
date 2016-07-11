@@ -117,6 +117,7 @@ ${brCompact(objects.map(_objectTest))}
     final result = library(path.last)
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
+      ..importAndExportAll(package.getProperty('importAndExportAll') ?? [])
       ..importAndExportAll(package.imports.map((PodPackage pkg) {
         final relPath = pkg.getProperty('relativePath');
         final importPath = relPath == null ? '' : '$relPath/';
@@ -188,7 +189,8 @@ void updateField(String fieldSpec, List<String> placeHolders) {
           ? []
           : field.podType is PodObject ||
                   field.podType is DateType ||
-                  field.podType is UuidType
+                  field.podType is UuidType ||
+                  field.podType is PodPredefinedType
               ? 'new ${field.podType.id.capCamel}()'
               : field.podType is PodEnum
                   ? '${field.podType.id.capCamel}.${field.podType.values.first.id.shout}'
@@ -230,6 +232,8 @@ void updateField(String fieldSpec, List<String> placeHolders) {
       return 'double';
     else if (t is UuidType)
       return 'Uuid';
+    else if (t is PodPredefinedType)
+      return t.id.capCamel;
     else if (t is Int8Type ||
         t is Int16Type ||
         t is Int32Type ||

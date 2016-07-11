@@ -318,6 +318,22 @@ abstract class PodType {
   Id _id;
 }
 
+/// Represents types that exist in target language
+class PodPredefinedType extends PodType with PropertySet {
+  // custom <class PodPredefinedType>
+
+  PodPredefinedType(id) : super(id);
+
+  Iterable<String> getPropertyErrors(
+          List<PropertyDefinitionSet> propertyDefinitionSets) =>
+      _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
+
+  get name => _id.snake;
+
+  // end <class PodPredefinedType>
+
+}
+
 /// Base class for user defined types
 abstract class PodUserDefinedType extends PodType with PropertySet {
   // custom <class PodUserDefinedType>
@@ -1108,8 +1124,10 @@ class PodPackage extends Entity with PropertySet {
       ]);
 
   _checkNamedTypes() {
-    if (!namedTypes
-        .every((namedType) => namedType is PodObject || namedType is PodEnum)) {
+    if (!namedTypes.every((namedType) =>
+        namedType is PodObject ||
+        namedType is PodEnum ||
+        namedType is PodPredefinedType)) {
       throw new ArgumentError(
           'PodPackage named types must be PodObjects or named PodEnums');
     }
@@ -1297,6 +1315,8 @@ PodField bitSetField(id, numBits, {rhsPadBits, lhsPadBits}) => new PodField(
 /// [maxLength].
 PodArrayType array(dynamic referredType, {doc, dynamic maxLength}) =>
     new PodArrayType(referredType, doc: doc, maxLength: maxLength);
+
+PodPredefinedType podPredefinedType(id) => new PodPredefinedType(id);
 
 PodMapType map(dynamic keyReferredType, dynamic valueReferredType, {doc}) =>
     new PodMapType(keyReferredType, valueReferredType, doc: doc);

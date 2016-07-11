@@ -195,6 +195,11 @@ the conventinos required by *capnp*.
                 ..access = RO,
               member('doc')..doc = 'Documentation for fixed size string',
             ],
+          class_('pod_predefined_type')
+            ..extend = 'PodType'
+            ..doc = 'Represents types that exist in target language'
+            ..mixins = ['PropertySet']
+            ..members = [],
           class_('pod_user_defined_type')
             ..extend = 'PodType'
             ..doc = 'Base class for user defined types'
