@@ -200,7 +200,7 @@ void updateField(String fieldSpec, List<String> placeHolders) {
     _logger.info('PodField ${field.id} type is ${field.podType.runtimeType}'
         ' => ${_initMember(field)}');
     final result = member(field.id)
-      ..ctorInit = _initMember(field)
+      ..ctorInit = field.getProperty('ctorInit') ?? _initMember(field)
       ..isFinal = false
       ..isInComparable = field.getProperty('isInComparable') ?? true
       ..isInEquality = field.getProperty('isInEquality') ?? true
@@ -226,6 +226,8 @@ void updateField(String fieldSpec, List<String> placeHolders) {
       return 'Map<${_getType(t.keyReferredType)}, ${_getType(t.valueReferredType)}>';
     else if (t is PodObject || t is PodEnum)
       return t.id.capCamel;
+    else if (t is BooleanType)
+      return 'bool';
     else if (t is DateType)
       return 'Date';
     else if (t is DoubleType)
