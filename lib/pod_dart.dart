@@ -201,7 +201,7 @@ void updateField(String fieldSpec, List<String> placeHolders) {
         ' => ${_initMember(field)}');
     final result = member(field.id)
       ..ctorInit = field.getProperty('ctorInit') ?? _initMember(field)
-      ..isFinal = false
+      ..isFinal = field.getProperty('isFinal') ?? false
       ..isInComparable = field.getProperty('isInComparable') ?? true
       ..isInEquality = field.getProperty('isInEquality') ?? true
       ..isInHashCode = field.getProperty('isInHashCode') ?? true
