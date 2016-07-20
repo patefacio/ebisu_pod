@@ -118,6 +118,7 @@ ${brCompact(objects.map(_objectTest))}
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
       ..importAndExportAll(package.getProperty('importAndExportAll') ?? [])
+      ..imports.addAll(package.getProperty('imports') ?? [])
       ..importAndExportAll(package.imports.map((PodPackage pkg) {
         final relPath = pkg.getProperty('relativePath');
         final importPath = relPath == null ? '' : '$relPath/';
