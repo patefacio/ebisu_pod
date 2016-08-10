@@ -130,7 +130,11 @@ ${brCompact(objects.map(_objectTest))}
   Class _makeClass(PodObject po) {
     final result = class_(po.id)
       ..doc = po.doc
-      ..withCtor('', (Ctor ctor) => ctor.isConst = false)
+      ..withCtor(
+          '',
+          (Ctor ctor) => ctor
+            ..isConst = false
+            ..tag = po.getProperty('defaultCtorTag'))
       ..members.addAll(po.fields.map(_makeClassMember));
     classToObjectMap[result] = po;
 
