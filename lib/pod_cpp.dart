@@ -82,6 +82,7 @@ class PodCppMapper {
   }
 
   _makeEnum(PodEnum pe) => new Enum(pe.id)
+    ..doc = pe.doc
     ..isStreamable = true
     ..isClass = true
     ..values =
@@ -96,10 +97,11 @@ class PodCppMapper {
   _makeScalarMember(PodObject po, PodField field) {
     var cppType = _cppType(field.podType);
     final cppMember = new Member(field.id)
+      ..doc = field.doc
       ..cppAccess = public
       ..type = cppType;
 
-    if (field.podType is StrType) {
+    if (field.podType is StrType || field.podType is PodObject) {
       cppMember.isByRef = true;
     }
     if (field.defaultValue != null) {
@@ -112,6 +114,7 @@ class PodCppMapper {
     var cppType = _cppType(field.podType);
 
     return new Member(field.id)
+      ..doc = field.doc
       ..cppAccess = public
       ..isByRef = true
       ..type = field.podType?.maxLength == null
