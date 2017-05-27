@@ -54,8 +54,9 @@ code generators.
   useDartFormatter = true;
   System ebisu = system('ebisu_pod')
     ..license = 'boost'
+    ..pubSpec.author = 'Daniel Davidson <dbdavidson@yahoo.com>'    
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.9'
+    ..pubSpec.version = '0.0.10'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose

@@ -55,7 +55,9 @@ void main([List<String> args]) {
   });
 
   test('pod package', () {
-    final podConstants = [constant('max_size', Int32, 42),];
+    final podConstants = [
+      constant('max_size', Int32, 42),
+    ];
 
     final namedTypes = [
       enum_('color', ['red', 'white', 'blue']),

@@ -1,5 +1,5 @@
 name: ebisu_pod
-version: 0.0.9
+version: 0.0.10
 author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/ebisu_pod
 description: >
@@ -18,34 +18,22 @@ dependencies:
 
 # custom <ebisu_pod dependencies>
 
-  ebisu: "^0.7.3"    
-  ebisu_cpp: "^0.3.22"
+  ebisu: "^0.7.5"
+  ebisu_cpp: "^0.3.25"
 
+    
 # end <ebisu_pod dependencies>
 
 dev_dependencies:
-  yaml: "any"
-  browser: "any"
 
 # custom <ebisu_pod dev dependencies>
 
-  test: "^0.12.0"
-  
-environment:
-  sdk: ">=1.8.0 <2.0.0"
+  test: ">=0.12.0 < 0.14.0"
   
 # end <ebisu_pod dev dependencies>
 
 dependency_overrides:
 # custom <ebisu_pod dependency overrides>
-
-  ebisu: #"^0.7.3"
-    git: git://github.com/patefacio/ebisu
-
-#    path: ../ebisu
-
-#  ebisu_cpp:
-#    path: ../ebisu_cpp
       
 # end <ebisu_pod dependency overrides>
 

@@ -107,8 +107,14 @@ void main([List<String> args]) {
     expect(stringToDouble.keyReferredType is StrType, true);
     expect(stringToDouble.valueReferredType is DoubleType, true);
 
-    final k = object('key_type')..addAllFields([field('x', Int32),]);
-    final v = object('value_type')..addAllFields([field('x', Timestamp),]);
+    final k = object('key_type')
+      ..addAllFields([
+        field('x', Int32),
+      ]);
+    final v = object('value_type')
+      ..addAllFields([
+        field('x', Timestamp),
+      ]);
     final m = map(k, v);
     expect(m.keyReferredType is PodObject, true);
     expect(m.keyReferredType.id.snake, 'key_type');
@@ -120,7 +126,10 @@ void main([List<String> args]) {
         .forEach((var t) {
       expect(t.isFixedSize, true);
 
-      final o = object('x')..addAllFields([field('x', t),]);
+      final o = object('x')
+        ..addAllFields([
+          field('x', t),
+        ]);
       expect(o.isFixedSize, true);
       final outer = object('y')..addAllFields([field('x', o)]);
       final outerOuter = object('z')..addAllFields([field('y', outer)]);
@@ -129,9 +138,15 @@ void main([List<String> args]) {
 
     [Str, BinaryData].forEach((var t) {
       expect(t.isFixedSize, false);
-      var o = object('x')..addAllFields([field('x', t),]);
+      var o = object('x')
+        ..addAllFields([
+          field('x', t),
+        ]);
       expect(o.isFixedSize, false);
-      o = object('x')..addAllFields([field('x_arr', array(t)),]);
+      o = object('x')
+        ..addAllFields([
+          field('x_arr', array(t)),
+        ]);
       expect(o.isFixedSize, false);
 
       final outer = object('y')..addAllFields([field('x', o)]);
@@ -153,9 +168,12 @@ void main([List<String> args]) {
       field('a1', array(Uint64)),
       field('a2', array(Uint64, maxLength: 10)),
     ]);
-    final hasVariable = object('obj', [field('a1', array(Uint64)),]);
-    final hasFixed =
-        object('obj', [field('a1', array(Uint64, maxLength: 10)),]);
+    final hasVariable = object('obj', [
+      field('a1', array(Uint64)),
+    ]);
+    final hasFixed = object('obj', [
+      field('a1', array(Uint64, maxLength: 10)),
+    ]);
 
     expect(hasBoth.hasFixedSizeArray, true);
     expect(hasBoth.hasVariableArray, true);
