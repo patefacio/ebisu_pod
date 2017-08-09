@@ -54,9 +54,9 @@ code generators.
   useDartFormatter = true;
   System ebisu = system('ebisu_pod')
     ..license = 'boost'
-    ..pubSpec.author = 'Daniel Davidson <dbdavidson@yahoo.com>'    
+    ..pubSpec.author = 'Daniel Davidson <dbdavidson@yahoo.com>'
     ..pubSpec.homepage = 'https://github.com/patefacio/ebisu_pod'
-    ..pubSpec.version = '0.0.10'
+    ..pubSpec.version = '0.0.11'
     ..pubSpec.doc = purpose
     ..rootPath = _topDir
     ..doc = purpose
@@ -68,6 +68,7 @@ code generators.
       library('test_bitset'),
       library('test_pod_cpp_mapper'),
       library('test_pod_dart_mapper'),
+      library('test_pod_rust_mapper'),
       library('test_properties'),
     ]
     ..libraries = [
@@ -511,6 +512,27 @@ toString() => id.capCamel;
               member('class_to_object_map')..init = {},
               member('member_to_field_map')..init = {},
             ],
+        ],
+      library('pod_rust')
+        ..doc = 'Consistent mapping of *plain old data* to rust structs'
+        ..imports = [
+          'package:ebisu/ebisu.dart',
+          'package:ebisu_pod/ebisu_pod.dart',
+          'package:ebisu_rs/ebisu_rs.dart',
+        ]
+        ..classes = [
+          class_('pod_rust_mapper')
+            ..defaultMemberAccess = RO
+            ..members = [
+              member('package')
+                ..doc = 'Package to generate basic rust mappings for'
+                ..type = 'PodPackage'
+                ..ctors = [''],
+              member('module')
+                ..doc = 'Module to insert rust mappings'
+                ..type = 'Module'
+                ..ctors = ['']
+            ]
         ],
       library('pod_cpp')
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'

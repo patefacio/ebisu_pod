@@ -914,6 +914,8 @@ class PackageName {
   bool get isQualified => path.isNotEmpty;
   toString() => path.map((id) => id.snake).join('.');
 
+  asId() => new Id(path.map((id) => id.snake).join('_'));
+
   // end <class PackageName>
 
   List<Id> _path = [];
@@ -968,6 +970,8 @@ class PodPackage extends Entity with PropertySet {
     _allTypes = visitTypes(null);
     _checkNamedTypes();
   }
+
+  get id => _packageName.asId();
 
   get name => _packageName.toString();
 

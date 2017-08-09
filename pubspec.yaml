@@ -1,5 +1,5 @@
 name: ebisu_pod
-version: 0.0.10
+version: 0.0.11
 author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/ebisu_pod
 description: >
@@ -21,6 +21,8 @@ dependencies:
   collection: ">=1.1.0<1.14.0"
   ebisu: "^0.7.5"
   ebisu_cpp: "^0.3.25"
+  ebisu_rs:
+    path: ../ebisu_rs
   id: "^1.0.16"
   logging: ">=0.9.3<0.12.0"
   quiver: ">=0.21.0<0.25.0"
