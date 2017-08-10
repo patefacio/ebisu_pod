@@ -54,7 +54,57 @@ void main([List<String> args]) {
     ]);
     final mapper = new PodRustMapper(pkg);
 
-    print(mapper.module.code);
+    expect(darkMatter(mapper.module.code), darkMatter('''
+/// TODO: comment module sample
+/// TODO: comment foo
+#[derive(Debug)]
+enum Foo {
+    /// TODO: comment a
+    A,
+    /// TODO: comment b
+    B,
+    /// TODO: comment c
+    C,
+}
+/// TODO: comment struct allTypes
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AllTypes {
+  /// TODO: comment field
+  a_char: char,
+  /// TODO: comment field
+  a_double: f64,
+  /// TODO: comment field
+  boolean: bool,
+  /// TODO: comment field
+  date: chrono::Date<chrono::Utc>,
+  /// TODO: comment field
+  regex: regex::Regex,
+  /// TODO: comment field
+  int8: i8,
+  /// TODO: comment field
+  int16: i16,
+  /// TODO: comment field
+  int32: i32,
+  /// TODO: comment field
+  int64: i64,
+  /// TODO: comment field
+  uint8: u8,
+  /// TODO: comment field
+  uint16: u16,
+  /// TODO: comment field
+  uint32: u32,
+  /// TODO: comment field
+  uint64: u64,
+  /// TODO: comment field
+  date_time: chrono::DateTime<chrono::Utc>,
+  /// TODO: comment field
+  timestamp: chrono::DateTime<chrono::Utc>,
+  /// TODO: comment field
+  fixed_size_double: f64,
+  /// TODO: comment field
+  var_size_double: f64,
+}
+'''));
   });
 
 // end <main>

@@ -61,20 +61,26 @@ class PodRustMapper {
 
   final _strNameRe = new RegExp(r'^str_(\d+)$');
 
+  _makeMember(PodObject po, PodField field) => field.podType.isArray
+      ? _makeArrayMember(field)
+      : (_makeField(field)..type = _mapFieldType(field.podType));
+
+  _makeField(PodField field) => ebisu_rs.field(field.id)..doc = field.doc;
+
+  _makeArrayMember(PodField field) {
+    var rustType = _mapFieldType(field.podType);
+
+    return _makeField(field)
+      ..type = field.podType?.maxLength == null
+          ? 'Vec<$rustType>'
+          : '[$rustType, ${field.podType.maxLength}]';
+  }
+
   _mapFieldType(PodType podType) {
     final podTypeName = podType is PodArrayType
-        ? podType.referredType.id.snake
-        : podType.typeName;
-    var rustType = _rustTypeMap[podTypeName];
-    if (rustType == null) {
-      final strMatch = _strNameRe.firstMatch(podTypeName);
-      if (strMatch != null) {
-        rustType = '${makeId(podTypeName).capSnake}_t';
-      } else {
-        rustType = podTypeName;
-      }
-    }
-    return rustType;
+        ? _mapFieldType(podType.referredType)
+        : _rustTypeMap[podType.id.snake];
+    return  podTypeName ?? podType.id.capCamel;
   }
 
   _makeEnum(PodEnum pe) =>
@@ -82,9 +88,13 @@ class PodRustMapper {
         ..derive = [ebisu_rs.Debug];
 
   _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
-    ..derive = [ebisu_rs.Debug, ebisu_rs.Clone, ebisu_rs.Serialize, ebisu_rs.Deserialize]
-    ..fields.addAll(po.fields.map((PodField field) =>
-        ebisu_rs.field(field.id)..type = _mapFieldType(field.podType)));
+    ..derive = [
+      ebisu_rs.Debug,
+      ebisu_rs.Clone,
+      ebisu_rs.Serialize,
+      ebisu_rs.Deserialize
+    ]
+    ..fields.addAll(po.fields.map((PodField field) => _makeMember(po, field)));
 
   // end <class PodRustMapper>
 
