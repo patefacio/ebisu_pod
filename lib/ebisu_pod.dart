@@ -368,6 +368,8 @@ class EnumValue {
 
   EnumValue(id, [this.doc]) : id = makeId(id);
 
+  toString() => id.snake;
+
   // end <class EnumValue>
 
 }

@@ -27,13 +27,25 @@ class PodRustMapper {
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
 
-      podEnums.forEach((e) {
-        print('Adding enum $e');
-        _module.enums.add(ebisu_rs.enum_(e.id, e.values.map((e) => e.id.snake)));
+      podEnums.forEach((pe) {
+        _module.enums.add(_makeEnum(pe));
+      });
+
+      podObjects.forEach((PodObject po) {
+        _module.structs.add(_makeStruct(po));
       });
     }
     return _module;
   }
+
+  _makeEnum(PodEnum pe) =>
+      ebisu_rs.enum_(pe.id, pe.values.map((e) => e.id.snake))
+      ..derive = [ ebisu_rs.Debug, ebisu_rs.Copy ];
+
+  _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
+    ..derive = [ebisu_rs.Debug, ebisu_rs.Copy]
+    ..fields
+        .addAll(po.fields.map((PodField field) => ebisu_rs.field(field.id)));
 
   // end <class PodRustMapper>
 
