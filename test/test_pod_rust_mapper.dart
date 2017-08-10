@@ -28,7 +28,7 @@ void main([List<String> args]) {
     final po = object('all_types', [
       field('a_char', Char),
       field('a_double', Double),
-      field('object_id', ObjectId),
+      // TODO: field('object_id', ObjectId),
       field('boolean', Boolean),
       field('date', Date),
       field('regex', Regex),
@@ -42,10 +42,10 @@ void main([List<String> args]) {
       field('uint64', Uint64),
       field('date_time', DateTime),
       field('timestamp', Timestamp),
-      field('fixed_size_str', fixedStr(10)),
+      // TODO: field('fixed_size_str', fixedStr(10)),
       field('fixed_size_double', array(Double, maxLength: 12)),
       field('var_size_double', array(Double)),
-      bitSetField('bs', 4, rhsPadBits: 2),
+      // TODO: bitSetField('bs', 4, rhsPadBits: 2),
     ]);
 
     final pkg = new PodPackage('sample', namedTypes: [

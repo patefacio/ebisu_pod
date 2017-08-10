@@ -38,14 +38,53 @@ class PodRustMapper {
     return _module;
   }
 
+  static final _rustTypeMap = {
+    'char': ebisu_rs.char,
+    'date': 'chrono::Date<chrono::Utc>',
+    'date_time': 'chrono::DateTime<chrono::Utc>',
+    'regex': 'regex::Regex',
+    'int': ebisu_rs.i64,
+    'int8': ebisu_rs.i8,
+    'int16': ebisu_rs.i16,
+    'int32': ebisu_rs.i32,
+    'int64': ebisu_rs.i64,
+    'uint': ebisu_rs.u64,
+    'uint8': ebisu_rs.u8,
+    'uint16': ebisu_rs.u16,
+    'uint32': ebisu_rs.u32,
+    'uint64': ebisu_rs.u64,
+    'double': ebisu_rs.f64,
+    'str': ebisu_rs.string,
+    'boolean': ebisu_rs.bool_,
+    'timestamp': 'chrono::DateTime<chrono::Utc>',
+  };
+
+  final _strNameRe = new RegExp(r'^str_(\d+)$');
+
+  _mapFieldType(PodType podType) {
+    final podTypeName = podType is PodArrayType
+        ? podType.referredType.id.snake
+        : podType.typeName;
+    var rustType = _rustTypeMap[podTypeName];
+    if (rustType == null) {
+      final strMatch = _strNameRe.firstMatch(podTypeName);
+      if (strMatch != null) {
+        rustType = '${makeId(podTypeName).capSnake}_t';
+      } else {
+        rustType = podTypeName;
+      }
+    }
+    return rustType;
+  }
+
   _makeEnum(PodEnum pe) =>
       ebisu_rs.enum_(pe.id, pe.values.map((e) => e.id.snake))
-      ..derive = [ ebisu_rs.Debug, ebisu_rs.Copy ];
+        ..derive = [ebisu_rs.Debug];
 
   _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
-    ..derive = [ebisu_rs.Debug, ebisu_rs.Copy]
-    ..fields
-        .addAll(po.fields.map((PodField field) => ebisu_rs.field(field.id)));
+    ..derive = [ebisu_rs.Debug, ebisu_rs.Clone, ebisu_rs.Serialize, ebisu_rs.Deserialize]
+    ..fields.addAll(po.fields.map((PodField field) =>
+        ebisu_rs.field(field.id)..type = _mapFieldType(field.podType)));
 
   // end <class PodRustMapper>
 
