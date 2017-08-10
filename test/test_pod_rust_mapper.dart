@@ -8,7 +8,6 @@ import 'package:test/test.dart';
 import 'package:ebisu/ebisu.dart';
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:ebisu_pod/pod_rust.dart';
-import 'package:ebisu_rs/ebisu_rs.dart' hide field;
 
 // end <additional imports>
 
@@ -49,9 +48,13 @@ void main([List<String> args]) {
       bitSetField('bs', 4, rhsPadBits: 2),
     ]);
 
-    final pkg = new PodPackage('sample', namedTypes: [po]);
-    final m = module(pkg.id);
-    final mapper = new PodRustMapper(pkg, m);
+    final pkg = new PodPackage('sample', namedTypes: [
+      po,
+      enum_('foo', ['a', 'b', 'c']),
+    ]);
+    final mapper = new PodRustMapper(pkg);
+
+    print(mapper.module.code);
   });
 
 // end <main>

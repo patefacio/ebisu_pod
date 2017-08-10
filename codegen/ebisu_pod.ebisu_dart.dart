@@ -518,7 +518,8 @@ toString() => id.capCamel;
         ..imports = [
           'package:ebisu/ebisu.dart',
           'package:ebisu_pod/ebisu_pod.dart',
-          'package:ebisu_rs/ebisu_rs.dart',
+          "'package:ebisu_rs/ebisu_rs.dart' show Module",
+          "'package:ebisu_rs/ebisu_rs.dart' as ebisu_rs"
         ]
         ..classes = [
           class_('pod_rust_mapper')
@@ -529,9 +530,9 @@ toString() => id.capCamel;
                 ..type = 'PodPackage'
                 ..ctors = [''],
               member('module')
+                ..access = IA
                 ..doc = 'Module to insert rust mappings'
                 ..type = 'Module'
-                ..ctors = ['']
             ]
         ],
       library('pod_cpp')
@@ -564,7 +565,7 @@ toString() => id.capCamel;
         ]
     ];
 
-  ebisu.generate(generateDrudge: false);
+  ebisu.generate(generateDrudge: true);
 
   _logger.warning('''
 **** NON GENERATED FILES ****
