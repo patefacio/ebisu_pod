@@ -515,6 +515,7 @@ toString() => id.capCamel;
         ],
       library('pod_rust')
         ..doc = 'Consistent mapping of *plain old data* to rust structs'
+        ..includesLogger = true
         ..imports = [
           'package:ebisu/ebisu.dart',
           'package:ebisu_pod/ebisu_pod.dart',

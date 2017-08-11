@@ -100,9 +100,9 @@ struct AllTypes {
   /// TODO: comment field
   timestamp: chrono::DateTime<chrono::Utc>,
   /// TODO: comment field
-  fixed_size_double: f64,
+  fixed_size_double: [f64, 12],
   /// TODO: comment field
-  var_size_double: f64,
+  var_size_double: Vec<f64>,
 }
 '''));
   });

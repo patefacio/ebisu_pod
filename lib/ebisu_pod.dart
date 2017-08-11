@@ -980,7 +980,12 @@ class PodPackage extends Entity with PropertySet {
   qualifiedName(s) => '$name.$s';
 
   get namedTypes => _namedTypesMap.values;
+  get namedTypesNames => _namedTypesMap.keys;
   get localNamedTypes => _localNamedTypesMap.values;
+
+  get podMaps => concat(podObjects.map((PodObject po) => po.fields
+      .where((PodField field) => field.podType is PodMapType)
+      .map((field) => field.podType)));
 
   Iterable<String> get propertyErrors =>
       getPropertyErrors(_propertyDefinitionSets);

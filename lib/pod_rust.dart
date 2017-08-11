@@ -5,9 +5,12 @@ import 'package:ebisu/ebisu.dart';
 import 'package:ebisu_pod/ebisu_pod.dart';
 import 'package:ebisu_rs/ebisu_rs.dart' as ebisu_rs;
 import 'package:ebisu_rs/ebisu_rs.dart' show Module;
+import 'package:logging/logging.dart';
 
 // custom <additional imports>
 // end <additional imports>
+
+final Logger _logger = new Logger('pod_rust');
 
 class PodRustMapper {
   PodRustMapper(this._package);
@@ -23,12 +26,26 @@ class PodRustMapper {
     if (_module == null) {
       _module = new Module(this.package.id);
 
-      final path = package.packageName.path;
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
 
       podEnums.forEach((pe) {
         _module.enums.add(_makeEnum(pe));
+      });
+
+      final uniqueStrMaps = new Set();
+      package.podMaps.forEach((PodMapType pmt) {
+        if (pmt.keyReferredType is StrType) {
+          final valueType = _mapFieldType(pmt.valueReferredType);
+          if (!uniqueStrMaps.contains(valueType)) {
+            _module.typeAliases.add(ebisu_rs.typeAlias(
+                'map_of_str_to_${pmt.valueReferredType.id.snake}',
+                'HashMap<String, $valueType>'));
+            uniqueStrMaps.add(valueType);
+          }
+        } else if (pmt.keyReferredType is PodEnum) {
+          _logger.info('Found key of enum type ${pmt.keyReferredType.id}');
+        }
       });
 
       podObjects.forEach((PodObject po) {
@@ -71,6 +88,7 @@ class PodRustMapper {
     var rustType = _mapFieldType(field.podType);
 
     return _makeField(field)
+      ..doc = field.doc
       ..type = field.podType?.maxLength == null
           ? 'Vec<$rustType>'
           : '[$rustType, ${field.podType.maxLength}]';
@@ -80,14 +98,16 @@ class PodRustMapper {
     final podTypeName = podType is PodArrayType
         ? _mapFieldType(podType.referredType)
         : _rustTypeMap[podType.id.snake];
-    return  podTypeName ?? podType.id.capCamel;
+    return podTypeName ?? podType.id.capCamel;
   }
 
   _makeEnum(PodEnum pe) =>
       ebisu_rs.enum_(pe.id, pe.values.map((e) => e.id.snake))
+        ..doc = pe.doc
         ..derive = [ebisu_rs.Debug];
 
   _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
+    ..doc = po.doc
     ..derive = [
       ebisu_rs.Debug,
       ebisu_rs.Clone,
