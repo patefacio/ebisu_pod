@@ -38,24 +38,10 @@ class PodRustMapper {
         final uniqueKey = pmt.id.capCamel;
         final keyType = _mapFieldType(pmt.keyReferredType);
         final valueType = _mapFieldType(pmt.valueReferredType);
-        if (pmt.keyReferredType is StrType) {
-          if (!uniqueMaps.contains(valueType)) {
-            _module.typeAliases.add(ebisu_rs.typeAlias(
-                uniqueKey, 
-                'HashMap<String, $valueType>'
-                ));
-            uniqueMaps.add(valueType);
-          }
-        } else if (pmt.keyReferredType is PodEnum) {
-          if (!uniqueMaps.contains(uniqueKey)) {
-            _module.typeAliases.add(ebisu_rs.typeAlias(
-                uniqueKey,
-                'HashMap<$keyType, $valueType>'));
-            uniqueMaps.add(uniqueKey);
-          }
-        } else {
-          _logger
-              .info('Found unexpected map key type ${pmt.keyReferredType.id}');
+        if (!uniqueMaps.contains(valueType)) {
+          _module.typeAliases.add(
+              ebisu_rs.typeAlias(uniqueKey, 'HashMap<$keyType, $valueType>'));
+          uniqueMaps.add(valueType);
         }
       });
 
