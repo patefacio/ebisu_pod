@@ -33,18 +33,29 @@ class PodRustMapper {
         _module.enums.add(_makeEnum(pe));
       });
 
-      final uniqueStrMaps = new Set();
+      final uniqueMaps = new Set();
       package.podMaps.forEach((PodMapType pmt) {
+        final uniqueKey = pmt.id.capCamel;
+        final keyType = _mapFieldType(pmt.keyReferredType);
+        final valueType = _mapFieldType(pmt.valueReferredType);
         if (pmt.keyReferredType is StrType) {
-          final valueType = _mapFieldType(pmt.valueReferredType);
-          if (!uniqueStrMaps.contains(valueType)) {
+          if (!uniqueMaps.contains(valueType)) {
             _module.typeAliases.add(ebisu_rs.typeAlias(
-                'map_of_str_to_${pmt.valueReferredType.id.snake}',
-                'HashMap<String, $valueType>'));
-            uniqueStrMaps.add(valueType);
+                uniqueKey, 
+                'HashMap<String, $valueType>'
+                ));
+            uniqueMaps.add(valueType);
           }
         } else if (pmt.keyReferredType is PodEnum) {
-          _logger.info('Found key of enum type ${pmt.keyReferredType.id}');
+          if (!uniqueMaps.contains(uniqueKey)) {
+            _module.typeAliases.add(ebisu_rs.typeAlias(
+                uniqueKey,
+                'HashMap<$keyType, $valueType>'));
+            uniqueMaps.add(uniqueKey);
+          }
+        } else {
+          _logger
+              .info('Found unexpected map key type ${pmt.keyReferredType.id}');
         }
       });
 
@@ -76,9 +87,7 @@ class PodRustMapper {
     'timestamp': 'chrono::DateTime<chrono::Utc>',
   };
 
-  final _strNameRe = new RegExp(r'^str_(\d+)$');
-
-  _makeMember(PodObject po, PodField field) => field.podType.isArray
+  _makeMember(PodField field) => field.podType.isArray
       ? _makeArrayMember(field)
       : (_makeField(field)..type = _mapFieldType(field.podType));
 
@@ -114,7 +123,7 @@ class PodRustMapper {
       ebisu_rs.Serialize,
       ebisu_rs.Deserialize
     ]
-    ..fields.addAll(po.fields.map((PodField field) => _makeMember(po, field)));
+    ..fields.addAll(po.fields.map((PodField field) => _makeMember(field)));
 
   // end <class PodRustMapper>
 
