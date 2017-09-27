@@ -34,6 +34,7 @@ class PodRustMapper {
       });
 
       final uniqueMaps = new Set();
+      bool requiresHashMap = false;
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
         final keyType = _mapFieldType(pmt.keyReferredType);
@@ -42,8 +43,13 @@ class PodRustMapper {
           _module.typeAliases.add(
               ebisu_rs.typeAlias(uniqueKey, 'HashMap<$keyType, $valueType>'));
           uniqueMaps.add(valueType);
+          requiresHashMap = true;
         }
       });
+
+      if (requiresHashMap) {
+        _module.uses.add(ebisu_rs.use('std::collections::HashMap'));
+      }
 
       podObjects.forEach((PodObject po) {
         _module.structs.add(_makeStruct(po));
@@ -54,7 +60,7 @@ class PodRustMapper {
 
   static final _rustTypeMap = {
     'char': ebisu_rs.char,
-    'date': 'chrono::Date<chrono::Utc>',
+    'date': 'chrono::NaiveDate',
     'date_time': 'chrono::DateTime<chrono::Utc>',
     'regex': 'regex::Regex',
     'int': ebisu_rs.i64,
@@ -96,10 +102,19 @@ class PodRustMapper {
     return podTypeName ?? podType.id.capCamel;
   }
 
-  _makeEnum(PodEnum pe) =>
-      ebisu_rs.enum_(pe.id, pe.values.map((e) => e.id.snake))
-        ..doc = pe.doc
-        ..derive = [ebisu_rs.Debug];
+  _makeEnum(PodEnum pe) => ebisu_rs.enum_(
+      pe.id, pe.values.map((e) => ebisu_rs.uv(e.id.snake)..doc = e.doc))
+    ..doc = pe.doc
+    ..derive = [
+      ebisu_rs.Debug,
+      ebisu_rs.Clone,
+      ebisu_rs.Copy,
+      ebisu_rs.Eq,
+      ebisu_rs.PartialEq,                  
+      ebisu_rs.Hash,      
+      ebisu_rs.Serialize,
+      ebisu_rs.Deserialize
+    ];
 
   _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
     ..doc = po.doc
