@@ -24,13 +24,21 @@ class PodRustMapper {
 
   Module _makeModule() {
     if (_module == null) {
-      _module = new Module(this.package.id);
+      _module = new Module(_package.id)..doc = _package.doc;
 
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
+      final predefined = _package.allTypes.where((t) => t is PodPredefinedType);
 
       podEnums.forEach((pe) {
         _module.enums.add(_makeEnum(pe));
+      });
+
+      predefined.forEach((PodPredefinedType ppt) {
+        final prop = ppt.getProperty('rust_aliased_to');
+        if (prop != null) {
+          _module.typeAliases.add(ebisu_rs.pubTypeAlias(ppt.id, prop));
+        }
       });
 
       final uniqueMaps = new Set();
@@ -40,8 +48,8 @@ class PodRustMapper {
         final keyType = _mapFieldType(pmt.keyReferredType);
         final valueType = _mapFieldType(pmt.valueReferredType);
         if (!uniqueMaps.contains(valueType)) {
-          _module.typeAliases.add(
-              ebisu_rs.typeAlias(uniqueKey, 'HashMap<$keyType, $valueType>'));
+          _module.typeAliases.add(ebisu_rs.pubTypeAlias(
+              uniqueKey, 'HashMap<$keyType, $valueType>'));
           uniqueMaps.add(valueType);
           requiresHashMap = true;
         }
@@ -83,7 +91,7 @@ class PodRustMapper {
       ? _makeArrayMember(field)
       : (_makeField(field)..type = _mapFieldType(field.podType));
 
-  _makeField(PodField field) => ebisu_rs.field(field.id)..doc = field.doc;
+  _makeField(PodField field) => ebisu_rs.pubField(field.id)..doc = field.doc;
 
   _makeArrayMember(PodField field) {
     var rustType = _mapFieldType(field.podType);
@@ -102,7 +110,7 @@ class PodRustMapper {
     return podTypeName ?? podType.id.capCamel;
   }
 
-  _makeEnum(PodEnum pe) => ebisu_rs.enum_(
+  _makeEnum(PodEnum pe) => ebisu_rs.pubEnum(
       pe.id, pe.values.map((e) => ebisu_rs.uv(e.id.snake)..doc = e.doc))
     ..doc = pe.doc
     ..derive = [
@@ -110,13 +118,13 @@ class PodRustMapper {
       ebisu_rs.Clone,
       ebisu_rs.Copy,
       ebisu_rs.Eq,
-      ebisu_rs.PartialEq,                  
-      ebisu_rs.Hash,      
+      ebisu_rs.PartialEq,
+      ebisu_rs.Hash,
       ebisu_rs.Serialize,
       ebisu_rs.Deserialize
     ];
 
-  _makeStruct(PodObject po) => ebisu_rs.struct(po.id)
+  _makeStruct(PodObject po) => ebisu_rs.pubStruct(po.id)
     ..doc = po.doc
     ..derive = [
       ebisu_rs.Debug,

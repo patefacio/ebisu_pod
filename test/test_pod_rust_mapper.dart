@@ -49,16 +49,24 @@ void main([List<String> args]) {
     ]);
 
     final pkg = new PodPackage('sample', namedTypes: [
+      podPredefinedType('goo')..setProperty('rust_aliased_to', 'f64'),
       po,
       enum_('foo', ['a', 'b', 'c']),
     ]);
     final mapper = new PodRustMapper(pkg);
 
     expect(darkMatter(mapper.module.code), darkMatter('''
-/// TODO: comment module sample
+//! TODO: comment module sample
+
+// --- module type aliases ---
+
+pub type Goo = f64;
+
+// --- module enum definitions ---
+
 /// TODO: comment foo
-#[derive(Debug)]
-enum Foo {
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
+pub enum Foo {
     /// TODO: comment a
     A,
     /// TODO: comment b
@@ -66,43 +74,46 @@ enum Foo {
     /// TODO: comment c
     C,
 }
+
+// --- module struct definitinos ---
+
 /// TODO: comment struct allTypes
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct AllTypes {
+pub struct AllTypes {
   /// TODO: comment field
-  a_char: char,
+  pub a_char: char,
   /// TODO: comment field
-  a_double: f64,
+  pub a_double: f64,
   /// TODO: comment field
-  boolean: bool,
+  pub boolean: bool,
   /// TODO: comment field
-  date: chrono::Date<chrono::Utc>,
+  pub date: chrono::NaiveDate,
   /// TODO: comment field
-  regex: regex::Regex,
+  pub regex: regex::Regex,
   /// TODO: comment field
-  int8: i8,
+  pub int8: i8,
   /// TODO: comment field
-  int16: i16,
+  pub int16: i16,
   /// TODO: comment field
-  int32: i32,
+  pub int32: i32,
   /// TODO: comment field
-  int64: i64,
+  pub int64: i64,
   /// TODO: comment field
-  uint8: u8,
+  pub uint8: u8,
   /// TODO: comment field
-  uint16: u16,
+  pub uint16: u16,
   /// TODO: comment field
-  uint32: u32,
+  pub uint32: u32,
   /// TODO: comment field
-  uint64: u64,
+  pub uint64: u64,
   /// TODO: comment field
-  date_time: chrono::DateTime<chrono::Utc>,
+  pub date_time: chrono::DateTime<chrono::Utc>,
   /// TODO: comment field
-  timestamp: chrono::DateTime<chrono::Utc>,
+  pub timestamp: chrono::DateTime<chrono::Utc>,
   /// TODO: comment field
-  fixed_size_double: [f64, 12],
+  pub fixed_size_double: [f64, 12],
   /// TODO: comment field
-  var_size_double: Vec<f64>,
+  pub var_size_double: Vec<f64>,
 }
 '''));
   });
