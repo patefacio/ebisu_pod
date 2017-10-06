@@ -41,7 +41,7 @@ void main([List<String> args]) {
       field('uint32', Uint32),
       field('uint64', Uint64),
       field('date_time', DateTime),
-      field('timestamp', Timestamp),
+      field('timestamp', Timestamp)..isOptional = true,
       // TODO: field('fixed_size_str', fixedStr(10)),
       field('fixed_size_double', array(Double, maxLength: 12)),
       field('var_size_double', array(Double)),
@@ -109,7 +109,7 @@ pub struct AllTypes {
   /// TODO: comment field
   pub date_time: chrono::DateTime<chrono::Utc>,
   /// TODO: comment field
-  pub timestamp: chrono::DateTime<chrono::Utc>,
+  pub timestamp: Option<chrono::DateTime<chrono::Utc>>,
   /// TODO: comment field
   pub fixed_size_double: [f64, 12],
   /// TODO: comment field

@@ -89,12 +89,13 @@ class PodRustMapper {
 
   _makeMember(PodField field) => field.podType.isArray
       ? _makeArrayMember(field)
-      : (_makeField(field)..type = _mapFieldType(field.podType));
+      : (_makeField(field)
+        ..type = _mapFieldType(field.isOptional, field.podType));
 
   _makeField(PodField field) => ebisu_rs.pubField(field.id)..doc = field.doc;
 
   _makeArrayMember(PodField field) {
-    var rustType = _mapFieldType(field.podType);
+    var rustType = _mapFieldType(field.isOptional, field.podType);
 
     return _makeField(field)
       ..doc = field.doc
@@ -103,9 +104,13 @@ class PodRustMapper {
           : '[$rustType, ${field.podType.maxLength}]';
   }
 
-  _mapFieldType(PodType podType) {
+  _mapFieldType(bool isOptional, PodType podType) => isOptional
+      ? 'Option<${_mapFieldTypeBase(podType)}>'
+      : _mapFieldTypeBase(podType);
+
+  _mapFieldTypeBase(PodType podType) {
     final podTypeName = podType is PodArrayType
-        ? _mapFieldType(podType.referredType)
+        ? _mapFieldTypeBase(podType.referredType)
         : _rustTypeMap[podType.id.snake];
     return podTypeName ?? podType.id.capCamel;
   }
