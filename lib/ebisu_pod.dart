@@ -704,10 +704,12 @@ class PodField extends Object with PropertySet {
           doc == other.doc &&
           isIndex == other.isIndex &&
           _podType == other._podType &&
-          defaultValue == other.defaultValue;
+          defaultValue == other.defaultValue &&
+          isOptional == other.isOptional;
 
   @override
-  int get hashCode => hash4(_id, doc, isIndex, defaultValue);
+  int get hashCode =>
+      hashObjects([_id, doc, isIndex, defaultValue, isOptional]);
 
   Id get id => _id;
 
@@ -716,7 +718,12 @@ class PodField extends Object with PropertySet {
 
   /// If true the field is defined as index
   bool isIndex = false;
+
+  /// A default value for the field
   dynamic defaultValue;
+
+  /// If set this field is optional - indicating [null] or `None` is acceptable
+  bool isOptional = false;
   PodObject get owner => _owner;
 
   // custom <class PodField>

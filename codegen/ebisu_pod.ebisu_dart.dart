@@ -380,7 +380,12 @@ If it is a String it is converted to a PodTypeRef
                 ..type = 'dynamic'
                 ..isInHashCode = false
                 ..access = IA,
-              member('default_value')..type = 'dynamic',
+              member('default_value')
+              ..doc = 'A default value for the field'
+              ..type = 'dynamic',
+              member('is_optional')
+              ..doc = 'If set this field is optional - indicating [null] or `None` is acceptable'
+              ..init = false,
               member('owner')
                 ..isInHashCode = false
                 ..isInEquality = false
