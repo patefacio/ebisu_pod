@@ -45,8 +45,8 @@ class PodRustMapper {
       bool requiresHashMap = false;
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
-        final keyType = _mapFieldType(pmt.keyReferredType);
-        final valueType = _mapFieldType(pmt.valueReferredType);
+        final keyType = _mapFieldType(false, pmt.keyReferredType);
+        final valueType = _mapFieldType(false, pmt.valueReferredType);
         if (!uniqueMaps.contains(valueType)) {
           _module.typeAliases.add(ebisu_rs.pubTypeAlias(
               uniqueKey, 'HashMap<$keyType, $valueType>'));
