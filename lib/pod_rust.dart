@@ -8,6 +8,10 @@ import 'package:ebisu_rs/ebisu_rs.dart' show Module;
 import 'package:logging/logging.dart';
 
 // custom <additional imports>
+
+import 'package:ebisu_rs/common_traits.dart';
+import 'package:id/id.dart';
+
 // end <additional imports>
 
 final Logger _logger = new Logger('pod_rust');
@@ -24,14 +28,21 @@ class PodRustMapper {
 
   Module _makeModule() {
     if (_module == null) {
-      _module = new Module(_package.id)..doc = _package.doc;
+      _module = new Module(_package.id)..doc = _package.doc
+      ..moduleCodeBlock(ebisu_rs.moduleBottom);
 
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
       final predefined = _package.allTypes.where((t) => t is PodPredefinedType);
 
       podEnums.forEach((pe) {
-        _module.enums.add(_makeEnum(pe));
+        final e = _makeEnum(pe);
+        _module.enums.add(e);
+        final imp = ebisu_rs.traitImpl(defaultTrait, e.unqualifiedName);
+        imp.functions.first.codeBlock
+          ..tag = null
+          ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
+        _module.impls.add(imp);
       });
 
       predefined.forEach((PodPredefinedType ppt) {
@@ -43,14 +54,15 @@ class PodRustMapper {
 
       final uniqueMaps = new Set();
       bool requiresHashMap = false;
+
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
         final keyType = _mapFieldType(false, pmt.keyReferredType);
         final valueType = _mapFieldType(false, pmt.valueReferredType);
-        if (!uniqueMaps.contains(valueType)) {
+        if (!uniqueMaps.contains([keyType, valueType])) {
           _module.typeAliases.add(ebisu_rs.pubTypeAlias(
               uniqueKey, 'HashMap<$keyType, $valueType>'));
-          uniqueMaps.add(valueType);
+          uniqueMaps.add([keyType, valueType]);
           requiresHashMap = true;
         }
       });
@@ -61,6 +73,10 @@ class PodRustMapper {
 
       podObjects.forEach((PodObject po) {
         _module.structs.add(_makeStruct(po));
+        final rustHasImpl = po.getProperty('rust_has_impl');
+        if(rustHasImpl ?? false) {
+          _module.impls.add(ebisu_rs.typeImpl(_module.structs.last.genericName));
+        }
       });
     }
     return _module;
@@ -68,7 +84,7 @@ class PodRustMapper {
 
   static final _rustTypeMap = {
     'char': ebisu_rs.char,
-    'date': 'chrono::NaiveDate',
+    'date': 'Date',
     'date_time': 'chrono::DateTime<chrono::Utc>',
     'regex': 'regex::Regex',
     'int': ebisu_rs.i64,
@@ -126,7 +142,7 @@ class PodRustMapper {
       ebisu_rs.PartialEq,
       ebisu_rs.Hash,
       ebisu_rs.Serialize,
-      ebisu_rs.Deserialize
+      ebisu_rs.Deserialize,
     ];
 
   _makeStruct(PodObject po) => ebisu_rs.pubStruct(po.id)
@@ -135,7 +151,8 @@ class PodRustMapper {
       ebisu_rs.Debug,
       ebisu_rs.Clone,
       ebisu_rs.Serialize,
-      ebisu_rs.Deserialize
+      ebisu_rs.Deserialize,
+      ebisu_rs.Default,
     ]
     ..fields.addAll(po.fields.map((PodField field) => _makeMember(field)));
 

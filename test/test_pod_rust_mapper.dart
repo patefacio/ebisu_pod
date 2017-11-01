@@ -40,7 +40,7 @@ void main([List<String> args]) {
       field('uint16', Uint16),
       field('uint32', Uint32),
       field('uint64', Uint64),
-      field('date_time', DateTime),
+      field('date', Date),
       field('timestamp', Timestamp)..isOptional = true,
       // TODO: field('fixed_size_str', fixedStr(10)),
       field('fixed_size_double', array(Double, maxLength: 12)),
@@ -77,8 +77,8 @@ pub enum Foo {
 
 // --- module struct definitinos ---
 
-/// TODO: comment struct allTypes
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// TODO: comment struct `AllTypes`
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AllTypes {
   /// TODO: comment field
   pub a_char: char,
@@ -87,7 +87,7 @@ pub struct AllTypes {
   /// TODO: comment field
   pub boolean: bool,
   /// TODO: comment field
-  pub date: chrono::NaiveDate,
+  pub date: Date,
   /// TODO: comment field
   pub regex: regex::Regex,
   /// TODO: comment field
@@ -107,7 +107,7 @@ pub struct AllTypes {
   /// TODO: comment field
   pub uint64: u64,
   /// TODO: comment field
-  pub date_time: chrono::DateTime<chrono::Utc>,
+  pub date: Date,
   /// TODO: comment field
   pub timestamp: Option<chrono::DateTime<chrono::Utc>>,
   /// TODO: comment field
@@ -115,6 +115,26 @@ pub struct AllTypes {
   /// TODO: comment field
   pub var_size_double: Vec<f64>,
 }
+
+// --- module impl definitions ---
+
+/// Implementation of trait `Default` for type `Foo`
+impl Default<> for Foo {
+  /// A trait for giving a type a useful default value.
+  ///
+  ///  * _return_ - The default value for the type
+  ///
+  fn default() -> Self {
+    Foo::A
+  }
+
+  // custom <impl Default for Foo>
+  // end <impl Default for Foo>
+}
+
+// custom <module sample ModuleBottom>
+// end <module sample ModuleBottom>
+
 '''));
   });
 
