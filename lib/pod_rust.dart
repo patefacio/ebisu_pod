@@ -22,14 +22,36 @@ class PodRustMapper {
   /// Package to generate basic rust mappings for
   PodPackage get package => _package;
 
+  /// List of derives to be applied to objects
+  List<ebisu_rs.Derivable> objectDerives = [
+    ebisu_rs.Debug,
+    ebisu_rs.Clone,
+    ebisu_rs.Serialize,
+    ebisu_rs.Deserialize,
+    ebisu_rs.Default
+  ];
+
+  /// List of derives to be applied to enumerations
+  List<ebisu_rs.Derivable> enumDerives = [
+    ebisu_rs.Debug,
+    ebisu_rs.Clone,
+    ebisu_rs.Copy,
+    ebisu_rs.Eq,
+    ebisu_rs.PartialEq,
+    ebisu_rs.Hash,
+    ebisu_rs.Serialize,
+    ebisu_rs.Deserialize
+  ];
+
   // custom <class PodRustMapper>
 
   Module get module => _makeModule();
 
   Module _makeModule() {
     if (_module == null) {
-      _module = new Module(_package.id)..doc = _package.doc
-      ..moduleCodeBlock(ebisu_rs.moduleBottom);
+      _module = new Module(_package.id)
+        ..doc = _package.doc
+        ..moduleCodeBlock(ebisu_rs.moduleBottom);
 
       final podObjects = _package.allTypes.where((t) => t is PodObject);
       final podEnums = _package.allTypes.where((t) => t is PodEnum);
@@ -57,8 +79,8 @@ class PodRustMapper {
 
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
-        final keyType = _mapFieldType(false, pmt.keyReferredType);
-        final valueType = _mapFieldType(false, pmt.valueReferredType);
+        final keyType = _mapFieldType(pmt.keyReferredType);
+        final valueType = _mapFieldType(pmt.valueReferredType);
         if (!uniqueMaps.contains([keyType, valueType])) {
           _module.typeAliases.add(ebisu_rs.pubTypeAlias(
               uniqueKey, 'HashMap<$keyType, $valueType>'));
@@ -74,8 +96,19 @@ class PodRustMapper {
       podObjects.forEach((PodObject po) {
         _module.structs.add(_makeStruct(po));
         final rustHasImpl = po.getProperty('rust_has_impl');
-        if(rustHasImpl ?? false) {
-          _module.impls.add(ebisu_rs.typeImpl(_module.structs.last.genericName));
+        if (rustHasImpl ?? false) {
+          _module.impls
+              .add(ebisu_rs.typeImpl(_module.structs.last.genericName));
+        }
+        final List rustDerives = po.getProperty('rust_derives');
+        if (rustDerives != null) {
+          _module.structs.last.derive.addAll(rustDerives);
+        }
+
+        final List rustNotDerives = po.getProperty('rust_not_derives');
+        if (rustNotDerives != null) {
+          final remove = rustNotDerives.map((d) => ebisu_rs.Derivable.fromString(d)).toList();
+          _module.structs.last.derive.removeWhere((d) => remove.contains(d));
         }
       });
     }
@@ -106,22 +139,23 @@ class PodRustMapper {
   _makeMember(PodField field) => field.podType.isArray
       ? _makeArrayMember(field)
       : (_makeField(field)
-        ..type = _mapFieldType(field.isOptional, field.podType));
+        ..type = _addOption(field));
 
   _makeField(PodField field) => ebisu_rs.pubField(field.id)..doc = field.doc;
 
   _makeArrayMember(PodField field) {
-    var rustType = _mapFieldType(field.isOptional, field.podType);
-
     return _makeField(field)
       ..doc = field.doc
-      ..type = field.podType?.maxLength == null
-          ? 'Vec<$rustType>'
-          : '[$rustType, ${field.podType.maxLength}]';
+      ..type = _addOption(field);
   }
 
-  _mapFieldType(bool isOptional, PodType podType) => isOptional
-      ? 'Option<${_mapFieldTypeBase(podType)}>'
+  _addOption(PodField field) => field.isOptional ? 'Option<${_mapFieldType(field.podType)}>' : _mapFieldType(field.podType);
+
+  _mapFieldType(PodType podType) => 
+      podType is PodArrayType? (
+        podType.maxLength == null
+          ? 'Vec<${_mapFieldTypeBase(podType)}>' 
+          : '[${_mapFieldTypeBase(podType)} , ${podType.maxLength}]')
       : _mapFieldTypeBase(podType);
 
   _mapFieldTypeBase(PodType podType) {
@@ -134,26 +168,11 @@ class PodRustMapper {
   _makeEnum(PodEnum pe) => ebisu_rs.pubEnum(
       pe.id, pe.values.map((e) => ebisu_rs.uv(e.id.snake)..doc = e.doc))
     ..doc = pe.doc
-    ..derive = [
-      ebisu_rs.Debug,
-      ebisu_rs.Clone,
-      ebisu_rs.Copy,
-      ebisu_rs.Eq,
-      ebisu_rs.PartialEq,
-      ebisu_rs.Hash,
-      ebisu_rs.Serialize,
-      ebisu_rs.Deserialize,
-    ];
+    ..derive = new List.from(enumDerives);
 
   _makeStruct(PodObject po) => ebisu_rs.pubStruct(po.id)
     ..doc = po.doc
-    ..derive = [
-      ebisu_rs.Debug,
-      ebisu_rs.Clone,
-      ebisu_rs.Serialize,
-      ebisu_rs.Deserialize,
-      ebisu_rs.Default,
-    ]
+    ..derive = new List.from(objectDerives)
     ..fields.addAll(po.fields.map((PodField field) => _makeMember(field)));
 
   // end <class PodRustMapper>

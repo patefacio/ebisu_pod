@@ -381,11 +381,12 @@ If it is a String it is converted to a PodTypeRef
                 ..isInHashCode = false
                 ..access = IA,
               member('default_value')
-              ..doc = 'A default value for the field'
-              ..type = 'dynamic',
+                ..doc = 'A default value for the field'
+                ..type = 'dynamic',
               member('is_optional')
-              ..doc = 'If set this field is optional - indicating [null] or `None` is acceptable'
-              ..init = false,
+                ..doc =
+                    'If set this field is optional - indicating [null] or `None` is acceptable'
+                ..init = false,
               member('owner')
                 ..isInHashCode = false
                 ..isInEquality = false
@@ -538,7 +539,32 @@ toString() => id.capCamel;
               member('module')
                 ..access = IA
                 ..doc = 'Module to insert rust mappings'
-                ..type = 'Module'
+                ..type = 'Module',
+              member('object_derives')
+                ..access = RW
+                ..doc = 'List of derives to be applied to objects'
+                ..type = 'List<ebisu_rs.Derivable>'
+                ..init = [
+                  'ebisu_rs.Debug',
+                  'ebisu_rs.Clone',
+                  'ebisu_rs.Serialize',
+                  'ebisu_rs.Deserialize',
+                  'ebisu_rs.Default',
+                ],
+              member('enum_derives')
+                ..doc = 'List of derives to be applied to enumerations'
+                ..access = RW
+                ..type = 'List<ebisu_rs.Derivable>'
+                ..init = [
+                  'ebisu_rs.Debug',
+                  'ebisu_rs.Clone',
+                  'ebisu_rs.Copy',
+                  'ebisu_rs.Eq',
+                  'ebisu_rs.PartialEq',
+                  'ebisu_rs.Hash',
+                  'ebisu_rs.Serialize',
+                  'ebisu_rs.Deserialize',
+                ],
             ]
         ],
       library('pod_cpp')
