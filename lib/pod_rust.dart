@@ -70,7 +70,8 @@ class PodRustMapper {
       predefined.forEach((PodPredefinedType ppt) {
         final prop = ppt.getProperty('rust_aliased_to');
         if (prop != null) {
-          _module.typeAliases.add(ebisu_rs.pubTypeAlias(ppt.id, prop));
+          _module.typeAliases
+              .add(ebisu_rs.pubTypeAlias(ppt.id, prop)..doc = ppt.doc);
         }
       });
 
@@ -107,7 +108,9 @@ class PodRustMapper {
 
         final List rustNotDerives = po.getProperty('rust_not_derives');
         if (rustNotDerives != null) {
-          final remove = rustNotDerives.map((d) => ebisu_rs.Derivable.fromString(d)).toList();
+          final remove = rustNotDerives
+              .map((d) => ebisu_rs.Derivable.fromString(d))
+              .toList();
           _module.structs.last.derive.removeWhere((d) => remove.contains(d));
         }
       });
@@ -138,8 +141,7 @@ class PodRustMapper {
 
   _makeMember(PodField field) => field.podType.isArray
       ? _makeArrayMember(field)
-      : (_makeField(field)
-        ..type = _addOption(field));
+      : (_makeField(field)..type = _addOption(field));
 
   _makeField(PodField field) => ebisu_rs.pubField(field.id)..doc = field.doc;
 
@@ -149,12 +151,13 @@ class PodRustMapper {
       ..type = _addOption(field);
   }
 
-  _addOption(PodField field) => field.isOptional ? 'Option<${_mapFieldType(field.podType)}>' : _mapFieldType(field.podType);
+  _addOption(PodField field) => field.isOptional
+      ? 'Option<${_mapFieldType(field.podType)}>'
+      : _mapFieldType(field.podType);
 
-  _mapFieldType(PodType podType) => 
-      podType is PodArrayType? (
-        podType.maxLength == null
-          ? 'Vec<${_mapFieldTypeBase(podType)}>' 
+  _mapFieldType(PodType podType) => podType is PodArrayType
+      ? (podType.maxLength == null
+          ? 'Vec<${_mapFieldTypeBase(podType)}>'
           : '[${_mapFieldTypeBase(podType)} , ${podType.maxLength}]')
       : _mapFieldTypeBase(podType);
 
