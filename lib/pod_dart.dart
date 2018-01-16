@@ -84,7 +84,7 @@ test('$name hashCode', () =>
     final relPath = package.getProperty('relativePath');
     final libName = '${package.packageName.path.last.snake}.dart';
     return library('test_coverage_${path.last.snake}')
-      ..imports.add(join(relPath, libName))
+      ..imports.add(join(relPath ?? '../lib', libName))
       ..imports.add('dart:convert')
       ..withMainCustomBlock((CodeBlock cb) {
         final enums = package.localNamedTypes.where((nt) => nt is PodEnum);
@@ -130,6 +130,10 @@ ${brCompact(objects.map(_objectTest))}
   Class _makeClass(PodObject po) {
     final result = class_(po.id)
       ..doc = po.doc
+      ..hasJsonSupport = true  // TODO: drive from properties
+      ..hasOpEquals = true  // TODO: drive from properties
+      ..jsonKeyFormat = JsonKeyFormat.snake
+      ..isCopyable = true  // TODO: drive from properties
       ..withCtor(
           '',
           (Ctor ctor) => ctor
@@ -158,7 +162,6 @@ ${brCompact(objects.map(_objectTest))}
     }
 
     pathUpdateFunction(FieldPath fieldPath) {
-      final leafField = fieldPath.path.last;
       final placeHolderCount = fieldPath.numPlaceHolders;
       return '''
 ///
@@ -171,7 +174,6 @@ ${brCompact(objects.map(_objectTest))}
     }
 
     pathEntry(FieldPath fieldPath) {
-      final leafField = fieldPath.path.last;
       return combine(
           ['///\n', pathKey(fieldPath), ':', pathUpdateFunction(fieldPath)]);
     }
@@ -220,6 +222,7 @@ void updateField(String fieldSpec, List<String> placeHolders) {
   Enum _makeEnum(PodEnum e) {
     return new Enum(e.id)
       ..doc = e.doc
+      ..hasJsonSupport = true // TODO: drive from properties
       ..values = e.values
           .map((ev) => new ebisu.EnumValue(ev.id, null)..doc = ev.doc)
           .toList();
@@ -239,8 +242,10 @@ void updateField(String fieldSpec, List<String> placeHolders) {
       return 'double';
     else if (t is UuidType)
       return 'Uuid';
-    else if (t is PodPredefinedType)
-      return t.id.capCamel;
+    else if (t is PodPredefinedType) {
+      final aliased = t.getProperty('dart_aliased_to');
+      return aliased != null? aliased : t.id.capCamel;
+    }
     else if (t is Int8Type ||
         t is Int16Type ||
         t is Int32Type ||

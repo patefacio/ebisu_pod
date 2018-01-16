@@ -801,6 +801,9 @@ class FieldPath {
 class PodObject extends PodUserDefinedType {
   List<PodField> get fields => _fields;
 
+  /// Indicates [PodObject] should have one and only one of the fields present
+  bool isEnumLike = false;
+
   // custom <class PodObject>
 
   PodObject(id, [this._fields]) : super(id) {

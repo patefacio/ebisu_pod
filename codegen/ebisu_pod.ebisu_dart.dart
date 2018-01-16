@@ -414,6 +414,10 @@ Represents the list of fields from some top level [PodObject] to a given field.
               member('field_paths')
                 ..type = 'Set<FieldPath>'
                 ..access = IA,
+              member('is_enum_like')
+                ..doc =
+                    'Indicates [PodObject] should have one and only one of the fields present'
+                ..init = false,
             ],
           class_('package_name')
             ..doc = '''
