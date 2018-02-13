@@ -130,10 +130,11 @@ ${brCompact(objects.map(_objectTest))}
   Class _makeClass(PodObject po) {
     final result = class_(po.id)
       ..doc = po.doc
-      ..hasJsonSupport = true  // TODO: drive from properties
-      ..hasOpEquals = true  // TODO: drive from properties
+      ..hasJsonSupport = true // TODO: drive from properties
+      ..hasJsonToString = true // TODO: drive from properties
+      ..hasOpEquals = true // TODO: drive from properties
       ..jsonKeyFormat = JsonKeyFormat.snake
-      ..isCopyable = true  // TODO: drive from properties
+      ..isCopyable = true // TODO: drive from properties
       ..withCtor(
           '',
           (Ctor ctor) => ctor
@@ -212,7 +213,7 @@ void updateField(String fieldSpec, List<String> placeHolders) {
       ..isInComparable = field.getProperty('isInComparable') ?? true
       ..isInEquality = field.getProperty('isInEquality') ?? true
       ..isInHashCode = field.getProperty('isInHashCode') ?? true
-      ..type = _getType(field.podType)
+      ..type = getType(field.podType)
       ..doc = field.doc;
 
     memberToFieldMap[result] = field;
@@ -228,37 +229,6 @@ void updateField(String fieldSpec, List<String> placeHolders) {
           .toList();
   }
 
-  _getType(PodType t) {
-    if (t is PodArrayType) return 'List<${_getType(t.referredType)}>';
-    if (t is PodMapType)
-      return 'Map<${_getType(t.keyReferredType)}, ${_getType(t.valueReferredType)}>';
-    else if (t is PodObject || t is PodEnum)
-      return t.id.capCamel;
-    else if (t is BooleanType)
-      return 'bool';
-    else if (t is DateType)
-      return 'Date';
-    else if (t is DoubleType)
-      return 'double';
-    else if (t is UuidType)
-      return 'Uuid';
-    else if (t is PodPredefinedType) {
-      final aliased = t.getProperty('dart_aliased_to');
-      return aliased != null? aliased : t.id.capCamel;
-    }
-    else if (t is Int8Type ||
-        t is Int16Type ||
-        t is Int32Type ||
-        t is Int64Type ||
-        t is Uint8Type ||
-        t is Uint16Type ||
-        t is Uint32Type ||
-        t is Uint64Type)
-      return 'int';
-    else
-      return 'String';
-  }
-
   // end <class PodDartMapper>
 
   PodPackage _package;
@@ -267,5 +237,35 @@ void updateField(String fieldSpec, List<String> placeHolders) {
 }
 
 // custom <library pod_dart>
+
+getType(PodType t) {
+  if (t is PodArrayType) return 'List<${getType(t.referredType)}>';
+  if (t is PodMapType)
+    return 'Map<${getType(t.keyReferredType)}, ${getType(t.valueReferredType)}>';
+  else if (t is PodObject || t is PodEnum)
+    return t.id.capCamel;
+  else if (t is BooleanType)
+    return 'bool';
+  else if (t is DateType)
+    return 'Date';
+  else if (t is DoubleType)
+    return 'double';
+  else if (t is UuidType)
+    return 'Uuid';
+  else if (t is PodPredefinedType) {
+    final aliased = t.getProperty('dart_aliased_to');
+    return aliased != null ? aliased : t.id.capCamel;
+  } else if (t is Int8Type ||
+      t is Int16Type ||
+      t is Int32Type ||
+      t is Int64Type ||
+      t is Uint8Type ||
+      t is Uint16Type ||
+      t is Uint32Type ||
+      t is Uint64Type)
+    return 'int';
+  else
+    return 'String';
+}
 
 // end <library pod_dart>

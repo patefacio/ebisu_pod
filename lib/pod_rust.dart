@@ -53,8 +53,10 @@ class PodRustMapper {
         ..doc = _package.doc
         ..moduleCodeBlock(ebisu_rs.moduleBottom);
 
-      final podObjects = _package.allTypes.where((t) => t is PodObject);
-      final podEnums = _package.allTypes.where((t) => t is PodEnum);
+      final podObjects = _package.localPodObjects.toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+      final podEnums = _package.localPodEnums.toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
       final predefined = _package.allTypes.where((t) => t is PodPredefinedType);
 
       podEnums.forEach((pe) {
@@ -94,6 +96,7 @@ class PodRustMapper {
         _module.uses.add(ebisu_rs.use('std::collections::HashMap'));
       }
 
+      bool requiresSerdeError = false;
       podObjects.forEach((PodObject po) {
         _module.structs.add(_makeStruct(po));
         final rustHasImpl = po.getProperty('rust_has_impl');
@@ -113,31 +116,60 @@ class PodRustMapper {
               .toList();
           _module.structs.last.derive.removeWhere((d) => remove.contains(d));
         }
+
+        final rustHasYamlReader = po.getProperty('include_yaml_reader');
+        if (rustHasYamlReader) {
+          _module.import('serde_yaml');
+          _module.import('serde');
+          _module.importWithMacros('serde_derive');
+          _module.importWithMacros('failure');
+          addYamlReader(po);
+          requiresSerdeError = true;
+        }
       });
+
+      if (requiresSerdeError) {
+        _module.structs.add(ebisu_rs.pubStruct('serde_yaml_error')
+          ..derive = ['Fail', 'Debug']
+          ..doc = 'Error encountered with serde_yaml serialization'
+          ..attrs = [
+            ebisu_rs.strAttr(
+                'fail(display="Failed reading type: {} source: {:?} error: {:?}", rust_type, source, error)')
+          ]
+          ..fields = [
+            ebisu_rs.field('rust_type')
+              ..doc = 'Type that failed to serialize'
+              ..type = 'String',
+            ebisu_rs.field('source')
+              ..doc = 'Source of failed data'
+              ..type = 'String',
+            ebisu_rs.field('error')
+              ..doc = 'Underlying serde_yaml error'
+              ..type = '::serde_yaml::Error'
+          ]);
+      }
     }
     return _module;
   }
 
-  static final _rustTypeMap = {
-    'char': ebisu_rs.char,
-    'date': 'Date',
-    'date_time': 'chrono::DateTime<chrono::Utc>',
-    'regex': 'regex::Regex',
-    'int': ebisu_rs.i64,
-    'int8': ebisu_rs.i8,
-    'int16': ebisu_rs.i16,
-    'int32': ebisu_rs.i32,
-    'int64': ebisu_rs.i64,
-    'uint': ebisu_rs.u64,
-    'uint8': ebisu_rs.u8,
-    'uint16': ebisu_rs.u16,
-    'uint32': ebisu_rs.u32,
-    'uint64': ebisu_rs.u64,
-    'double': ebisu_rs.f64,
-    'str': ebisu_rs.string,
-    'boolean': ebisu_rs.bool_,
-    'timestamp': 'chrono::DateTime<chrono::Utc>',
-  };
+  addYamlReader(PodObject po) => _module.functions.add(
+          new ebisu_rs.Fn('read_${po.id.snake}_from_yaml_file', [
+        ebisu_rs.parm('yaml_path', ebisu_rs.ref('::std::path::Path'))
+          ..doc = 'Path to yaml file'
+      ])
+            ..isPub = true
+            ..doc = 'Reads and parses a ${po.id.snake} object from a file path'
+            ..body = '''
+use ::std::io::Read;
+use ::serde_yaml::from_str;
+let mut yaml_file = ::std::fs::File::open(yaml_path)?;
+let mut buffer = String::new();
+yaml_file.read_to_string(&mut buffer)?;
+from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_string(), source: yaml_path.to_string_lossy().into(), error: e }.into())
+          '''
+            ..returns =
+                '::std::result::Result<${po.id.capCamel}, ::failure::Error>'
+            ..returnDoc = 'Parsed ${po.id.capCamel}');
 
   _makeMember(PodField field) => field.podType.isArray
       ? _makeArrayMember(field)
@@ -164,7 +196,7 @@ class PodRustMapper {
   _mapFieldTypeBase(PodType podType) {
     final podTypeName = podType is PodArrayType
         ? _mapFieldTypeBase(podType.referredType)
-        : _rustTypeMap[podType.id.snake];
+        : simpleRustType(podType);
     return podTypeName ?? podType.id.capCamel;
   }
 
@@ -187,4 +219,28 @@ class PodRustMapper {
 }
 
 // custom <library pod_rust>
+
+final _rustTypeMap = {
+  'char': ebisu_rs.char,
+  'date': 'Date',
+  'date_time': 'chrono::DateTime<chrono::Utc>',
+  'regex': 'regex::Regex',
+  'int': ebisu_rs.i64,
+  'int8': ebisu_rs.i8,
+  'int16': ebisu_rs.i16,
+  'int32': ebisu_rs.i32,
+  'int64': ebisu_rs.i64,
+  'uint': ebisu_rs.u64,
+  'uint8': ebisu_rs.u8,
+  'uint16': ebisu_rs.u16,
+  'uint32': ebisu_rs.u32,
+  'uint64': ebisu_rs.u64,
+  'double': ebisu_rs.f64,
+  'str': ebisu_rs.string,
+  'boolean': ebisu_rs.bool_,
+  'timestamp': 'chrono::DateTime<chrono::Utc>',
+};
+
+simpleRustType(PodType podType) => _rustTypeMap[podType.id.snake];
+
 // end <library pod_rust>
