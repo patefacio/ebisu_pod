@@ -127,9 +127,6 @@ impl Default<> for Foo {
   fn default() -> Self {
     Foo::A
   }
-
-  // custom <impl Default for Foo>
-  // end <impl Default for Foo>
 }
 
 // custom <module sample ModuleBottom>

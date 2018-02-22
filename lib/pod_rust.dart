@@ -57,12 +57,14 @@ class PodRustMapper {
         ..sort((a, b) => a.id.compareTo(b.id));
       final podEnums = _package.localPodEnums.toList()
         ..sort((a, b) => a.id.compareTo(b.id));
-      final predefined = _package.allTypes.where((t) => t is PodPredefinedType);
+      final predefined =
+          _package.localNamedTypes.where((t) => t is PodPredefinedType);
 
       podEnums.forEach((pe) {
         final e = _makeEnum(pe);
         _module.enums.add(e);
-        final imp = ebisu_rs.traitImpl(defaultTrait, e.unqualifiedName);
+        final imp = ebisu_rs.traitImpl(defaultTrait, e.unqualifiedName)
+          ..codeBlock.tag = null;
         imp.functions.first.codeBlock
           ..tag = null
           ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
@@ -131,7 +133,7 @@ class PodRustMapper {
       if (requiresSerdeError) {
         _module.structs.add(ebisu_rs.pubStruct('serde_yaml_error')
           ..derive = ['Fail', 'Debug']
-          ..doc = 'Error encountered with serde_yaml serialization'
+          ..doc = 'Error encountered with `serde_yaml` serialization'
           ..attrs = [
             ebisu_rs.strAttr(
                 'fail(display="Failed reading type: {} source: {:?} error: {:?}", rust_type, source, error)')
@@ -144,7 +146,7 @@ class PodRustMapper {
               ..doc = 'Source of failed data'
               ..type = 'String',
             ebisu_rs.field('error')
-              ..doc = 'Underlying serde_yaml error'
+              ..doc = 'Underlying `serde_yaml` error'
               ..type = '::serde_yaml::Error'
           ]);
       }
