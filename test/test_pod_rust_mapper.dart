@@ -65,7 +65,7 @@ pub type Goo = f64;
 // --- module enum definitions ---
 
 /// TODO: comment foo
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Foo {
     /// TODO: comment a
     A,
@@ -111,7 +111,7 @@ pub struct AllTypes {
   /// TODO: comment field
   pub timestamp: Option<chrono::DateTime<chrono::Utc>>,
   /// TODO: comment field
-  pub fixed_size_double: [f64, 12],
+  pub fixed_size_double: [f64 , 12],
   /// TODO: comment field
   pub var_size_double: Vec<f64>,
 }
@@ -131,6 +131,7 @@ impl Default<> for Foo {
 
 // custom <module sample ModuleBottom>
 // end <module sample ModuleBottom>
+
 
 '''));
   });

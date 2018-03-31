@@ -1045,6 +1045,7 @@ class PodPackage extends Entity with PropertySet {
 
   get localPodObjects => localNamedTypes.where((t) => t is PodObject);
   get localPodEnums => localNamedTypes.where((t) => t is PodEnum);
+  get localPodMaps => localNamedTypes.where((t) => t is PodMapType);
 
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
@@ -1116,7 +1117,9 @@ class PodPackage extends Entity with PropertySet {
 
   _findNamedType(typeName) {
     try {
-      return namedTypes.singleWhere((t) => t.typeName == typeName);
+      return namedTypes.firstWhere((t) => t.typeName == typeName,
+          orElse: () => throw "Could not find type ${typeName} in named types "
+              "${namedTypes.map((nt) => nt.id).join(', ')}");
     } catch (e) {
       throw 'Could not find single matching type $typeName - excp: $e';
     }

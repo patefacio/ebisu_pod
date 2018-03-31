@@ -3,19 +3,19 @@
     "configurations": [
         {
             "name": "codegen",
-            "type": "dart-cli",
+            "type": "dart",
             "request": "launch",
             "program": "${workspaceRoot}/codegen/ebisu_pod.ebisu_dart.dart"
         },
         {
             "name": "test rust",
-            "type": "dart-cli",
+            "type": "dart",
             "request": "launch",
             "program": "${workspaceRoot}/test/test_pod_rust_mapper.dart"
         },
         {
             "name": "Test Runner",
-            "type": "dart-cli",
+            "type": "dart",
             "request": "launch",
             "program": "${workspaceRoot}/test/runner.dart"
         }

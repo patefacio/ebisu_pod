@@ -38,6 +38,8 @@ class PodRustMapper {
     ebisu_rs.Copy,
     ebisu_rs.Eq,
     ebisu_rs.PartialEq,
+    ebisu_rs.PartialOrd,
+    ebisu_rs.Ord,
     ebisu_rs.Hash,
     ebisu_rs.Serialize,
     ebisu_rs.Deserialize
@@ -68,6 +70,12 @@ class PodRustMapper {
         imp.functions.first.codeBlock
           ..tag = null
           ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
+        if (pe.getProperty('rust_has_snake_conversions') == true) {
+          e.hasSnakeConversions = true;
+        }
+        if (pe.getProperty('rust_has_shout_conversions') == true) {
+          e.hasShoutConversions = true;
+        }
         _module.impls.add(imp);
       });
 
@@ -80,27 +88,33 @@ class PodRustMapper {
       });
 
       final uniqueMaps = new Set();
-      bool requiresHashMap = false;
-
+      bool requiresBTreeMap = false;
+        
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
         final keyType = _mapFieldType(pmt.keyReferredType);
         final valueType = _mapFieldType(pmt.valueReferredType);
+        
         if (!uniqueMaps.contains([keyType, valueType])) {
           _module.typeAliases.add(ebisu_rs.pubTypeAlias(
-              uniqueKey, 'HashMap<$keyType, $valueType>'));
+              uniqueKey, 'BTreeMap<$keyType, $valueType>'));
           uniqueMaps.add([keyType, valueType]);
-          requiresHashMap = true;
+          requiresBTreeMap = true;
         }
       });
 
-      if (requiresHashMap) {
-        _module.uses.add(ebisu_rs.use('std::collections::HashMap'));
+      if (requiresBTreeMap) {
+        _module.uses.add(ebisu_rs.use('std::collections::BTreeMap'));
       }
 
       bool requiresSerdeError = false;
       podObjects.forEach((PodObject po) {
         _module.structs.add(_makeStruct(po));
+        final rustIsEncapsulated = po.getProperty('rust_is_encapsulated');
+        if (rustIsEncapsulated ?? false) {
+          ebisu_rs.Struct struct = module.structs.last;
+          struct.isEncapsulated = true;
+        }
         final rustHasImpl = po.getProperty('rust_has_impl');
         if (rustHasImpl ?? false) {
           _module.impls
