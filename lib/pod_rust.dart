@@ -134,7 +134,7 @@ class PodRustMapper {
         }
 
         final rustHasYamlReader = po.getProperty('include_yaml_reader');
-        if (rustHasYamlReader) {
+        if (rustHasYamlReader ?? false) {
           _module.import('serde_yaml');
           _module.import('serde');
           _module.importWithMacros('serde_derive');

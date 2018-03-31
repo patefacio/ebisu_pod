@@ -65,7 +65,7 @@ pub type Goo = f64;
 // --- module enum definitions ---
 
 /// TODO: comment foo
-#[derive(Debug, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Foo {
     /// TODO: comment a
     A,
@@ -78,7 +78,7 @@ pub enum Foo {
 // --- module struct definitions ---
 
 /// TODO: comment struct `AllTypes`
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct AllTypes {
   /// TODO: comment field
   pub a_char: char,
@@ -131,8 +131,6 @@ impl Default<> for Foo {
 
 // custom <module sample ModuleBottom>
 // end <module sample ModuleBottom>
-
-
 '''));
   });
 
