@@ -75,7 +75,7 @@ pub enum Foo {
     C,
 }
 
-// --- module struct definitinos ---
+// --- module struct definitions ---
 
 /// TODO: comment struct `AllTypes`
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
