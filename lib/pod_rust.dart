@@ -89,12 +89,12 @@ class PodRustMapper {
 
       final uniqueMaps = new Set();
       bool requiresBTreeMap = false;
-        
+
       package.podMaps.forEach((PodMapType pmt) {
         final uniqueKey = pmt.id.capCamel;
         final keyType = _mapFieldType(pmt.keyReferredType);
         final valueType = _mapFieldType(pmt.valueReferredType);
-        
+
         if (!uniqueMaps.contains([keyType, valueType])) {
           _module.typeAliases.add(ebisu_rs.pubTypeAlias(
               uniqueKey, 'BTreeMap<$keyType, $valueType>'));
@@ -191,7 +191,21 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
       ? _makeArrayMember(field)
       : (_makeField(field)..type = _addOption(field));
 
-  _makeField(PodField field) => ebisu_rs.pubField(field.id)..doc = field.doc;
+  _makeField(PodField field) {
+    final result = ebisu_rs.pubField(field.id)..doc = field.doc;
+
+    if (field.getProperty('rust_read_only') ?? false) {
+      result.access = ebisu_rs.ro;
+    }
+
+    if (field.getProperty('rust_read_only_ref') ?? false) {
+      result
+        ..access = ebisu_rs.ro
+        ..byRef = true;
+    }
+
+    return result;
+  }
 
   _makeArrayMember(PodField field) {
     return _makeField(field)
