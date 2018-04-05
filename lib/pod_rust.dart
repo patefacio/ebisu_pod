@@ -109,20 +109,19 @@ class PodRustMapper {
 
       bool requiresSerdeError = false;
       podObjects.forEach((PodObject po) {
-        _module.structs.add(_makeStruct(po));
+        final newStruct = _makeStruct(po);
+        _module.structs.add(newStruct);
         final rustIsEncapsulated = po.getProperty('rust_is_encapsulated');
         if (rustIsEncapsulated ?? false) {
-          ebisu_rs.Struct struct = module.structs.last;
-          struct.isEncapsulated = true;
+          newStruct.isEncapsulated = true;
         }
         final rustHasImpl = po.getProperty('rust_has_impl');
         if (rustHasImpl ?? false) {
-          _module.impls
-              .add(ebisu_rs.typeImpl(_module.structs.last.genericName));
+          newStruct.impl;
         }
         final List rustDerives = po.getProperty('rust_derives');
         if (rustDerives != null) {
-          _module.structs.last.derive.addAll(rustDerives);
+          newStruct.derive.addAll(rustDerives);
         }
 
         final List rustNotDerives = po.getProperty('rust_not_derives');
@@ -130,7 +129,7 @@ class PodRustMapper {
           final remove = rustNotDerives
               .map((d) => ebisu_rs.Derivable.fromString(d))
               .toList();
-          _module.structs.last.derive.removeWhere((d) => remove.contains(d));
+          newStruct.derive.removeWhere((d) => remove.contains(d));
         }
 
         final rustHasYamlReader = po.getProperty('include_yaml_reader');
