@@ -110,7 +110,6 @@ class PodRustMapper {
       bool requiresSerdeError = false;
       podObjects.forEach((PodObject po) {
         final newStruct = _makeStruct(po);
-        _module.structs.add(newStruct);
         final rustIsEncapsulated = po.getProperty('rust_is_encapsulated');
         if (rustIsEncapsulated ?? false) {
           newStruct.isEncapsulated = true;
@@ -140,6 +139,18 @@ class PodRustMapper {
           _module.importWithMacros('failure');
           addYamlReader(po);
           requiresSerdeError = true;
+        }
+
+        final ownModule = po.getProperty('rust_own_module');
+        if (ownModule) {
+          _module.modules.add(new Module(po.id, ebisu_rs.ModuleType.fileModule)
+            ..doc = 'Module for pod object `${po.id.snake}`'
+            ..structs.add(newStruct)
+            ..uses.add(ebisu_rs.use('super::*')));
+          _module.uses.add(
+              ebisu_rs.use('${po.id.snake}::${po.id.capCamel}')..isPub = true);
+        } else {
+          _module.structs.add(newStruct);
         }
       });
 
