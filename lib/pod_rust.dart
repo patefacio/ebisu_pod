@@ -141,14 +141,38 @@ class PodRustMapper {
           requiresSerdeError = true;
         }
 
-        final ownModule = po.getProperty('rust_own_module');
-        if (ownModule) {
-          _module.modules.add(new Module(po.id, ebisu_rs.ModuleType.fileModule)
+        Module makeSubModule(id) {
+          final newModule = new Module(id, ebisu_rs.ModuleType.fileModule)
+            ..moduleCodeBlock(ebisu_rs.moduleBottom)
             ..doc = 'Module for pod object `${po.id.snake}`'
-            ..structs.add(newStruct)
-            ..uses.add(ebisu_rs.use('super::*')));
+            ..uses.add(ebisu_rs.use('super::*'));
+          _module.modules.add(newModule);
+          return newModule;
+        }
+
+        Module findOrMakeSubModule(id) {
+          Module otherModule =
+              _module.modules.firstWhere((m) => m.id == id, orElse: () => null);
+          if (otherModule == null) {
+            otherModule = makeSubModule(id);
+          }
+          return otherModule;
+        }
+
+        final ownModule = po.getProperty('rust_own_module');
+        final inModule = po.getProperty('rust_in_module');
+
+        if (ownModule) {
+          final module = findOrMakeSubModule(po.id);
+          module.structs.add(newStruct);
           _module.uses.add(
               ebisu_rs.use('${po.id.snake}::${po.id.capCamel}')..isPub = true);
+        } else if (inModule != null) {
+          final id = makeId(inModule);
+          final module = findOrMakeSubModule(id);
+          module.structs.add(newStruct);
+          _module.uses.add(
+              ebisu_rs.use('${id.snake}::${po.id.capCamel}')..isPub = true);
         } else {
           _module.structs.add(newStruct);
         }
