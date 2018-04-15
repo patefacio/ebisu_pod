@@ -62,22 +62,30 @@ class PodRustMapper {
       final predefined =
           _package.localNamedTypes.where((t) => t is PodPredefinedType);
 
-      podEnums.forEach((pe) {
-        final e = _makeEnum(pe);
-        _module.enums.add(e);
-        final imp = ebisu_rs.traitImpl(defaultTrait, e.unqualifiedName)
-          ..codeBlock.tag = null;
-        imp.functions.first.codeBlock
-          ..tag = null
-          ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
-        if (pe.getProperty('rust_has_snake_conversions') == true) {
-          e.hasSnakeConversions = true;
-        }
-        if (pe.getProperty('rust_has_shout_conversions') == true) {
-          e.hasShoutConversions = true;
-        }
-        _module.impls.add(imp);
-      });
+      if (podEnums.isNotEmpty) {
+        final enumModuleId = '${_package.id.snake}_enums';
+        final enumModule = new Module(enumModuleId, ebisu_rs.fileModule)
+          ..doc = 'Enums for package ${_package.id}';
+        podEnums.forEach((pe) {
+          final e = _makeEnum(pe);
+          _module.uses
+              .add(ebisu_rs.pubUse('$enumModuleId::${e.unqualifiedName}'));
+          enumModule.enums.add(e);
+          final imp = ebisu_rs.traitImpl(defaultTrait, e.unqualifiedName)
+            ..codeBlock.tag = null;
+          imp.functions.first.codeBlock
+            ..tag = null
+            ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
+          if (pe.getProperty('rust_has_snake_conversions') == true) {
+            e.hasSnakeConversions = true;
+          }
+          if (pe.getProperty('rust_has_shout_conversions') == true) {
+            e.hasShoutConversions = true;
+          }
+          enumModule.impls.add(imp);
+        });
+        _module.modules.add(enumModule);
+      }
 
       predefined.forEach((PodPredefinedType ppt) {
         final prop = ppt.getProperty('rust_aliased_to');

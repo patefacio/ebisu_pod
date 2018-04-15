@@ -55,12 +55,9 @@ void main([List<String> args]) {
     ]);
     final mapper = new PodRustMapper(pkg);
 
-    expect(darkMatter(mapper.module.code), darkMatter('''
-//! TODO: comment module sample
-
-// --- module type aliases ---
-
-pub type Goo = f64;
+    final enumModule = mapper.module.modules.first;
+    expect(darkMatter(enumModule.code), darkMatter('''
+//! Enums for package sample
 
 // --- module enum definitions ---
 
@@ -74,6 +71,33 @@ pub enum Foo {
     /// TODO: comment c
     C,
 }
+
+// --- module impl definitions ---
+
+/// Implementation of trait `Default` for type `Foo`
+impl Default<> for Foo {
+  /// A trait for giving a type a useful default value.
+  ///
+  ///  * _return_ - The default value for the type
+  ///
+  fn default() -> Self {
+    Foo::A
+  }
+}
+    '''));
+
+    expect(darkMatter(mapper.module.code), darkMatter('''
+//! TODO: comment module sample
+
+// --- module pub use statements ---
+
+pub use sample_enums::Foo;
+
+mod sample_enums;
+
+// --- module type aliases ---
+
+pub type Goo = f64;
 
 // --- module struct definitions ---
 
@@ -114,19 +138,6 @@ pub struct AllTypes {
   pub fixed_size_double: [f64 , 12],
   /// TODO: comment field
   pub var_size_double: Vec<f64>,
-}
-
-// --- module impl definitions ---
-
-/// Implementation of trait `Default` for type `Foo`
-impl Default<> for Foo {
-  /// A trait for giving a type a useful default value.
-  ///
-  ///  * _return_ - The default value for the type
-  ///
-  fn default() -> Self {
-    Foo::A
-  }
 }
 
 // custom <module sample ModuleBottom>
