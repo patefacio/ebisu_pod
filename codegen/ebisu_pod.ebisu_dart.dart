@@ -565,10 +565,16 @@ toString() => id.capCamel;
                   'ebisu_rs.Copy',
                   'ebisu_rs.Eq',
                   'ebisu_rs.PartialEq',
+                  'ebisu_rs.PartialOrd',
+                  'ebisu_rs.Ord',
                   'ebisu_rs.Hash',
                   'ebisu_rs.Serialize',
                   'ebisu_rs.Deserialize',
                 ],
+              member('skip_serialize_none')
+                ..doc = 'If set will annotate optional fields to skip if [None]'
+                ..access = RW
+                ..init = false,
             ]
         ],
       library('pod_cpp')

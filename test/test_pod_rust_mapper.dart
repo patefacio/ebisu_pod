@@ -102,7 +102,7 @@ pub type Goo = f64;
 // --- module struct definitions ---
 
 /// TODO: comment struct `AllTypes`
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct AllTypes {
   /// TODO: comment field
   pub a_char: char,

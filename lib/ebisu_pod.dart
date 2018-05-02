@@ -1047,6 +1047,8 @@ class PodPackage extends Entity with PropertySet {
   get localPodEnums => localNamedTypes.where((t) => t is PodEnum);
   get localPodMaps => localNamedTypes.where((t) => t is PodMapType);
 
+  get localPodFields => concat(localPodObjects.map((PodObject o) => o.fields));
+
   visitTypes(func(PodType)) {
     Set visitedTypes = new Set();
 

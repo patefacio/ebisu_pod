@@ -28,7 +28,8 @@ class PodRustMapper {
     ebisu_rs.Clone,
     ebisu_rs.Serialize,
     ebisu_rs.Deserialize,
-    ebisu_rs.Default
+    ebisu_rs.Default,
+    ebisu_rs.PartialEq,    
   ];
 
   /// List of derives to be applied to enumerations
@@ -44,6 +45,9 @@ class PodRustMapper {
     ebisu_rs.Serialize,
     ebisu_rs.Deserialize
   ];
+
+  /// If set will annotate optional fields to skip if [None]
+  bool skipSerializeNone = false;
 
   // custom <class PodRustMapper>
 
@@ -113,6 +117,25 @@ class PodRustMapper {
 
       if (requiresBTreeMap) {
         _module.uses.add(ebisu_rs.use('std::collections::BTreeMap'));
+      }
+
+      final podFields = package.localPodFields;
+
+      if (skipSerializeNone && podFields.any((PodField pf) => pf.isOptional)) {
+        _module.functions.addAll([
+          ebisu_rs.pubFn('is_default', [
+            ebisu_rs.parm('field', ebisu_rs.ref('T'))
+              ..doc = 'Field to check if is default'
+          ])
+            ..doc = 'Checks if the field value is the default'
+            ..typeParms = [
+              ebisu_rs.typeParm('t')..bounds = ['Default', 'PartialEq']
+            ]
+            ..returns = 'bool'
+            ..returnDoc = 'True if the value is the default for its type'
+            ..body = '*field == Default::default()'
+            ..isInline = true
+        ]);
       }
 
       bool requiresSerdeError = false;
@@ -244,6 +267,11 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
       result
         ..access = ebisu_rs.ro
         ..byRef = true;
+    }
+
+    if (skipSerializeNone && field.isOptional) {
+      result.attrs
+          .add(ebisu_rs.strAttr('serde(skip_serializing_if = "is_default")'));
     }
 
     return result;
