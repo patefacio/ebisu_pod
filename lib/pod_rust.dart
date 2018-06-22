@@ -29,7 +29,7 @@ class PodRustMapper {
     ebisu_rs.Serialize,
     ebisu_rs.Deserialize,
     ebisu_rs.Default,
-    ebisu_rs.PartialEq,    
+    ebisu_rs.PartialEq,
   ];
 
   /// List of derives to be applied to enumerations
@@ -261,11 +261,13 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
 
     if (field.getProperty('rust_read_only') ?? false) {
       result.access = ebisu_rs.ro;
-    }
-
-    if (field.getProperty('rust_read_only_ref') ?? false) {
+    } else if (field.getProperty('rust_read_only_ref') ?? false) {
       result
         ..access = ebisu_rs.ro
+        ..byRef = true;
+    } else if (field.getProperty('rust_read_write_ref') ?? false) {
+      result
+        ..access = ebisu_rs.rw
         ..byRef = true;
     }
 
@@ -283,9 +285,13 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
       ..type = _addOption(field);
   }
 
-  _addOption(PodField field) => field.isOptional
-      ? 'Option<${_mapFieldType(field.podType)}>'
+  _maybeBoxed(PodField field) => (field.getProperty('rust_is_boxed') ?? false)
+      ? 'Box<${_mapFieldType(field.podType)}>'
       : _mapFieldType(field.podType);
+
+  _addOption(PodField field) => field.isOptional
+      ? 'Option<${_maybeBoxed(field)}>'
+      : _maybeBoxed(field);
 
   _mapFieldType(PodType podType) => podType is PodArrayType
       ? (podType.maxLength == null
