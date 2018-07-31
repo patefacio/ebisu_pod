@@ -23,7 +23,8 @@ class PropertyType implements Comparable<PropertyType> {
   /// Property for annotating [PodPackage]
   static const PropertyType PACKAGE_PROPERTY = const PropertyType._(2);
 
-  static get values => [UDT_PROPERTY, FIELD_PROPERTY, PACKAGE_PROPERTY];
+  static List<PropertyType> get values =>
+      const <PropertyType>[UDT_PROPERTY, FIELD_PROPERTY, PACKAGE_PROPERTY];
 
   final int value;
 
@@ -31,7 +32,7 @@ class PropertyType implements Comparable<PropertyType> {
 
   const PropertyType._(this.value);
 
-  copy() => this;
+  PropertyType copy() => this;
 
   int compareTo(PropertyType other) => value.compareTo(other.value);
 
@@ -780,7 +781,7 @@ class FieldPath {
   FieldPath(this.path);
 
   /// Fields from top level [PodObject] to a leaf field
-  List<Field> path = [];
+  List<PodField> path = [];
 
   // custom <class FieldPath>
 
@@ -818,7 +819,7 @@ class PodObject extends PodUserDefinedType {
     _fields.add(field);
   }
 
-  addAllFields(Iterable<Field> fields) => fields.forEach((f) => addField(f));
+  addAllFields(Iterable<PodField> fields) => fields.forEach((f) => addField(f));
 
   Iterable<String> _getPropertyErrors(
       UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
@@ -907,7 +908,7 @@ class PackageName {
       identical(this, other) || const ListEquality().equals(_path, other._path);
 
   @override
-  int get hashCode => const ListEquality<Id>().hash(_path).hashCode;
+  int get hashCode => const ListEquality<Id>().hash(_path ?? const []).hashCode;
 
   List<Id> get path => _path;
 

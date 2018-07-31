@@ -61,18 +61,18 @@ code generators.
     ..rootPath = _topDir
     ..doc = purpose
     ..testLibraries = [
-      library('test_pod'),
-      library('test_package'),
-      library('test_example'),
-      library('test_max_length'),
-      library('test_bitset'),
-      library('test_pod_cpp_mapper'),
-      library('test_pod_dart_mapper'),
-      library('test_pod_rust_mapper'),
-      library('test_properties'),
+      library_('test_pod'),
+      library_('test_package'),
+      library_('test_example'),
+      library_('test_max_length'),
+      library_('test_bitset'),
+      library_('test_pod_cpp_mapper'),
+      library_('test_pod_dart_mapper'),
+      library_('test_pod_rust_mapper'),
+      library_('test_properties'),
     ]
     ..libraries = [
-      library('ebisu_pod')
+      library_('ebisu_pod')
         ..includesLogger = true
         ..imports = [
           'mirrors',
@@ -401,7 +401,7 @@ Represents the list of fields from some top level [PodObject] to a given field.
             ..members = [
               member('path')
                 ..doc = 'Fields from top level [PodObject] to a leaf field'
-                ..type = 'List<Field>'
+                ..type = 'List<PodField>'
                 ..init = []
             ],
           class_('pod_object')
@@ -499,7 +499,7 @@ toString() => id.capCamel;
                   final clsName = clsId.capCamel;
                   return "final $clsName = new ${clsName}Type._();";
                 })))),
-      library('pod_dart')
+      library_('pod_dart')
         ..doc = 'Consistent mapping of pod to dart classes'
         ..includesLogger = true
         ..imports = [
@@ -523,7 +523,7 @@ toString() => id.capCamel;
               member('member_to_field_map')..init = {},
             ],
         ],
-      library('pod_rust')
+      library_('pod_rust')
         ..doc = 'Consistent mapping of *plain old data* to rust structs'
         ..includesLogger = true
         ..imports = [
@@ -554,6 +554,7 @@ toString() => id.capCamel;
                   'ebisu_rs.Serialize',
                   'ebisu_rs.Deserialize',
                   'ebisu_rs.Default',
+                  'ebisu_rs.PartialEq',
                 ],
               member('enum_derives')
                 ..doc = 'List of derives to be applied to enumerations'
@@ -577,7 +578,7 @@ toString() => id.capCamel;
                 ..init = false,
             ]
         ],
-      library('pod_cpp')
+      library_('pod_cpp')
         ..doc = 'Consistent mapping of *plain old data* to C++ structs'
         ..imports = [
           'package:ebisu/ebisu.dart',

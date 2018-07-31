@@ -83,7 +83,7 @@ test('$name hashCode', () =>
     final path = package.packageName.path;
     final relPath = package.getProperty('relativePath');
     final libName = '${package.packageName.path.last.snake}.dart';
-    return library('test_coverage_${path.last.snake}')
+    return library_('test_coverage_${path.last.snake}')
       ..imports.add(join(relPath ?? '../lib', libName))
       ..imports.add('dart:convert')
       ..withMainCustomBlock((CodeBlock cb) {
@@ -114,7 +114,7 @@ ${brCompact(objects.map(_objectTest))}
 
   Library _createLibrary(PodPackage package) {
     final path = package.packageName.path;
-    final result = library(path.last)
+    final result = library_(path.last)
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
       ..importAndExportAll(package.getProperty('importAndExportAll') ?? [])

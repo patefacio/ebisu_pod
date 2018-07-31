@@ -29,7 +29,7 @@ class PodRustMapper {
     ebisu_rs.Serialize,
     ebisu_rs.Deserialize,
     ebisu_rs.Default,
-    ebisu_rs.PartialEq,
+    ebisu_rs.PartialEq
   ];
 
   /// List of derives to be applied to enumerations
@@ -289,9 +289,8 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
       ? 'Box<${_mapFieldType(field.podType)}>'
       : _mapFieldType(field.podType);
 
-  _addOption(PodField field) => field.isOptional
-      ? 'Option<${_maybeBoxed(field)}>'
-      : _maybeBoxed(field);
+  _addOption(PodField field) =>
+      field.isOptional ? 'Option<${_maybeBoxed(field)}>' : _maybeBoxed(field);
 
   _mapFieldType(PodType podType) => podType is PodArrayType
       ? (podType.maxLength == null
