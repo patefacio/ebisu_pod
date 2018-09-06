@@ -60,15 +60,15 @@ void main([List<String> args]) {
   test('property validations', () {
     final fieldProperty = defineFieldProperty(
         'serializable', 'indicates type is serializable',
-        isValueValidPredicate: (Color value) => true);
+        isValueValidPredicate: (value) => true);
 
     final udtProperty = defineUdtProperty(
         'serializable', 'indicates type is serializable',
-        isValueValidPredicate: (Color value) => true);
+        isValueValidPredicate: (value) => true);
 
     final packageProperty = definePackageProperty(
         'serializable', 'indicates type is serializable',
-        isValueValidPredicate: (Color value) => true);
+        isValueValidPredicate: (value) => true);
 
     var pds = new PropertyDefinitionSet('serializable_props')
       ..fieldPropertyDefinitions.add(fieldProperty)

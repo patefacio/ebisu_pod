@@ -100,8 +100,8 @@ void main([List<String> args]) {
     ]);
 
     final c1 = a.getType('color');
-    final c2 = b.getType('b').getField('color');
-    final x = b.getType('b').getField('color').podType;
+    final c2 = (b.getType('b') as PodObject).getField('color');
+    final x = (b.getType('b') as PodObject).getField('color').podType;
     expect(b.getFieldType('b', 'color'), a.getType('color'));
   });
 

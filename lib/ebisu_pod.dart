@@ -203,7 +203,18 @@ abstract class PropertySet {
   mapProperties(f(propName, property)) =>
       propertyNames.map((pn) => f(pn, _properties[pn]));
 
-  setProperty(String propName, propValue) => _properties[propName] = propValue;
+  setProperty(String propName, propValue) {
+    if (propValue is Property) {
+      _properties[propName] = propValue;
+    } else {
+      final id = makeId(propName);
+      final propertyType = (this is PodEnum || this is PodObject)? PropertyType.UDT_PROPERTY :
+      this is PodPackage? PropertyType.PACKAGE_PROPERTY :
+      PropertyType.FIELD_PROPERTY;
+
+      _properties[propName] = Property(PropertyDefinition(id, propertyType, null), propValue);
+    }
+  } 
 
   getProperty(String propName) => _properties[propName];
 
@@ -212,7 +223,7 @@ abstract class PropertySet {
 
   Iterable<String> _getPropertyErrors(PropertyType propertyType,
       List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List errors = [];
+    List<String> errors = [];
     propertyNames.forEach((var propName) {
       final matching = propertyDefinitionSets.firstWhere((var pds) {
         final found = pds
@@ -222,7 +233,7 @@ abstract class PropertySet {
       }, orElse: () => null);
 
       if (matching == null) {
-        errors.add(new PropertyError(propertyType, this.name, propName));
+        errors.add(new PropertyError(propertyType, this.name, propName).toString());
       }
     });
     return errors;
@@ -300,9 +311,9 @@ abstract class PodType {
 
   PodType(id) : _id = makeId(id);
 
-  bool operator ==(PodType other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType && _id == other._id;
+      other is PodType && _id == other._id;
 
   int get hashCode => _id.hashCode;
 
@@ -330,6 +341,8 @@ class PodPredefinedType extends PodType with PropertySet {
       _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
 
   get name => _id.snake;
+
+  get isFixedSize => true;
 
   // end <class PodPredefinedType>
 
@@ -552,9 +565,9 @@ class BitSetType extends PodType {
   // custom <class BitSetType>
 
   BitSetType(id, this.numBits, {rhsPadBits, lhsPadBits})
-      : super(id),
-        this.rhsPadBits = rhsPadBits ?? 0,
-        this.lhsPadBits = lhsPadBits ?? 0 {}
+      : this.rhsPadBits = rhsPadBits ?? 0,
+        this.lhsPadBits = lhsPadBits ?? 0,
+        super(id) {}
 
   bool get isFixedSize => true;
 
@@ -576,7 +589,7 @@ class PodArrayType extends VariableSizeType {
 
   bool operator ==(other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType && _referredType == other._referredType;
+      other is PodArrayType && referredType == other.referredType;
 
   int get hashCode => _referredType.hashCode;
 
@@ -658,7 +671,7 @@ class PodTypeRef extends PodType {
   @override
   bool operator ==(other) =>
       identical(this, other) ||
-      (runtimeType == other.runtimeType &&
+      (other is PodTypeRef &&
           _packageName == other._packageName &&
           _resolvedType == other._resolvedType);
 
@@ -823,16 +836,16 @@ class PodObject extends PodUserDefinedType {
 
   Iterable<String> _getPropertyErrors(
       UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List errors =
+    List<String> errors =
         super._getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
     fields.forEach((field) =>
         errors.addAll(field.getPropertyErrors(propertyDefinitionSets)));
     return errors;
   }
 
-  bool operator ==(PodObject other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType &&
+      other is PodObject &&
           _id == other._id &&
           const ListEquality().equals(fields, other.fields);
 
@@ -988,6 +1001,8 @@ class PodPackage extends Entity with PropertySet {
 
   get name => _packageName.toString();
 
+  Iterable<Entity> get children => Iterable.empty();
+
   qualifiedName(s) => '$name.$s';
 
   get namedTypes => _namedTypesMap.values;
@@ -1007,7 +1022,7 @@ class PodPackage extends Entity with PropertySet {
 
   Iterable<String> _getPropertyErrors(
       propertyType, List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List errors =
+    List<String> errors =
         super._getPropertyErrors(propertyType, propertyDefinitionSets);
     allTypes.where((t) => t is PodUserDefinedType).forEach(
         (t) => errors.addAll(t.getPropertyErrors(propertyDefinitionSets)));
@@ -1026,8 +1041,7 @@ class PodPackage extends Entity with PropertySet {
       allTypes.firstWhere((t) => t.typeName == typeName, orElse: () => null);
 
   PodType getFieldType(String objectName, String fieldName) {
-    final podType = getType(objectName);
-    assert(podType is PodObject);
+    final podType = getType(objectName) as PodObject;
     final fieldType = podType.getField(fieldName).podType;
     return fieldType is PodTypeRef ? _resolveType(fieldType) : fieldType;
   }
@@ -1044,9 +1058,9 @@ class PodPackage extends Entity with PropertySet {
   get podObjects => namedTypes.where((t) => t is PodObject);
   get podEnums => namedTypes.where((t) => t is PodEnum);
 
-  get localPodObjects => localNamedTypes.where((t) => t is PodObject);
-  get localPodEnums => localNamedTypes.where((t) => t is PodEnum);
-  get localPodMaps => localNamedTypes.where((t) => t is PodMapType);
+  Iterable<PodObject> get localPodObjects => localNamedTypes.whereType<PodObject>();
+  Iterable<PodEnum> get localPodEnums => localNamedTypes.whereType<PodEnum>();
+  Iterable<PodMapType> get localPodMaps => localNamedTypes.whereType<PodMapType>();
 
   get localPodFields => concat(localPodObjects.map((PodObject o) => o.fields));
 
@@ -1360,8 +1374,8 @@ PodPackage package(packageName,
         imports: imports,
         namedTypes: namedTypes);
 
-_makeValidIdPart(part) => makeId(part);
-_makeValidPath(path) => path.map(_makeValidIdPart).toList();
+Id _makeValidIdPart(part) => makeId(part);
+List<Id> _makeValidPath(Iterable<dynamic> path) => path.map(_makeValidIdPart).toList();
 
 typedef bool PropertyRequiredPredicate(Property);
 typedef bool PropertyValueValidPredicate(dynamic value);

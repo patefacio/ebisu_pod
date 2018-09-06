@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 // custom <additional imports>
 
 import 'package:ebisu_rs/common_traits.dart';
-import 'package:id/id.dart';
 
 // end <additional imports>
 
@@ -64,7 +63,7 @@ class PodRustMapper {
       final podEnums = _package.localPodEnums.toList()
         ..sort((a, b) => a.id.compareTo(b.id));
       final predefined =
-          _package.localNamedTypes.where((t) => t is PodPredefinedType);
+          _package.localNamedTypes.whereType<PodPredefinedType>();
 
       if (podEnums.isNotEmpty) {
         final enumModuleId = '${_package.id.snake}_enums';
@@ -211,7 +210,7 @@ class PodRustMapper {
 
       if (requiresSerdeError) {
         _module.structs.add(ebisu_rs.pubStruct('serde_yaml_error')
-          ..derive = ['Fail', 'Debug']
+          ..derive = [ebisu_rs.Fail, ebisu_rs.Debug]
           ..doc = 'Error encountered with `serde_yaml` serialization'
           ..attrs = [
             ebisu_rs.strAttr(

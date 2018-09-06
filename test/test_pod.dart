@@ -276,7 +276,7 @@ PodPackage(foo)
   PodObject(r)
 ''')), true);
 
-    expect(pkg.getType('iii').fields.first.podType, Int32);
+    expect((pkg.getType('iii') as PodObject).fields.first.podType, Int32);
   });
 
 // end <main>

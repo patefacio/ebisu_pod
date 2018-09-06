@@ -26,9 +26,9 @@ class PodCppMapper {
   get header {
     if (_header == null) {
       final path = package.packageName.path;
-      final podObjects = _package.allTypes.where((t) => t is PodObject);
-      final podEnums = _package.allTypes.where((t) => t is PodEnum);
-      final fixedStrTypes = new Set.from(concat(podObjects.map((po) => po.fields
+      final Iterable<PodObject> podObjects = _package.allTypes.whereType<PodObject>();
+      final Iterable<PodEnum> podEnums = _package.allTypes.whereType<PodEnum>();
+      final Iterable<StrType> fixedStrTypes = new Set.from(concat(podObjects.map((po) => po.fields
           .map((field) => field.podType)
           .where((pt) => pt is StrType && pt.isFixedSize))));
 
@@ -65,7 +65,7 @@ class PodCppMapper {
   _addArrayIncludes(l) =>
       l.addAll(['ebisu/utils/streamers/array.hpp', 'array']);
 
-  _makeClass(PodObject po) {
+  Class _makeClass(PodObject po) {
     final result = new Class(po.id)
       ..doc = po.doc
       ..isStruct = true
