@@ -186,6 +186,8 @@ class Property {
 
   Property(this._propertyDefinition, this._value);
 
+  get valueString => _value.toString();
+
   // end <class Property>
 
   PropertyDefinition _propertyDefinition;
@@ -216,14 +218,14 @@ abstract class PropertySet {
     }
   } 
 
-  getProperty(String propName) => _properties[propName];
+  Property getProperty(String propName) => _properties[propName];
 
-  Iterable<String> getPropertyErrors(
+  Iterable<PropertyError> getPropertyErrors(
       List<PropertyDefinitionSet> propertyDefinitionSets);
 
-  Iterable<String> _getPropertyErrors(PropertyType propertyType,
+  Iterable<PropertyError> _getPropertyErrors(PropertyType propertyType,
       List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List<String> errors = [];
+    List<PropertyError> errors = [];
     propertyNames.forEach((var propName) {
       final matching = propertyDefinitionSets.firstWhere((var pds) {
         final found = pds
@@ -233,7 +235,7 @@ abstract class PropertySet {
       }, orElse: () => null);
 
       if (matching == null) {
-        errors.add(new PropertyError(propertyType, this.name, propName).toString());
+        errors.add(new PropertyError(propertyType, this.name, propName));
       }
     });
     return errors;
@@ -336,7 +338,7 @@ class PodPredefinedType extends PodType with PropertySet {
 
   PodPredefinedType(id) : super(id);
 
-  Iterable<String> getPropertyErrors(
+  Iterable<PropertyError> getPropertyErrors(
           List<PropertyDefinitionSet> propertyDefinitionSets) =>
       _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
 
@@ -354,7 +356,7 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
 
   PodUserDefinedType(id) : super(id);
 
-  Iterable<String> getPropertyErrors(
+  Iterable<PropertyError> getPropertyErrors(
           List<PropertyDefinitionSet> propertyDefinitionSets) =>
       _getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
 
@@ -748,7 +750,7 @@ class PodField extends Object with PropertySet {
     this.podType = podType;
   }
 
-  Iterable<String> getPropertyErrors(
+  Iterable<PropertyError> getPropertyErrors(
           List<PropertyDefinitionSet> propertyDefinitionSets) =>
       _getPropertyErrors(FIELD_PROPERTY, propertyDefinitionSets);
 
@@ -834,9 +836,9 @@ class PodObject extends PodUserDefinedType {
 
   addAllFields(Iterable<PodField> fields) => fields.forEach((f) => addField(f));
 
-  Iterable<String> _getPropertyErrors(
+  Iterable<PropertyError> _getPropertyErrors(
       UDT_PROPERTY, List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List<String> errors =
+    List<PropertyError> errors =
         super._getPropertyErrors(UDT_PROPERTY, propertyDefinitionSets);
     fields.forEach((field) =>
         errors.addAll(field.getPropertyErrors(propertyDefinitionSets)));
@@ -1010,19 +1012,20 @@ class PodPackage extends Entity with PropertySet {
   get localNamedTypes => _localNamedTypesMap.values;
 
   get podMaps => concat(podObjects.map((PodObject po) => po.fields
-      .where((PodField field) => field.podType is PodMapType)
-      .map((field) => field.podType)));
+      .map((PodField field) => field.podType)
+      .whereType<PodMapType>()
+      .map((mapType) => mapType)));
 
-  Iterable<String> get propertyErrors =>
+  Iterable<PropertyError> get propertyErrors =>
       getPropertyErrors(_propertyDefinitionSets);
 
-  Iterable<String> getPropertyErrors(
+  Iterable<PropertyError> getPropertyErrors(
           List<PropertyDefinitionSet> propertyDefinitionSets) =>
       _getPropertyErrors(PACKAGE_PROPERTY, propertyDefinitionSets);
 
-  Iterable<String> _getPropertyErrors(
+  Iterable<PropertyError> _getPropertyErrors(
       propertyType, List<PropertyDefinitionSet> propertyDefinitionSets) {
-    List<String> errors =
+    List<PropertyError> errors =
         super._getPropertyErrors(propertyType, propertyDefinitionSets);
     allTypes.where((t) => t is PodUserDefinedType).forEach(
         (t) => errors.addAll(t.getPropertyErrors(propertyDefinitionSets)));
@@ -1055,8 +1058,8 @@ class PodPackage extends Entity with PropertySet {
     return _allTypes;
   }
 
-  get podObjects => namedTypes.where((t) => t is PodObject);
-  get podEnums => namedTypes.where((t) => t is PodEnum);
+  Iterable<PodObject> get podObjects => namedTypes.whereType<PodObject>();
+  Iterable<PodEnum> get podEnums => namedTypes.whereType<PodEnum>();
 
   Iterable<PodObject> get localPodObjects => localNamedTypes.whereType<PodObject>();
   Iterable<PodEnum> get localPodEnums => localNamedTypes.whereType<PodEnum>();

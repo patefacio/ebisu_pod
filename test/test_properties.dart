@@ -28,32 +28,32 @@ void main([List<String> args]) {
   group('user defined type properties', () {
     test('basic setProperty on UDT', () {
       final t = object('o')..setProperty('serializable', Color.blue);
-      expect(t.getProperty('serializable'), Color.blue);
+      expect(t.getProperty('serializable').value, Color.blue);
     });
   });
 
   group('field type properties', () {
     test('basic setProperty on field', () {
       final t = field('f', Str)..setProperty('serializable', Color.blue);
-      expect(t.getProperty('serializable'), Color.blue);
+      expect(t.getProperty('serializable').value, Color.blue);
     });
   });
 
   group('package properties', () {
     test('basic setProperty on package', () {
       final t = package('p')..setProperty('serializable', Color.blue);
-      expect(t.getProperty('serializable'), Color.blue);
+      expect(t.getProperty('serializable').value, Color.blue);
     });
   });
 
   group('properties and noSuchMethod', () {
     test('catches property get', () {
       final t = package('p')..setProperty('serializable', Color.blue);
-      expect(t.getProperty('serializable'), Color.blue);
+      expect(t.getProperty('serializable').value, Color.blue);
       t.setProperty('serializable', true);
       expect(t.propertyNames, ['serializable']);
       final f = field('o', Str)..setProperty('donkeys', 'ehh-haw');
-      expect(f.getProperty('donkeys'), 'ehh-haw');
+      expect(f.getProperty('donkeys').value, 'ehh-haw');
     });
   });
 

@@ -79,10 +79,10 @@ class PodRustMapper {
           imp.functions.first.codeBlock
             ..tag = null
             ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
-          if (pe.getProperty('rust_has_snake_conversions') == true) {
+          if (pe.getProperty('rust_has_snake_conversions')?.value ?? false == true) {
             e.hasSnakeConversions = true;
           }
-          if (pe.getProperty('rust_has_shout_conversions') == true) {
+          if (pe.getProperty('rust_has_shout_conversions')?.value ?? false == true) {
             e.hasShoutConversions = true;
           }
           enumModule.impls.add(imp);
@@ -94,7 +94,7 @@ class PodRustMapper {
         final prop = ppt.getProperty('rust_aliased_to');
         if (prop != null) {
           _module.typeAliases
-              .add(ebisu_rs.pubTypeAlias(ppt.id, prop)..doc = ppt.doc);
+              .add(ebisu_rs.pubTypeAlias(ppt.id, ebisu_rs.rsType(prop.value))..doc = ppt.doc);
         }
       });
 
@@ -144,16 +144,16 @@ class PodRustMapper {
         if (rustIsEncapsulated ?? false) {
           newStruct.isEncapsulated = true;
         }
-        final rustHasImpl = po.getProperty('rust_has_impl');
+        final rustHasImpl = po.getProperty('rust_has_impl')?.value;
         if (rustHasImpl ?? false) {
           newStruct.impl;
         }
-        final List rustDerives = po.getProperty('rust_derives');
+        final List rustDerives = po.getProperty('rust_derives')?.value;
         if (rustDerives != null) {
           newStruct.derive.addAll(rustDerives);
         }
 
-        final List rustNotDerives = po.getProperty('rust_not_derives');
+        final List rustNotDerives = po.getProperty('rust_not_derives')?.value;
         if (rustNotDerives != null) {
           final remove = rustNotDerives
               .map((d) => ebisu_rs.Derivable.fromString(d))
@@ -192,7 +192,7 @@ class PodRustMapper {
         final ownModule = po.getProperty('rust_own_module');
         final inModule = po.getProperty('rust_in_module');
 
-        if (ownModule) {
+        if (ownModule != null) {
           final module = findOrMakeSubModule(po.id);
           module.structs.add(newStruct);
           _module.uses.add(

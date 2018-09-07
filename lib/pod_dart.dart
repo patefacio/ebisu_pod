@@ -139,7 +139,7 @@ ${brCompact(objects.map(_objectTest))}
           '',
           (Ctor ctor) => ctor
             ..isConst = false
-            ..tag = po.getProperty('defaultCtorTag'))
+            ..tag = po.getProperty('defaultCtorTag').valueString)
       ..members.addAll(po.fields.map(_makeClassMember));
     classToObjectMap[result] = po;
 
