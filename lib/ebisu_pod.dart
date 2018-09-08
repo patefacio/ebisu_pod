@@ -402,11 +402,12 @@ class PodEnum extends PodUserDefinedType {
 
   // custom <class PodEnum>
 
-  bool operator ==(PodEnum other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType &&
+      (other is PodEnum &&
+          runtimeType == other.runtimeType &&
           _id == other._id &&
-          const ListEquality().equals(values, other.values);
+          const ListEquality().equals(values, other.values));
 
   int get hashCode => hash2(
       super.hashCode, const ListEquality<EnumValue>().hash(values).hashCode);
@@ -464,11 +465,12 @@ abstract class VariableSizeType extends PodType {
     this.maxLength = maxLength;
   }
 
-  bool operator ==(VariableSizeType other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      runtimeType == other.runtimeType &&
+      (other is VariableSizeType &&
+          runtimeType == other.runtimeType &&
           _id == other._id &&
-          _maxLength == other._maxLength;
+          _maxLength == other._maxLength);
 
   int get hashCode => hash2(_maxLength, super.hashCode);
 

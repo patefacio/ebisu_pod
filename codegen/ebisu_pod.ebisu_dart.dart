@@ -608,7 +608,7 @@ toString() => id.capCamel;
         ]
     ];
 
-  ebisu.generate(generateDrudge: true);
+  ebisu.generate();
 
   _logger.warning('''
 **** NON GENERATED FILES ****
