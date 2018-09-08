@@ -79,10 +79,12 @@ class PodRustMapper {
           imp.functions.first.codeBlock
             ..tag = null
             ..snippets.add('${e.unqualifiedName}::${e.variants.first.name}');
-          if (pe.getProperty('rust_has_snake_conversions')?.value ?? false == true) {
+          if (pe.getProperty('rust_has_snake_conversions')?.value ??
+              false == true) {
             e.hasSnakeConversions = true;
           }
-          if (pe.getProperty('rust_has_shout_conversions')?.value ?? false == true) {
+          if (pe.getProperty('rust_has_shout_conversions')?.value ??
+              false == true) {
             e.hasShoutConversions = true;
           }
           enumModule.impls.add(imp);
@@ -93,8 +95,9 @@ class PodRustMapper {
       predefined.forEach((PodPredefinedType ppt) {
         final prop = ppt.getProperty('rust_aliased_to');
         if (prop != null) {
-          _module.typeAliases
-              .add(ebisu_rs.pubTypeAlias(ppt.id, ebisu_rs.rsType(prop.value))..doc = ppt.doc);
+          _module.typeAliases.add(
+              ebisu_rs.pubTypeAlias(ppt.id, ebisu_rs.rsType(prop.value))
+                ..doc = ppt.doc);
         }
       });
 

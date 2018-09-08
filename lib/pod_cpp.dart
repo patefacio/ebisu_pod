@@ -26,11 +26,13 @@ class PodCppMapper {
   get header {
     if (_header == null) {
       final path = package.packageName.path;
-      final Iterable<PodObject> podObjects = _package.allTypes.whereType<PodObject>();
+      final Iterable<PodObject> podObjects =
+          _package.allTypes.whereType<PodObject>();
       final Iterable<PodEnum> podEnums = _package.allTypes.whereType<PodEnum>();
-      final Iterable<StrType> fixedStrTypes = new Set.from(concat(podObjects.map((po) => po.fields
-          .map((field) => field.podType)
-          .where((pt) => pt is StrType && pt.isFixedSize))));
+      final Iterable<StrType> fixedStrTypes = new Set.from(concat(
+          podObjects.map((po) => po.fields
+              .map((field) => field.podType)
+              .where((pt) => pt is StrType && pt.isFixedSize))));
 
       final ns = new Namespace(path);
       _header = new Header(path.last)..namespace = ns;

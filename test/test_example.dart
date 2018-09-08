@@ -28,7 +28,10 @@ void main([List<String> args]) {
     expect(balanceSheet.getType('holding_type') is PodEnum, true);
     expect(balanceSheet.getType('date').typeName, 'date');
     expect(balanceSheet.getType('holding').typeName, 'holding');
-    expect((balanceSheet.getType('holding') as PodObject).getField('holding_type').typeName,
+    expect(
+        (balanceSheet.getType('holding') as PodObject)
+            .getField('holding_type')
+            .typeName,
         'holding_type');
   });
 

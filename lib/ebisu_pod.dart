@@ -86,11 +86,12 @@ class PropertyError {
   const PropertyError(this.propertyType, this.itemAccessed, this.property);
 
   @override
-  bool operator ==(PropertyError other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      propertyType == other.propertyType &&
+      (other is PropertyError &&
+          propertyType == other.propertyType &&
           itemAccessed == other.itemAccessed &&
-          property == other.property;
+          property == other.property);
 
   @override
   int get hashCode => hash3(propertyType, itemAccessed, property);
@@ -110,13 +111,14 @@ class PropertyError {
 /// Identity of a property that can be associated with a [PodType], [PodField] or [PodPackage]
 class PropertyDefinition {
   @override
-  bool operator ==(PropertyDefinition other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      _id == other._id &&
+      (other is PropertyDefinition &&
+          _id == other._id &&
           _propertyType == other._propertyType &&
           _doc == other._doc &&
           _defaultValue == other._defaultValue &&
-          _isValueValidPredicate == other._isValueValidPredicate;
+          _isValueValidPredicate == other._isValueValidPredicate);
 
   @override
   int get hashCode => hashObjects(
@@ -168,10 +170,11 @@ class PropertyDefinition {
 /// A property associated with a [PodType], [PodField] or [PodPackage]
 class Property {
   @override
-  bool operator ==(Property other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      _propertyDefinition == other._propertyDefinition &&
-          _value == other._value;
+      (other is Property &&
+          _propertyDefinition == other._propertyDefinition &&
+          _value == other._value);
 
   @override
   int get hashCode => hash2(_propertyDefinition, _value);
@@ -210,13 +213,16 @@ abstract class PropertySet {
       _properties[propName] = propValue;
     } else {
       final id = makeId(propName);
-      final propertyType = (this is PodEnum || this is PodObject)? PropertyType.UDT_PROPERTY :
-      this is PodPackage? PropertyType.PACKAGE_PROPERTY :
-      PropertyType.FIELD_PROPERTY;
+      final propertyType = (this is PodEnum || this is PodObject)
+          ? PropertyType.UDT_PROPERTY
+          : this is PodPackage
+              ? PropertyType.PACKAGE_PROPERTY
+              : PropertyType.FIELD_PROPERTY;
 
-      _properties[propName] = Property(PropertyDefinition(id, propertyType, null), propValue);
+      _properties[propName] =
+          Property(PropertyDefinition(id, propertyType, null), propValue);
     }
-  } 
+  }
 
   Property getProperty(String propName) => _properties[propName];
 
@@ -314,8 +320,7 @@ abstract class PodType {
   PodType(id) : _id = makeId(id);
 
   bool operator ==(other) =>
-      identical(this, other) ||
-      other is PodType && _id == other._id;
+      identical(this, other) || other is PodType && _id == other._id;
 
   int get hashCode => _id.hashCode;
 
@@ -369,8 +374,9 @@ abstract class PodUserDefinedType extends PodType with PropertySet {
 /// Combines the enumerant id and optionally a doc string
 class EnumValue {
   @override
-  bool operator ==(EnumValue other) =>
-      identical(this, other) || id == other.id && doc == other.doc;
+  bool operator ==(other) =>
+      identical(this, other) ||
+      (other is EnumValue && id == other.id && doc == other.doc);
 
   @override
   int get hashCode => hash2(id, doc);
@@ -673,7 +679,7 @@ class PodTypeRef extends PodType {
   @override
   bool operator ==(other) =>
       identical(this, other) ||
-      (other is PodTypeRef &&
+      (runtimeType == other.runtimeType &&
           _packageName == other._packageName &&
           _resolvedType == other._resolvedType);
 
@@ -714,14 +720,15 @@ class PodTypeRef extends PodType {
 /// A field, which is a named and type entry, in a [PodObject]
 class PodField extends Object with PropertySet {
   @override
-  bool operator ==(PodField other) =>
+  bool operator ==(other) =>
       identical(this, other) ||
-      _id == other._id &&
+      (other is PodField &&
+          _id == other._id &&
           doc == other.doc &&
           isIndex == other.isIndex &&
           _podType == other._podType &&
           defaultValue == other.defaultValue &&
-          isOptional == other.isOptional;
+          isOptional == other.isOptional);
 
   @override
   int get hashCode =>
@@ -919,8 +926,9 @@ class PodObject extends PodUserDefinedType {
 ///    [ id('dossier'), id('balance_sheet') ] => 'dossier.balance_sheet'
 class PackageName {
   @override
-  bool operator ==(PackageName other) =>
-      identical(this, other) || const ListEquality().equals(_path, other._path);
+  bool operator ==(other) =>
+      identical(this, other) ||
+      (other is PackageName && const ListEquality().equals(_path, other._path));
 
   @override
   int get hashCode => const ListEquality<Id>().hash(_path ?? const []).hashCode;
@@ -1061,9 +1069,11 @@ class PodPackage extends Entity with PropertySet {
   Iterable<PodObject> get podObjects => namedTypes.whereType<PodObject>();
   Iterable<PodEnum> get podEnums => namedTypes.whereType<PodEnum>();
 
-  Iterable<PodObject> get localPodObjects => localNamedTypes.whereType<PodObject>();
+  Iterable<PodObject> get localPodObjects =>
+      localNamedTypes.whereType<PodObject>();
   Iterable<PodEnum> get localPodEnums => localNamedTypes.whereType<PodEnum>();
-  Iterable<PodMapType> get localPodMaps => localNamedTypes.whereType<PodMapType>();
+  Iterable<PodMapType> get localPodMaps =>
+      localNamedTypes.whereType<PodMapType>();
 
   get localPodFields => concat(localPodObjects.map((PodObject o) => o.fields));
 
@@ -1378,7 +1388,8 @@ PodPackage package(packageName,
         namedTypes: namedTypes);
 
 Id _makeValidIdPart(part) => makeId(part);
-List<Id> _makeValidPath(Iterable<dynamic> path) => path.map(_makeValidIdPart).toList();
+List<Id> _makeValidPath(Iterable<dynamic> path) =>
+    path.map(_makeValidIdPart).toList();
 
 typedef bool PropertyRequiredPredicate(Property);
 typedef bool PropertyValueValidPredicate(dynamic value);
