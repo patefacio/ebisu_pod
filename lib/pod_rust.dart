@@ -63,7 +63,7 @@ class PodRustMapper {
       final podEnums = _package.localPodEnums.toList()
         ..sort((a, b) => a.id.compareTo(b.id));
       final predefined =
-          _package.localNamedTypes.whereType<PodPredefinedType>();
+          _package.localNamedTypes.where((pdt) => pdt is PodPredefinedType);
 
       if (podEnums.isNotEmpty) {
         final enumModuleId = '${_package.id.snake}_enums';

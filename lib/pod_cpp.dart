@@ -27,8 +27,9 @@ class PodCppMapper {
     if (_header == null) {
       final path = package.packageName.path;
       final Iterable<PodObject> podObjects =
-          _package.allTypes.whereType<PodObject>();
-      final Iterable<PodEnum> podEnums = _package.allTypes.whereType<PodEnum>();
+          _package.allTypes.where((po) => po is PodObject);
+      final Iterable<PodEnum> podEnums =
+          _package.allTypes.where((pe) => pe is PodEnum);
       final Iterable<StrType> fixedStrTypes = new Set.from(concat(
           podObjects.map((po) => po.fields
               .map((field) => field.podType)

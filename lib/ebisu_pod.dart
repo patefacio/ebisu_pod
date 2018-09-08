@@ -219,8 +219,8 @@ abstract class PropertySet {
               ? PropertyType.PACKAGE_PROPERTY
               : PropertyType.FIELD_PROPERTY;
 
-      _properties[propName] =
-          Property(PropertyDefinition(id, propertyType, null), propValue);
+      _properties[propName] = new Property(
+          new PropertyDefinition(id, propertyType, null), propValue);
     }
   }
 
@@ -1023,7 +1023,7 @@ class PodPackage extends Entity with PropertySet {
 
   get podMaps => concat(podObjects.map((PodObject po) => po.fields
       .map((PodField field) => field.podType)
-      .whereType<PodMapType>()
+      .where((po) => po is PodMapType)
       .map((mapType) => mapType)));
 
   Iterable<PropertyError> get propertyErrors =>
@@ -1068,14 +1068,16 @@ class PodPackage extends Entity with PropertySet {
     return _allTypes;
   }
 
-  Iterable<PodObject> get podObjects => namedTypes.whereType<PodObject>();
-  Iterable<PodEnum> get podEnums => namedTypes.whereType<PodEnum>();
+  Iterable<PodObject> get podObjects =>
+      namedTypes.where((po) => po is PodObject);
+  Iterable<PodEnum> get podEnums => namedTypes.where((pe) => pe is PodEnum);
 
   Iterable<PodObject> get localPodObjects =>
-      localNamedTypes.whereType<PodObject>();
-  Iterable<PodEnum> get localPodEnums => localNamedTypes.whereType<PodEnum>();
+      localNamedTypes.where((po) => po is PodObject);
+  Iterable<PodEnum> get localPodEnums =>
+      localNamedTypes.where((pe) => pe is PodEnum);
   Iterable<PodMapType> get localPodMaps =>
-      localNamedTypes.whereType<PodMapType>();
+      localNamedTypes.where((pm) => pm is PodMapType);
 
   get localPodFields => concat(localPodObjects.map((PodObject o) => o.fields));
 
