@@ -81,7 +81,7 @@ test('$name hashCode', () =>
 
   Library _createCoverageTestLibrary(PodPackage package) {
     final path = package.packageName.path;
-    final relPath = package.getProperty('relativePath');
+    final relPath = package.getProperty('relativePath')?.value;
     final libName = '${package.packageName.path.last.snake}.dart';
     return library_('test_coverage_${path.last.snake}')
       ..imports.add(join(relPath ?? '../lib', libName))
@@ -117,10 +117,10 @@ ${brCompact(objects.map(_objectTest))}
     final result = library_(path.last)
       ..classes.addAll(package.localPodObjects.map(_makeClass))
       ..enums.addAll(package.localPodEnums.map(_makeEnum))
-      ..importAndExportAll(package.getProperty('importAndExportAll') ?? [])
-      ..imports.addAll(package.getProperty('imports') ?? [])
+      ..importAndExportAll(package.getProperty('importAndExportAll')?.value ?? [])
+      ..imports.addAll(package.getProperty('imports')?.value ?? [])
       ..importAndExportAll(package.imports.map((PodPackage pkg) {
-        final relPath = pkg.getProperty('relativePath');
+        final relPath = pkg.getProperty('relativePath')?.value;
         final importPath = relPath == null ? '' : '$relPath/';
         return '$importPath${pkg.packageName.path.last.snake}.dart';
       }));
@@ -139,11 +139,11 @@ ${brCompact(objects.map(_objectTest))}
           '',
           (Ctor ctor) => ctor
             ..isConst = false
-            ..tag = po.getProperty('defaultCtorTag').valueString)
+            ..tag = po.getProperty('defaultCtorTag')?.valueString)
       ..members.addAll(po.fields.map(_makeClassMember));
     classToObjectMap[result] = po;
 
-    if (po.getProperty('hasFieldUpdateMethod') ?? false) {
+    if (po.getProperty('hasFieldUpdateMethod')?.value ?? false) {
       addFieldUpdateMethod(po, result);
     }
 
@@ -205,14 +205,14 @@ void updateField(String fieldSpec, List<String> placeHolders) {
                   : null;
 
   Member _makeClassMember(PodField field) {
-    _logger.info('PodField ${field.id} type is ${field.podType.runtimeType}'
-        ' => ${_initMember(field)}');
+    // print('PodField ${field.id} type is ${field.podType.runtimeType} -> ${field.podType}'
+    //     ' => ${_initMember(field)}');
     final result = member(field.id)
-      ..ctorInit = field.getProperty('ctorInit') ?? _initMember(field)
-      ..isFinal = field.getProperty('isFinal') ?? false
-      ..isInComparable = field.getProperty('isInComparable') ?? true
-      ..isInEquality = field.getProperty('isInEquality') ?? true
-      ..isInHashCode = field.getProperty('isInHashCode') ?? true
+      ..ctorInit = field.getProperty('ctorInit')?.value ?? _initMember(field)
+      ..isFinal = field.getProperty('isFinal')?.value ?? false
+      ..isInComparable = field.getProperty('isInComparable')?.value ?? true
+      ..isInEquality = field.getProperty('isInEquality')?.value ?? true
+      ..isInHashCode = field.getProperty('isInHashCode')?.value ?? true
       ..type = getType(field.podType)
       ..doc = field.doc;
 
@@ -253,7 +253,7 @@ getType(PodType t) {
   else if (t is UuidType)
     return 'Uuid';
   else if (t is PodPredefinedType) {
-    final aliased = t.getProperty('dart_aliased_to');
+    final aliased = t.getProperty('dart_aliased_to')?.value;
     return aliased != null ? aliased : t.id.capCamel;
   } else if (t is Int8Type ||
       t is Int16Type ||

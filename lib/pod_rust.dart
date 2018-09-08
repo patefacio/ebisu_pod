@@ -93,10 +93,10 @@ class PodRustMapper {
       }
 
       predefined.forEach((PodPredefinedType ppt) {
-        final prop = ppt.getProperty('rust_aliased_to');
+        final prop = ppt.getProperty('rust_aliased_to')?.value;
         if (prop != null) {
           _module.typeAliases.add(
-              ebisu_rs.pubTypeAlias(ppt.id, ebisu_rs.rsType(prop.value))
+              ebisu_rs.pubTypeAlias(ppt.id, ebisu_rs.rsType(prop))
                 ..doc = ppt.doc);
         }
       });
@@ -143,7 +143,7 @@ class PodRustMapper {
       bool requiresSerdeError = false;
       podObjects.forEach((PodObject po) {
         final newStruct = _makeStruct(po);
-        final rustIsEncapsulated = po.getProperty('rust_is_encapsulated');
+        final rustIsEncapsulated = po.getProperty('rust_is_encapsulated')?.value;
         if (rustIsEncapsulated ?? false) {
           newStruct.isEncapsulated = true;
         }
@@ -164,7 +164,7 @@ class PodRustMapper {
           newStruct.derive.removeWhere((d) => remove.contains(d));
         }
 
-        final rustHasYamlReader = po.getProperty('include_yaml_reader');
+        final rustHasYamlReader = po.getProperty('include_yaml_reader')?.value;
         if (rustHasYamlReader ?? false) {
           _module.import('serde_yaml');
           _module.import('serde');
@@ -192,8 +192,8 @@ class PodRustMapper {
           return otherModule;
         }
 
-        final ownModule = po.getProperty('rust_own_module');
-        final inModule = po.getProperty('rust_in_module');
+        final ownModule = po.getProperty('rust_own_module')?.value;
+        final inModule = po.getProperty('rust_in_module')?.value;
 
         if (ownModule != null) {
           final module = findOrMakeSubModule(po.id);
@@ -261,13 +261,13 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
   _makeField(PodField field) {
     final result = ebisu_rs.pubField(field.id)..doc = field.doc;
 
-    if (field.getProperty('rust_read_only') ?? false) {
+    if (field.getProperty('rust_read_only')?.value ?? false) {
       result.access = ebisu_rs.ro;
-    } else if (field.getProperty('rust_read_only_ref') ?? false) {
+    } else if (field.getProperty('rust_read_only_ref')?.value ?? false) {
       result
         ..access = ebisu_rs.ro
         ..byRef = true;
-    } else if (field.getProperty('rust_read_write_ref') ?? false) {
+    } else if (field.getProperty('rust_read_write_ref')?.value ?? false) {
       result
         ..access = ebisu_rs.rw
         ..byRef = true;
@@ -287,7 +287,7 @@ from_str(&buffer).map_err(|e| SerdeYamlError{ rust_type: "${po.id.capCamel}".to_
       ..type = _addOption(field);
   }
 
-  _maybeBoxed(PodField field) => (field.getProperty('rust_is_boxed') ?? false)
+  _maybeBoxed(PodField field) => (field.getProperty('rust_is_boxed')?.value ?? false)
       ? 'Box<${_mapFieldType(field.podType)}>'
       : _mapFieldType(field.podType);
 
